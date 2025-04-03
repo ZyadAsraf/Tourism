@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('governorates', function (Blueprint $table) {
+            //$table->uuid(column: 'id')->primary();
             $table->id();
+            $table->string('Name',50);
             $table->timestamps();
         });
     }

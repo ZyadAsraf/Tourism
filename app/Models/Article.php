@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
-    /** @use HasFactory<\Database\Factories\ArticleFactory> */
-    use HasFactory;
+    protected $fillable = [
+        "article_links",
+        "article_heading",
+        'article_body',
+        'img',
+        'admin_id',
+    ] ;
+    public function admin(){
+        return $this->belongsTo(Admin::class);
+    }
 }

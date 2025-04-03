@@ -22,6 +22,7 @@ class UsersTableSeeder extends Seeder
             'username' => 'superadmin',
             'firstname' => 'Super',
             'lastname' => 'Admin',
+            'phonenumber'=> '123',
             'email' => 'superadmin@starter-kit.com',
             'email_verified_at' => now(),
             'password' => Hash::make('superadmin'),
@@ -44,6 +45,7 @@ class UsersTableSeeder extends Seeder
                     'email' => $faker->unique()->safeEmail,
                     'email_verified_at' => now(),
                     'password' => Hash::make('password'),
+                    'phonenumber'=> '123',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

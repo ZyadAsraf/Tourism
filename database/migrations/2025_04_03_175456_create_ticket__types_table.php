@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ticket__types', function (Blueprint $table) {
+            //$table->uuid(column: 'id')->primary();
             $table->id();
+            $table->string('title',50);
+            $table->string('description',250)->nullable();
+            $table->float('Discount_Amount');
             $table->timestamps();
         });
     }

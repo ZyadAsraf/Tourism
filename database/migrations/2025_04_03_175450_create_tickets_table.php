@@ -12,7 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
+            //$table->uuid(column: 'id')->primary();
             $table->id();
+            $table->string('PhoneNumber',20);
+            $table->text('QR_Code');
+            $table->dateTime('Booking_Time');
+            $table->integer('Quantity');
+            $table->date('Visit_Date');
+            $table->float('total_cost');
+            $table->foreignId('tourist_id')->constrained('tourists', 'id')->restrictOnDelete();
+            $table->foreignId('attraction_id')->constrained('attractions', 'id')->restrictOnDelete();
+            $table->foreignId('attraction_staff_id')->constrained('attraction__staff', 'id')->restrictOnDelete()->nullable();
+
             $table->timestamps();
         });
     }

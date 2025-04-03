@@ -12,7 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('attraction__staff', function (Blueprint $table) {
-            $table->id();
+           // $table->uuid(column: 'id')->primary();
+           $table->id();
+            $table->string('FirstName',50);
+            $table->string('LastName',50);
+            $table->string('Email',60);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('Password',255);
+            $table->date('BirthDate');
+            $table->string('PhoneNumber',11);
+            $table->foreignId('attraction_id')->constrained('attractions','id')->restrictOnDelete();
+
             $table->timestamps();
         });
     }
