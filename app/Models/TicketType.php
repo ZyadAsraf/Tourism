@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ticket_Type extends Model
+class TicketType extends Model
 {
     use HasFactory;
 
-    protected $table = 'ticket__types'; // Matches table name in migration
+    protected $table = 'ticket_types'; // Matches table name in migration
 
     protected $primaryKey = 'id'; 
     public $incrementing = true;
     protected $fillable = [
-        'title',
-        'description',
-        'Discount_Amount',
+        'Title',
+        'Description',
+        'DiscountAmount',
     ];
 
     /**

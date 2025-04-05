@@ -22,8 +22,8 @@ class SuperAdminSeeder extends Seeder
             'LastName' => 'Admin',
             'PhoneNumber'=> '123',
             'Email' => 'superadmin@starter-kit.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('superadmin'),
+            'EmailVerifiedAt' => now(),
+            'Password' => Hash::make('superadmin'),
             'created_at' => now(),
             'updated_at' => now(),
             'BirthDate' => '1990-01-01'

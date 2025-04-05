@@ -15,14 +15,14 @@ class Ticket extends Model
     public $incrementing = true;
     protected $fillable = [
         'PhoneNumber',
-        'QR_Code',
-        'Booking_Time',
+        'QRCode',
+        'BookingTime',
         'Quantity',
-        'Visit_Date',
-        'total_cost',
-        'tourist_id',
-        'attraction_id',
-        'attraction_staff_id'
+        'VisitDate',
+        'TotalCost',
+        'TouristId',
+        'AttractionId',
+        'AttractionStaffId'
     ];
 
     /**
@@ -44,6 +44,6 @@ class Ticket extends Model
     // A Ticket is managed by an Attraction Staff
     public function attractionStaff()
     {
-        return $this->belongsTo(Attraction_Staff::class, 'attraction_staff_id');
+        return $this->belongsTo(AttractionStaff::class, 'AttractionStaffId');
     }
 }

@@ -7,6 +7,7 @@ use App\Filament\Resources\ArticleResource\RelationManagers;
 use App\Models\Admin;
 use App\Models\Article;
 use App\Models\articles;
+use App\Models\NormalAdmin;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\MarkdownEditor;
@@ -37,7 +38,7 @@ class ArticleResource extends Resource
                 TextInput::make('article_heading')->required()->label('Heading')->rules('max:100'),
                 MarkdownEditor::make('article_body')->required(),
                 FileUpload::make('img')->directory('imgs')->required()->directory("Imgs"),
-                Select::make('admin_id')->options(Admin::pluck('Email','id'))->required(),
+                Select::make('admin_id')->options(NormalAdmin::pluck('Email','id'))->required(),
             ]);
     }
 

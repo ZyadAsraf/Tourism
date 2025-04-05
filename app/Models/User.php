@@ -28,7 +28,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
+     * 
      */
+
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $fillable = [
         'username',
         'email',

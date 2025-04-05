@@ -35,7 +35,7 @@ class Attraction extends Model
     // Relationship with Admin
     public function admin()
     {
-        return $this->belongsTo(Admin::class);
+        return $this->belongsTo(NormalAdmin::class);
     }
 
     // Relationship with Governorate
@@ -51,6 +51,6 @@ class Attraction extends Model
 
     public function ticketType()
     {
-        return $this->belongsTo(Ticket_Type::class, 'ticket_types_id');
+        return $this->belongsTo(TicketType::class, 'ticket_types_id');
     }
 }

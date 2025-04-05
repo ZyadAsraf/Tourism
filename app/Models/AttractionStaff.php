@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
@@ -10,7 +13,6 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
@@ -18,22 +20,33 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
- class SuperAdmin extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar, HasName, HasMedia
- {
-     use InteractsWithMedia;
-     use HasUuids, HasRoles;
-     use HasApiTokens, HasFactory, Notifiable;
- 
-     protected $table = 'super_admins';
-    protected $fillable = [
-        'FirstName',
-        'LastName',
-        'PhoneNumber',
-        'BirthDate',
-        'Email',
-        'Password',
+class AttractionStaff extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar, HasName, HasMedia
+{
+    use InteractsWithMedia;
+    use HasUuids, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+    *
+    * @var list<string>
+    */
+    protected $fillable = [
+    'FirstName',
+    'LastName',
+    'Email',
+    'Password',
+    'BirthDate',
+    'PhoneNumber',
+    'AttractionId',
     ];
+    public function attraction(){
+    return $this->belongsTo(Attraction::class);
+    }
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
+    }
     public function getFilamentName(): string
     {
         return $this->username;
@@ -54,3 +67,4 @@ use Spatie\Permission\Traits\HasRoles;
     }
 
 }
+

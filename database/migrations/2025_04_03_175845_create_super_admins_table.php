@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('PhoneNumber', 20);
             $table->date('BirthDate');
             $table->string('Email', 60)->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('EmailVerifiedAt')->nullable();
             $table->string('Password', 255);
             $table->timestamps();
         });

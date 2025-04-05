@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Article extends Model
 {
     protected $fillable = [
-        "article_links",
-        "article_heading",
-        'article_body',
-        'img',
-        'admin_id',
+        "ArticleLinks",
+        "ArticleHeading",
+        'ArticleBody',
+        'Img',
+        'AdminId',
     ] ;
+    
     public function admin(){
-        return $this->belongsTo(Admin::class);
+        return $this->belongsTo(NormalAdmin::class);
     }
 }

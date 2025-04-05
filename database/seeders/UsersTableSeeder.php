@@ -19,19 +19,19 @@ class UsersTableSeeder extends Seeder
         $sid = Str::uuid();
         DB::table('users')->insert([
             'id' => $sid,
-            'username' => 'superadmin',
-            'firstname' => 'Super',
-            'lastname' => 'Admin',
-            'phonenumber'=> '123',
-            'email' => 'superadmin@starter-kit.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('superadmin'),
+            'UserName' => 'superadmin',
+            'FirstName' => 'Super',
+            'LastName' => 'Admin',
+            'Phonenumber'=> '123',
+            'Email' => 'superadmin@starter-kit.com',
+            'EmailVerifiedAt' => now(),
+            'Password' => Hash::make('superadmin'),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         // Bind superadmin user to FilamentShield
-        Artisan::call('shield:super-admin', ['--user' => $sid]);
+        Artisan::call('shield:super-admin', parameters: ['--user' => $sid]);
 
         $roles = DB::table('roles')->whereNot('name', 'super_admin')->get();
         foreach ($roles as $role) {
@@ -39,13 +39,13 @@ class UsersTableSeeder extends Seeder
                 $userId = Str::uuid();
                 DB::table('users')->insert([
                     'id' => $userId,
-                    'username' => $faker->unique()->userName,
-                    'firstname' => $faker->firstName,
-                    'lastname' => $faker->lastName,
-                    'email' => $faker->unique()->safeEmail,
-                    'email_verified_at' => now(),
-                    'password' => Hash::make('password'),
-                    'phonenumber'=> '123',
+                    'UserName' => $faker->unique()->userName,
+                    'FirstName' => $faker->firstName,
+                    'LastName' => $faker->lastName,
+                    'Email' => $faker->unique()->safeEmail,
+                    'EmailVerifiedAt' => now(),
+                    'Password' => Hash::make('password'),
+                    'PhoneNumber'=> '123',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

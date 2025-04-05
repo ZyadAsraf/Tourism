@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ticket__types', function (Blueprint $table) {
+        Schema::create('ticket_types', function (Blueprint $table) {
             //$table->uuid(column: 'id')->primary();
             $table->id();
-            $table->string('title',50);
-            $table->string('description',250)->nullable();
-            $table->float('Discount_Amount');
+            $table->string('Title',50);
+            $table->string('Description',250)->nullable();
+            $table->float('DiscountAmount');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ticket__types');
+        Schema::dropIfExists('ticket_types');
     }
 };

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class attraction_category extends Pivot
+class AttractionCategory extends Pivot
 {
     use HasFactory;
 
@@ -14,7 +14,7 @@ class attraction_category extends Pivot
     public $timestamps = false; // Pivot tables usually don’t have timestamps
 
     protected $fillable = [
-        'attraction_id',
-        'category_id'
+        'AttractionId',
+        'CategoryId'
     ];
 }

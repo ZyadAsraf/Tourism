@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketTypeResource\Pages;
 use App\Filament\Resources\TicketTypeResource\RelationManagers;
-use App\Models\Ticket_Type;
+use App\Models\TicketType;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TicketTypeResource extends Resource
 {
-    protected static ?string $model = Ticket_Type::class;
+    protected static ?string $model = TicketType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -25,9 +25,9 @@ class TicketTypeResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('title')->required()->rules('max:49'),
-                TextInput::make('description')->required()->rules('max:249'),
-                TextInput::make('Discount_Amount')->required()->numeric()->rules('min:0'),
+                TextInput::make('Title')->required()->rules('max:49'),
+                TextInput::make('Description')->required()->rules('max:249'),
+                TextInput::make('DiscountAmount')->required()->numeric()->rules('min:0'),
             ]);
     }
 
@@ -35,9 +35,9 @@ class TicketTypeResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title'),
-                TextColumn::make('description'),
-                TextColumn::make('discount_amount'),
+                TextColumn::make('Title'),
+                TextColumn::make('Description'),
+                TextColumn::make('DiscountAmount'),
             ])
             ->filters([
                 //

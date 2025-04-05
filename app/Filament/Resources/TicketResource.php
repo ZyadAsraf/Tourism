@@ -35,9 +35,9 @@ class TicketResource extends Resource
                 TextColumn::make('tourist.Email'),
                 TextColumn::make('Quantity'),
                 TextColumn::make('PhoneNumber'),
-                TextColumn::make('Visit_Date'),
-                TextColumn::make('attraction.Attraction_Name'),
-                TextColumn::make('total_cost'),
+                TextColumn::make('VisitDate'),
+                TextColumn::make('attraction.AttractionName'),
+                TextColumn::make('TotalCost'),
             ])
             ->filters([
                 //

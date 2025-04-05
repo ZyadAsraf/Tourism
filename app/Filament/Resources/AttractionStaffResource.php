@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Filament\Resources;
+use App\Models\AttractionStaff;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\AttractionStaffResource\Pages;
 use App\Filament\Resources\AttractionStaffResource\RelationManagers;
 use App\Models\Attraction;
-use App\Models\Attraction_Staff;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AttractionStaffResource extends Resource
 {
-    protected static ?string $model = Attraction_Staff::class;
+    protected static ?string $model = AttractionStaff::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -43,7 +43,7 @@ class AttractionStaffResource extends Resource
                 ]),
                 DatePicker::make('BirthDate')->required(),
                 TextInput::make('PhoneNumber')->numeric()->required()->label('phone number')->rules('phone:EG'),
-                Select::make('attraction_id')->options(Attraction::pluck('Attraction_Name','id'))->required(),
+                Select::make('AttractionId')->options(Attraction::pluck('Attraction_Name','id'))->required(),
             ]);
     }
 
@@ -57,7 +57,7 @@ class AttractionStaffResource extends Resource
                 TextColumn::make('PhoneNumber'),
                 TextColumn::make('BirthDate'),
                 TextColumn::make('Email'),
-                TextColumn::make('attraction.Attraction_Name')->label('Attraction'),
+                TextColumn::make('attraction.AttractionName')->label('Attraction'),
             ])
             ->filters([
                 //
