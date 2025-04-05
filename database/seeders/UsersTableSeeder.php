@@ -16,9 +16,9 @@ class UsersTableSeeder extends Seeder
         $faker = Faker::create();
 
         // Superadmin user
-        $sid = Str::uuid();
+        $userId = Str::uuid();
         DB::table('users')->insert([
-            'id' => $sid,
+            'id' => $userId,
             'UserName' => 'superadmin',
             'FirstName' => 'Super',
             'LastName' => 'Admin',
@@ -30,8 +30,7 @@ class UsersTableSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        // Bind superadmin user to FilamentShield
-        Artisan::call('shield:super-admin', parameters: ['--user' => $sid]);
+
 
         $roles = DB::table('roles')->whereNot('name', 'super_admin')->get();
         foreach ($roles as $role) {

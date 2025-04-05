@@ -84,11 +84,11 @@ return [
         ],
         'Admins' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Admin::class,
+            'model' => App\Models\NormalAdmin::class,
         ],
         'AttractionsStaff' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Attraction_Staff::class,
+            'model' => App\Models\AttractionStaff::class,
         ],
     ],
 

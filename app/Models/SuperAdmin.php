@@ -18,13 +18,17 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
- class SuperAdmin extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar, HasName, HasMedia
- {
-     use InteractsWithMedia;
-     use HasUuids, HasRoles;
-     use HasApiTokens, HasFactory, Notifiable;
- 
-     protected $table = 'super_admins';
+class SuperAdmin extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar, HasName, HasMedia
+{
+    use InteractsWithMedia;
+    use HasUuids, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable;
+
+    protected $table = 'super_admins';
+    protected $keyType = 'string';
+    public $incrementing = false;
+    protected $primaryKey = 'id';  // Specify the primary key column
+
     protected $fillable = [
         'FirstName',
         'LastName',
