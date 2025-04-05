@@ -36,10 +36,24 @@ return [
     */
 
     'guards' => [
-        'web' => [
+        'Tourist' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'Tourists',
         ],
+
+        'SuperAdmin' => [
+            'driver' => 'session',
+            'provider' => 'SuperAdmins',
+        ],
+        'Admin' => [
+            'driver' => 'session',
+            'provider' => 'Admins',
+        ],
+        'AttractionStaff' => [
+            'driver' => 'session',
+            'provider' => 'AttractionsStaff',
+        ],
+
     ],
 
     /*
@@ -60,15 +74,22 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'Tourists' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'SuperAdmins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\SuperAdmin::class,
+        ],
+        'Admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,
+        ],
+        'AttractionsStaff' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Attraction_Staff::class,
+        ],
     ],
 
     /*

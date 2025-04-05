@@ -31,10 +31,9 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('superadmins')
-            ->path('superadmin')
-            // ->authGuard('superadmin') // 🔹 ADD THIS LINE
-            // ->user(\App\Models\Admin::class)
+            ->id('SuperAdmin')
+            ->path('SuperAdmin')
+            ->authGuard('SuperAdmin') 
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class)
             ->emailVerification(EmailVerification::class)

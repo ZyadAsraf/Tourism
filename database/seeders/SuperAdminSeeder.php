@@ -16,7 +16,7 @@ class SuperAdminSeeder extends Seeder
     public function run(): void
     {
 
-         DB::table('super_admins')->insert([
+        DB::table('super_admins')->insert([
             'id' => 1,
             'FirstName' => 'Super',
             'LastName' => 'Admin',

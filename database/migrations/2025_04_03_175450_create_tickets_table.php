@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('Quantity');
             $table->date('Visit_Date');
             $table->float('total_cost');
-            $table->foreignId('tourist_id')->constrained('tourists', 'id')->restrictOnDelete();
+            $table->foreignUuid('tourist_id')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignId('attraction_id')->constrained('attractions', 'id')->restrictOnDelete();
             $table->foreignId('attraction_staff_id')->constrained('attraction__staff', 'id')->restrictOnDelete()->nullable();
 
