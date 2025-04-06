@@ -34,10 +34,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'username',
-        'email',
-        'firstname',
-        'lastname',
+        'UserName',
+        'Email',
+        'FirstName',
+        'LastName',
+        'PhoneNumber',
         'password',
         'birthdate',
         'phonenumber',
@@ -66,7 +67,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
 
     public function getFilamentName(): string
     {
-        return $this->username;
+        return $this->UserName;
     }
 
     public function canAccessPanel(Panel $panel): bool

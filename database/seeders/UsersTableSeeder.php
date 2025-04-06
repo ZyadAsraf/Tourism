@@ -15,7 +15,6 @@ class UsersTableSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        // Superadmin user
         $userId = Str::uuid();
         DB::table('users')->insert([
             'id' => $userId,
@@ -23,6 +22,7 @@ class UsersTableSeeder extends Seeder
             'FirstName' => 'Super',
             'LastName' => 'Admin',
             'Phonenumber'=> '123',
+            'birthdate' => now(),
             'Email' => 'superadmin@starter-kit.com',
             'EmailVerifiedAt' => now(),
             'Password' => Hash::make('superadmin'),
@@ -41,6 +41,7 @@ class UsersTableSeeder extends Seeder
                     'UserName' => $faker->unique()->userName,
                     'FirstName' => $faker->firstName,
                     'LastName' => $faker->lastName,
+                    'birthdate' => now(),
                     'Email' => $faker->unique()->safeEmail,
                     'EmailVerifiedAt' => now(),
                     'Password' => Hash::make('password'),
