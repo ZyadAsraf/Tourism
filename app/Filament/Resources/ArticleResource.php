@@ -21,6 +21,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Foundation\Auth\User;
 
 
 
@@ -29,16 +30,17 @@ class ArticleResource extends Resource
     protected static ?string $model = Article::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = "Content Management";
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('article_links')->required()->label('Link')->url()->rules('max:100'),
-                TextInput::make('article_heading')->required()->label('Heading')->rules('max:100'),
-                MarkdownEditor::make('article_body')->required(),
-                FileUpload::make('img')->directory('imgs')->required()->directory("Imgs"),
-                Select::make('admin_id')->options(NormalAdmin::pluck('Email','id'))->required(),
+                TextInput::make('ArticleLinks')->required()->label('Link')->url()->rules('max:100'),
+                TextInput::make('ArticleHeading')->required()->label('Heading')->rules('max:100'),
+                MarkdownEditor::make('ArticleBody')->required(),
+                FileUpload::make('Img')->directory('imgs')->required()->directory("Imgs"),
+                Select::make('AdminId')->options(User::pluck('email','id'))->required(),
             ]);
     }
 
@@ -47,9 +49,9 @@ class ArticleResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id'),
-                TextColumn::make('article_heading'),
-                TextColumn::make('article_links'),
-                TextColumn::make('admin.Email'),
+                TextColumn::make('ArticleHeading'),
+                TextColumn::make('ArticleLinks'),
+                TextColumn::make('admin.email'),
             ])
             ->filters([
                 //

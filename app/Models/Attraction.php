@@ -14,18 +14,18 @@ class Attraction extends Model
     public $incrementing = true;
 
     protected $fillable = [
-        'Attraction_Name',
+        'AttractionName',
         'Description',
-        'address',
-        'city',
-        'street',
-        'location_link',
-        'img',
-        'entryFee',
-        'admin_id',
-        'status',
-        'governorate_id',
-        'ticket_types_id' 
+        'Address',
+        'City',
+        'Street',
+        'LocationLink',
+        'Img',
+        'EntryFee',
+        'AdminId',
+        'Status',
+        'GovernorateId',
+        'TicketTypesId' 
     ];
 
     /**
@@ -35,7 +35,7 @@ class Attraction extends Model
     // Relationship with Admin
     public function admin()
     {
-        return $this->belongsTo(NormalAdmin::class);
+        return $this->belongsTo(User::class);
     }
 
     // Relationship with Governorate
@@ -46,8 +46,11 @@ class Attraction extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class, 'attraction_category')->withTimestamps();
+        return $this->belongsToMany(Category::class, 'attraction_category', 'AttractionId', 'CategoryId')->withTimestamps();
     }
+    
+
+
 
     public function ticketType()
     {

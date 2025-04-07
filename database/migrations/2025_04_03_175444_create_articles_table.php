@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('ArticleHeading', 100);
             $table->text('ArticleBody'); // Changed from string(500) to text()
             $table->string('Img');
-            $table->foreignId('AdminId')->constrained('normal_admins','id')->restrictOnDelete(); // Fixed foreign key
+            $table->foreignUuid('AdminId')->constrained('users','id')->restrictOnDelete(); // Fixed foreign key
             $table->timestamps();
         });
     }

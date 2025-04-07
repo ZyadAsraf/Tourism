@@ -11,6 +11,7 @@
         "superduper",
         "website"
     ],
+   
     "authors": [
         {
             "name": "Rio Dewanto P",
@@ -34,9 +35,9 @@
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.8",
+        "laravel/ui": "^4.6",
         "league/commonmark": "^2.4",
         "opcodesio/log-viewer": "^3.11",
-        "propaganistas/laravel-phone": "*",
         "riodwanto/filament-ace-editor": "^1.0",
         "stichoza/google-translate-php": "^5.2",
         "tomatophp/filament-media-manager": "^1.1",
@@ -49,8 +50,7 @@
         "laravel/sail": "^1.18",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^8.1",
-        "pestphp/pest": "^3.7",
-        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpunit/phpunit": "^10.1",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
@@ -66,6 +66,7 @@
         }
     },
     "scripts": {
+
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
@@ -79,6 +80,9 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
+        ],
+        "test": [
+            "@php artisan test"
         ]
     },
     "extra": {

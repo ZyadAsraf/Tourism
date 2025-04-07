@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('Img');
             $table->float('EntryFee');
             $table->string('Status',50);
-            $table->foreignId('AdminId')->constrained('normal_admins', 'id')->restrictOnDelete();
+            $table->foreignUuid('AdminId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignId('GovernorateId')->constrained('governorates', 'id')->restrictOnDelete();
             $table->foreignId('TicketTypesId')->constrained('ticket_types', 'id')->restrictOnDelete();
             $table->timestamps();

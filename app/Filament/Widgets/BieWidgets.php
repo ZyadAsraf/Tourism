@@ -30,14 +30,14 @@ class BieWidgets extends ChartWidget
         }
 
         // Count occurrences of each ticket type using the foreign key
-        $ticketTypeCounts = Ticket::selectRaw('ticket_type_id, COUNT(*) as count')
-            ->groupBy('ticket_type_id')
-            ->pluck('count', 'ticket_type_id')
+        $ticketTypeCounts = Ticket::selectRaw('TicketTypeId, COUNT(*) as count')
+            ->groupBy('TicketTypeId')
+            ->pluck('count', 'TicketTypeId')
             ->toArray();
 
         // Get ticket type names
-        $ticketTypeNames = Ticket_Type::whereIn('id', array_keys($ticketTypeCounts))
-            ->pluck('title', 'id')
+        $ticketTypeNames = TicketType::whereIn('id', array_keys($ticketTypeCounts))
+            ->pluck('Title', 'id')
             ->toArray();
 
         // Calculate percentages

@@ -21,12 +21,12 @@ class CategoryResource extends Resource
     protected static ?string $model = Category::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationGroup = "Content Management";
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('Name')->required()->rules('max:50'),
+                TextInput::make(name: 'Name')->required()->rules('max:50'),
                 TextInput::make('Description')->required(),
             ]);
     }

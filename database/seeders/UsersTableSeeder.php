@@ -15,14 +15,13 @@ class UsersTableSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        $userId = Str::uuid();
+        // Superadmin user
+        $sid = Str::uuid();
         DB::table('users')->insert([
-            'id' => $userId,
-            'UserName' => 'superadmin',
-            'FirstName' => 'Super',
-            'LastName' => 'Admin',
-            'Phonenumber'=> '123',
-            'birthdate' => now(),
+            'id' => $sid,
+            'username' => 'superadmin',
+            'firstname' => 'Super',
+            'lastname' => 'Admin',
             'email' => 'superadmin@starter-kit.com',
             'email_verified_at' => now(),
             'password' => Hash::make('superadmin'),
@@ -30,7 +29,8 @@ class UsersTableSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-
+        // Bind superadmin user to FilamentShield
+        Artisan::call('shield:super-admin', ['--user' => $sid]);
 
         $roles = DB::table('roles')->whereNot('name', 'super_admin')->get();
         foreach ($roles as $role) {
@@ -41,11 +41,9 @@ class UsersTableSeeder extends Seeder
                     'username' => $faker->unique()->userName,
                     'firstname' => $faker->firstName,
                     'lastname' => $faker->lastName,
-                    'birthdate' => now(),
                     'email' => $faker->unique()->safeEmail,
                     'email_verified_at' => now(),
                     'password' => Hash::make('password'),
-                    'phonenumber'=> '123',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

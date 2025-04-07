@@ -13,16 +13,16 @@ class ChartWidgets extends ChartWidget
     protected function getData(): array
     {
         // Count the number of tickets per attraction
-        $attractionsData = Ticket::selectRaw('attraction_id, COUNT(*) as visit_count')
-            ->groupBy('attraction_id')
-            ->orderByDesc('visit_count') // Order by most visited
+        $attractionsData = Ticket::selectRaw('AttractionId, COUNT(*) as VisitCount')
+            ->groupBy('AttractionId')
+            ->orderByDesc('VisitCount') // Order by most visited
             ->limit(10) // Get the top 10 attractions
-            ->pluck('visit_count', 'attraction_id')
+            ->pluck('VisitCount', 'AttractionId')
             ->toArray();
 
         // Get attraction names for labels
         $attractionNames = Attraction::whereIn('id', array_keys($attractionsData))
-            ->pluck('Attraction_Name', 'id')
+            ->pluck('AttractionName', 'id')
             ->toArray();
 
         return [

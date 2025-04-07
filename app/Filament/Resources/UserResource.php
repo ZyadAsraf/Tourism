@@ -23,8 +23,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
-class UserResource extends Resource
+
+class UserResource extends Resource 
 {
     protected static ?string $model = User::class;
     protected static int $globalSearchResultsLimit = 20;
@@ -33,6 +35,12 @@ class UserResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-s-users';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    // protected static function getEloquentQuery(): Builder
+    // {
+    //     return parent::getEloquentQuery()->where('role', 'admin');
+    // }
+    
 
     public static function form(Form $form): Form
     {
@@ -155,6 +163,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+           // ->modifyQueryUsing(fn (Builder $query) => $query->where('email',"ashlynn88@example.com"))//user type
             ->columns([
                 SpatieMediaLibraryImageColumn::make('media')->label('Avatar')
                     ->collection('avatars')

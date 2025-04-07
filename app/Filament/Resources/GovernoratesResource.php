@@ -2,31 +2,32 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TicketResource\Pages;
-use App\Filament\Resources\TicketResource\RelationManagers;
-use App\Models\Ticket;
+use App\Filament\Resources\GovernoratesResource\Pages;
+use App\Filament\Resources\GovernoratesResource\RelationManagers;
+use App\Models\Governorate;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class TicketResource extends Resource
+class GovernoratesResource extends Resource
 {
-    protected static ?string $model = Ticket::class;
+    protected static ?string $model = Governorate::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    
-    protected static ?string $navigationGroup = "Tickets";
+    protected static ?string $navigationGroup = "Content Management";
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                TextInput::make(name: 'Name')->required()->rules('max:50'),
+
             ]);
     }
 
@@ -34,12 +35,7 @@ class TicketResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('tourist.Email'),
-                TextColumn::make('Quantity'),
-                TextColumn::make('PhoneNumber'),
-                TextColumn::make('VisitDate'),
-                TextColumn::make('attraction.AttractionName'),
-                TextColumn::make('TotalCost'),
+                TextColumn::make('Name'),
             ])
             ->filters([
                 //
@@ -57,14 +53,16 @@ class TicketResource extends Resource
     public static function getRelations(): array
     {
         return [
-            
+            //
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTickets::route('/'),
+            'index' => Pages\ListGovernorates::route('/'),
+            'create' => Pages\CreateGovernorates::route('/create'),
+            'edit' => Pages\EditGovernorates::route('/{record}/edit'),
         ];
     }
 }

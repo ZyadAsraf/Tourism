@@ -15,6 +15,6 @@ class Article extends Model
     ] ;
     
     public function admin(){
-        return $this->belongsTo(NormalAdmin::class);
+        return $this->belongsTo(User::class);
     }
 }

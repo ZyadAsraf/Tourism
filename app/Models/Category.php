@@ -25,6 +25,7 @@ class Category extends Model
     // A Category can have multiple Attractions
     public function attractions()
     {
-        return $this->belongsToMany(Attraction::class, 'attraction_category')->withTimestamps();
+        return $this->belongsToMany(Attraction::class, 'attraction_category', 'CategoryId', 'AttractionId')->withTimestamps();
     }
+    
 }

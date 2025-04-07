@@ -22,7 +22,7 @@ return new class extends Migration
             $table->float('TotalCost');
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignId('AttractionId')->constrained('attractions', 'id')->restrictOnDelete();
-            $table->foreignId('AttractionStaffId')->constrained('attraction_staff', 'id')->restrictOnDelete()->nullable();
+            $table->foreignUlid('AttractionStaffId')->constrained('users', 'id')->restrictOnDelete()->nullable();
 
             $table->timestamps();
         });

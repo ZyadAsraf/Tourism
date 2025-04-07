@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-
-use App\Models\SuperAdmin;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 
@@ -16,16 +14,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            TicketTypeSeeder::class,
             CategorySeeder::class,
             GovernorateSeeder::class,
-            SuperAdminSeeder::class,
+            TicketTypeSeeder::class,
             RolesAndPermissionsSeeder::class,
             UsersTableSeeder::class,
             BannersTableSeeder::class,
             BlogCategoriesTableSeeder::class,
             BlogPostsTableSeeder::class,
-
         ]);
 
         Artisan::call('shield:generate --all');

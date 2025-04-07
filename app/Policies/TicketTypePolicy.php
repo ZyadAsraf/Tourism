@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Ticket_Type;
+use App\Models\TicketType;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class Ticket_TypePolicy
+class TicketTypePolicy
 {
     use HandlesAuthorization;
 
@@ -21,7 +21,7 @@ class Ticket_TypePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Ticket_Type $ticketType): bool
+    public function view(User $user, TicketType $ticketType): bool
     {
         return $user->can('view_ticket::type');
     }
@@ -37,7 +37,7 @@ class Ticket_TypePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Ticket_Type $ticketType): bool
+    public function update(User $user, TicketType $ticketType): bool
     {
         return $user->can('update_ticket::type');
     }
@@ -45,7 +45,7 @@ class Ticket_TypePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Ticket_Type $ticketType): bool
+    public function delete(User $user, TicketType $ticketType): bool
     {
         return $user->can('delete_ticket::type');
     }
@@ -61,7 +61,7 @@ class Ticket_TypePolicy
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Ticket_Type $ticketType): bool
+    public function forceDelete(User $user, TicketType $ticketType): bool
     {
         return $user->can('force_delete_ticket::type');
     }
@@ -77,7 +77,7 @@ class Ticket_TypePolicy
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Ticket_Type $ticketType): bool
+    public function restore(User $user, TicketType $ticketType): bool
     {
         return $user->can('restore_ticket::type');
     }
@@ -93,7 +93,7 @@ class Ticket_TypePolicy
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Ticket_Type $ticketType): bool
+    public function replicate(User $user, TicketType $ticketType): bool
     {
         return $user->can('replicate_ticket::type');
     }

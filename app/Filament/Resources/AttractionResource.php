@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 use App\Models\NormalAdmin;
 use App\Models\TicketType;
+use App\Models\User;
 use Filament\Forms\Components\Checkbox;
 use App\Models\Category;
 use Filament\Forms\Components\Select;
@@ -30,26 +31,26 @@ class AttractionResource extends Resource
 {
     protected static ?string $model = Attraction::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'heroicon-o-home-modern';
+    protected static ?string $navigationGroup = "Attractions & Tourism";
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('AttractionName')->required()->rules('max:49'),
-                MarkdownEditor::make('Description')->required(),
+                TextInput::make('EntryFee')->numeric()->rules(rules: 'min:0')->validationMessages(['min'=>'The entry fee cannot be negative.'])->required(),
+                Select::make('AdminId')->options(User::pluck('email','id'))->required(),
                 TextInput::make('Address')->rules('max:49'),
                 TextInput::make('City')->rules('max:49'),
                 TextInput::make('Street')->rules('max:49'),
                 TextInput::make('Location Link')->url(),
                 FileUpload::make('Img')->required()->directory('Imgs'),
-                TextInput::make('EntryFee')->numeric()->rules('min:0')->validationMessages(['min'=>'The entry fee cannot be negative.'])->required(),
-                Select::make('AdminId')->options(NormalAdmin::pluck('Email','id'))->required(),
+                MarkdownEditor::make('Description')->required(),
                 Select::make('GovernorateId')->options(Governorate::pluck('Name','id'))->required(),
                 Select::make('TicketTypesId')->options(TicketType::pluck( 'title' , 'id'))->required(),
                 Select::make('Status')->options(['Available'=>'Available' ,'Not available'=>'Not available']),
-                CheckboxList::make('Categories')->relationship('categories','Name')
-            ])->columns(1);
+                CheckboxList::make('Categories')->relationship('categories', 'Name')
+                ])->columns(3);
     }
 
     public static function table(Table $table): Table
@@ -59,9 +60,9 @@ class AttractionResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('AttractionName'),
                 TextColumn::make('EntryFee'),
-                TextColumn::make('normal_admin.Email')->label('Admin'),
-                TextColumn::make('governorate.Name')->label('Governrates'),
-                TextColumn::make('ticketType.Title')->label('Ticket type'),
+                TextColumn::make('user.email')->label('Admin'),
+                TextColumn::make('Governorate.Name')->label('Governrates'),
+                TextColumn::make('TicketType.Title')->label('Ticket type'),
                 TextColumn::make('Status'),
             ])
             ->filters([
