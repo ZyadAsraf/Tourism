@@ -1,21 +1,27 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AttractionController;
+use App\Http\Controllers\HomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Tourist routes - public
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/attractions', [AttractionController::class, 'index'])->name('attractions.index');
+Route::get('/attractions/{slug}', [AttractionController::class, 'show'])->name('attractions.show');
+Route::get('/categories/{category}', [AttractionController::class, 'byCategory'])->name('attractions.category');
+Route::get('/search', [AttractionController::class, 'search'])->name('attractions.search');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+// Booking routes
+Route::get('/booking/{attraction}', [AttractionController::class, 'bookingForm'])->name('booking.form');
+Route::post('/booking/{attraction}/payment', [AttractionController::class, 'paymentForm'])->name('booking.payment');
+Route::post('/booking/{attraction}/process', [AttractionController::class, 'processBooking'])->name('booking.process');
 
-
+// Auth routes
 require __DIR__.'/auth.php';
+

@@ -1,4 +1,9 @@
 <x-guest-layout>
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-600">Reset Password</h2>
+        <p class="text-sm text-gray-500 mt-1">Create a new password for your account</p>
+    </div>
+
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 
@@ -37,3 +42,4 @@
         </div>
     </form>
 </x-guest-layout>
+
