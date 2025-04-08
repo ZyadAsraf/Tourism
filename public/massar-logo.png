@@ -1,0 +1,2 @@
+<img src="{{ asset('images/massar-logo.png') }}" alt="Massar Logo" class="h-16">
+
