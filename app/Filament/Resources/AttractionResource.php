@@ -47,7 +47,7 @@ class AttractionResource extends Resource
                 FileUpload::make('Img')->required()->directory('Imgs'),
                 MarkdownEditor::make('Description')->required(),
                 Select::make('GovernorateId')->options(Governorate::pluck('Name','id'))->required(),
-                Select::make('TicketTypesId')->options(TicketType::pluck( 'title' , 'id'))->required(),
+                Select::make('TicketTypesId')->options(TicketType::pluck( 'Title' , 'id'))->required(),
                 Select::make('Status')->options(['Available'=>'Available' ,'Not available'=>'Not available']),
                 CheckboxList::make('Categories')->relationship('categories', 'Name')
                 ])->columns(3);
@@ -60,8 +60,7 @@ class AttractionResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('AttractionName'),
                 TextColumn::make('EntryFee'),
-                TextColumn::make('user.email')->label('Admin'),
-                TextColumn::make('Governorate.Name')->label('Governrates'),
+                TextColumn::make('governorate.Name'),
                 TextColumn::make('TicketType.Title')->label('Ticket type'),
                 TextColumn::make('Status'),
             ])
@@ -93,4 +92,5 @@ class AttractionResource extends Resource
             'edit' => Pages\EditAttraction::route('/{record}/edit'),
         ];
     }
+    // Temporarily disable authorization in your resource
 }

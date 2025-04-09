@@ -26,4 +26,8 @@ class Governorate extends Model
     {
         return $this->hasMany(Attraction::class);
     }
+    public static function canViewAny(): bool
+    {
+        return true; // Temporary override
+    }
 }

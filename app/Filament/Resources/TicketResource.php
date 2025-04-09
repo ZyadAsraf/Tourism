@@ -67,4 +67,5 @@ class TicketResource extends Resource
             'index' => Pages\ListTickets::route('/'),
         ];
     }
+
 }
