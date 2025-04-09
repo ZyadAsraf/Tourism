@@ -3,6 +3,7 @@
 @section('title', 'Massar - Discover Egypt\'s Hidden Gems')
 
 @section('content')
+
 <!-- Hero Section with Video Background -->
 <section class="relative h-[80vh] overflow-hidden mb-16">
     <div class="absolute inset-0 bg-black">

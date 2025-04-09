@@ -70,6 +70,7 @@
 </style>
 </head>
 <body>
+
 <div class="container mx-auto px-4 py-8">
     <header class="flex justify-between items-center mb-8">
         <div class="flex items-center gap-2">
@@ -120,11 +121,15 @@
                     <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">{{ $cartCount }}</span>
                 @endif
             </a>
+            <a href="{{ route('profile.edit') }}" class="text-gray-600 hover:text-primary">Profile</a>
+
         </nav>
-        
+    
         <div class="flex items-center gap-4">
             @auth
                 <span class="text-gray-600">Welcome, {{ Auth::user()->firstname }}</span>
+                <!-- Profile Dropdown Link -->
+               
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="btn-primary">Logout</button>
@@ -135,6 +140,7 @@
             @endauth
         </div>
     </header>
+    
 
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">

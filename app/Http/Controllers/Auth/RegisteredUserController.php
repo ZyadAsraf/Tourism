@@ -41,6 +41,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Create the new user
         $user = User::create([
             'username' => $request->username,
             'firstname' => $request->firstname,
@@ -49,11 +50,16 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Trigger the Registered event
         event(new Registered($user));
 
+        // Log the user in
         Auth::login($user);
 
-        return redirect()->route('home');
+        // Send email verification link
+        $user->sendEmailVerificationNotification();
+
+        // Redirect the user to the email verification notice page
+        return redirect(route('verification.notice'));
     }
 }
-
