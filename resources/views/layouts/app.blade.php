@@ -75,7 +75,7 @@
     <header class="flex justify-between items-center mb-8">
         <div class="flex items-center gap-2">
             <a href="{{ route('home') }}">
-                <img src="/images/massar-logo.png" alt="Massar Logo" class="h-12">
+                <img src="images/massar-log.png" alt="Massar Logo" class="h-12">
             </a>
             <h1 class="text-2xl font-bold text-[#4b4f29]">Massar</h1>
         </div>
@@ -160,7 +160,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
                 <div class="flex items-center gap-2 mb-4">
-                    <img src="{{ asset('images/massar-logo.png') }}" alt="Massar Logo" class="h-12">
+                    <img src="{{ asset('images/massar-log.png') }}" alt="Massar Logo" class="h-12">
                     <h2 class="text-xl font-bold text-[#4b4f29]">Massar</h2>
                 </div>
                 <p class="text-sm text-gray-500 mb-4">Discover the wonders of Egypt with our curated attractions and experiences.</p>
