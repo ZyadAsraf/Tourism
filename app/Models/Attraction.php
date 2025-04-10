@@ -41,7 +41,7 @@ class Attraction extends Model
     // Relationship with Governorate
     public function governorate()
     {
-        return $this->belongsTo(Governorate::class);
+        return $this->belongsTo(Governorate::class,"id");
     }
 
     public function categories()
@@ -54,6 +54,6 @@ class Attraction extends Model
 
     public function ticketType()
     {
-        return $this->belongsTo(TicketType::class, 'ticket_types_id');
+        return $this->belongsTo(TicketType::class, "id");
     }
 }

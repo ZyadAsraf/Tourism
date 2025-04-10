@@ -1,4 +1,16 @@
+<<<<<<< Updated upstream
 <x-guest-layout>
+=======
+@extends('layouts.app')
+
+@section('content')
+<div class="max-w-md mx-auto mt-10">
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-600">Welcome Back</h2>
+        <p class="text-sm text-gray-500 mt-1">Sign in to your account</p>
+    </div>
+
+>>>>>>> Stashed changes
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -15,12 +27,10 @@
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
-
             <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
+                          type="password"
+                          name="password"
+                          required autocomplete="current-password" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
@@ -43,5 +53,19 @@
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
+<<<<<<< Updated upstream
     </form>
 </x-guest-layout>
+=======
+
+        <div class="text-center mt-6 pt-4 border-t border-gray-200">
+            <p class="text-sm text-gray-600">Don't have an account? 
+                <a href="{{ route('register') }}" class="text-[#d2ac71] hover:text-[#c19c61] font-medium">
+                    Register now
+                </a>
+            </p>
+        </div>
+    </form>
+</div>
+@endsection
+>>>>>>> Stashed changes

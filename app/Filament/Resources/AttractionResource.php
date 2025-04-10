@@ -60,7 +60,6 @@ class AttractionResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('AttractionName'),
                 TextColumn::make('EntryFee'),
-                TextColumn::make('user.email')->label('Admin'),
                 TextColumn::make('Governorate.Name')->label('Governrates'),
                 TextColumn::make('TicketType.Title')->label('Ticket type'),
                 TextColumn::make('Status'),

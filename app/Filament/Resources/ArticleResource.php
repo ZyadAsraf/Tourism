@@ -51,7 +51,6 @@ class ArticleResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('ArticleHeading'),
                 TextColumn::make('ArticleLinks'),
-                TextColumn::make('admin.email'),
             ])
             ->filters([
                 //
