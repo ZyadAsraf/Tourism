@@ -7,10 +7,11 @@ use App\Models\Category;
 use App\Models\Banner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth; 
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Get featured attractions (limit to 6)
         $attractions = Attraction::where('Status', 'Available')
@@ -53,12 +54,15 @@ class HomeController extends Controller
             ->orderBy('sort')
             ->get();
         
+        // Get authenticated user data (if logged in)
+        $user = Auth::user();
+
         return view('home', [
             'attractions' => $attractions,
             'featured' => $featured,
             'categories' => $formattedCategories,
-            'banners' => $banners
+            'banners' => $banners,
+            'user' => $user 
         ]);
     }
 }
-
