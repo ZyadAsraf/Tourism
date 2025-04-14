@@ -30,7 +30,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/trip-plan/clear', [CartController::class, 'clear'])->name('cart.clear');
     Route::get('/trip-plan/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('/trip-plan/process-checkout', [CartController::class, 'processCheckout'])->name('cart.process-checkout');
+    Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
     Route::get('/trip-plan/confirmation', [CartController::class, 'confirmation'])->name('cart.confirmation');
+
+    // Stripe 
+    Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
 
     // Booking
     Route::get('/booking/{attraction}', [AttractionController::class, 'bookingForm'])->name('booking.form');

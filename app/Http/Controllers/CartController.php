@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Attraction;
 use Illuminate\Support\Facades\Session;
 
+use Stripe\Stripe;
+use Stripe\StripeClient;
+use Stripe\PaymentIntent;
+
 class CartController extends Controller
 {
     /**
@@ -218,5 +222,19 @@ class CartController extends Controller
     {
         $cart = Session::get('cart', []);
         return count($cart);
+    }
+
+
+    public function store(Request $request){
+        $stripe = new \Stripe\StripeClient(env("STRIPE_SECRET"));
+
+        $charge = $stripe->charges->create([
+            'amount' => $request->total *100,
+            'currency' => 'usd',
+            'source' => $request->stripeToken,
+            'description' => 'Payment from Massar.com'
+        ]);
+        // dd($charge);
+        return redirect()->route('cart.confirmation');
     }
 }
