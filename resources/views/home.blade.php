@@ -3,10 +3,11 @@
 @section('title', 'Massar - Discover Egypt\'s Hidden Gems')
 
 @section('content')
+
 <!-- Hero Section with Video Background -->
 <section class="relative h-[80vh] overflow-hidden mb-16">
     <div class="absolute inset-0 bg-black">
-        <img src="/placeholder.svg?height=800&width=1600" alt="Egypt Tourism" class="w-full h-full object-cover opacity-80" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
+        <img src="images/image3.jpg" alt="Egypt Tourism" class="w-full h-full object-cover opacity-80" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
     </div>
     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
     <div class="container mx-auto px-4 h-full flex items-center relative z-10">
@@ -92,7 +93,7 @@
             <!-- Experience 1 -->
             <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div class="h-48 overflow-hidden">
-                    <img src="public\images\pexels-ezz7-1738536.jpg" alt="Historical Sites" class="w-full h-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
+                    <img src="images/image5.jpg" alt="Historical Sites" class="w-full h-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
                 </div>
                 <div class="p-6">
                     <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -114,7 +115,7 @@
             <!-- Experience 2 -->
             <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div class="h-48 overflow-hidden">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Desert Adventures" class="w-full h-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
+                    <img src="images/image6.jpg" alt="Desert Adventures" class="w-full h-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
                 </div>
                 <div class="p-6">
                     <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -136,7 +137,7 @@
             <!-- Experience 3 -->
             <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div class="h-48 overflow-hidden">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Nile Cruises" class="w-full h-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
+                    <img src="images/image1.jpg" alt="Nile Cruises" class="w-full h-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
                 </div>
                 <div class="p-6">
                     <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -158,7 +159,7 @@
             <!-- Experience 4 -->
             <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div class="h-48 overflow-hidden">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Cultural Experiences" class="w-full h-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
+                    <img src="images/image7.jpg" alt="Cultural Experiences" class="w-full h-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
                 </div>
                 <div class="p-6">
                     <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -192,7 +193,7 @@
         <div class="bg-white rounded-xl p-6 shadow-md">
             <div class="flex items-center mb-4">
                 <div class="h-12 w-12 rounded-full overflow-hidden mr-4">
-                    <img src="/placeholder.svg?height=100&width=100" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
+                    <img src="images\pexels-lokmansevim-18731384.jpg" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
                 </div>
                 <div>
                     <h4 class="font-bold text-gray-700">Sarah Johnson</h4>
@@ -223,7 +224,7 @@
         <div class="bg-white rounded-xl p-6 shadow-md">
             <div class="flex items-center mb-4">
                 <div class="h-12 w-12 rounded-full overflow-hidden mr-4">
-                    <img src="/placeholder.svg?height=100&width=100" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
+                    <img src="images\pexels-gabby-k-5384429.jpg" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
                 </div>
                 <div>
                     <h4 class="font-bold text-gray-700">David Chen</h4>
@@ -251,7 +252,7 @@
         <div class="bg-white rounded-xl p-6 shadow-md">
             <div class="flex items-center mb-4">
                 <div class="h-12 w-12 rounded-full overflow-hidden mr-4">
-                    <img src="/placeholder.svg?height=100&width=100" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
+                    <img src="images\pexels-iamikeee-2709388.jpg" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
                 </div>
                 <div>
                     <h4 class="font-bold text-gray-700">Emma Wilson</h4>

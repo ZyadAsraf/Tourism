@@ -1,4 +1,4 @@
-a<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -70,11 +70,12 @@ a<!DOCTYPE html>
 </style>
 </head>
 <body>
+
 <div class="container mx-auto px-4 py-8">
     <header class="flex justify-between items-center mb-8">
         <div class="flex items-center gap-2">
             <a href="{{ route('home') }}">
-                <img src="/images/massar-logo.png" alt="Massar Logo" class="h-12">
+                <img src="images/massar-log.png" alt="Massar Logo" class="h-12">
             </a>
             <h1 class="text-2xl font-bold text-[#4b4f29]">Massar</h1>
         </div>
@@ -120,11 +121,15 @@ a<!DOCTYPE html>
                     <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">{{ $cartCount }}</span>
                 @endif
             </a>
+            <a href="{{ route('profile.edit') }}" class="text-gray-600 hover:text-primary">Profile</a>
+
         </nav>
-        
+    
         <div class="flex items-center gap-4">
             @auth
                 <span class="text-gray-600">Welcome, {{ Auth::user()->firstname }}</span>
+                <!-- Profile Dropdown Link -->
+               
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="btn-primary">Logout</button>
@@ -135,6 +140,7 @@ a<!DOCTYPE html>
             @endauth
         </div>
     </header>
+    
 
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
@@ -154,7 +160,7 @@ a<!DOCTYPE html>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
                 <div class="flex items-center gap-2 mb-4">
-                    <img src="{{ asset('images/massar-logo.png') }}" alt="Massar Logo" class="h-12">
+                    <img src="{{ asset('images/massar-log.png') }}" alt="Massar Logo" class="h-12">
                     <h2 class="text-xl font-bold text-[#4b4f29]">Massar</h2>
                 </div>
                 <p class="text-sm text-gray-500 mb-4">Discover the wonders of Egypt with our curated attractions and experiences.</p>

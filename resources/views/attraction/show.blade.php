@@ -145,9 +145,7 @@
   @if(isset($attraction['mapImage']))
   <div class="mb-12">
       <h2 class="text-2xl font-bold mb-4 text-gray-600">Location</h2>
-      <div class="rounded-xl overflow-hidden">
-          <img src="{{ $attraction['mapImage'] }}" alt="Map showing {{ $attraction['title'] }}" class="w-full h-[400px] object-cover">
-      </div>
+   
   </div>
   @endif
   
