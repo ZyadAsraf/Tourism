@@ -16,21 +16,17 @@ return new class extends Migration
             $table->id();
             $table->string('PhoneNumber',20);
             $table->text('QRCode');
-            $table->dateTime('BookingTime');
+            $table->dateTime('BookingTime')->nullable();
             $table->integer('Quantity');
-            $table->date('VisitDate');
+            $table->dateTime('VisitDate');
             $table->float('TotalCost');
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignId('AttractionId')->constrained('attractions', 'id')->restrictOnDelete();
-            $table->foreignUlid('AttractionStaffId')->constrained('users', 'id')->restrictOnDelete()->nullable();
+            $table->foreignUlid('AttractionStaffId')->constrained('users', 'id')->nullable()->restrictOnDelete();
 
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tickets');

@@ -54,6 +54,6 @@ class Attraction extends Model
 
     public function ticketType()
     {
-        return $this->belongsTo(TicketType::class, 'id');
+        return $this->belongsTo(TicketType::class, 'TicketTypesId');
     }
 }

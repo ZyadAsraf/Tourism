@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app') 
 
 @section('title', $attraction['title'] . ' - Massar')
 
@@ -92,27 +92,26 @@
                 <div class="space-y-4 mb-6">
                     <div>
                         <label class="block text-gray-600 mb-1">Date</label>
-                        <input type="date" name="date" class="w-full p-2 border border-gray-200 rounded-md" required>
+                        <input type='datetime-local' name="VisitDate" class="w-full p-2 border border-gray-200 rounded-md" required>
                     </div>
-                    <div>
+                    {{-- <div>
                         <label class="block text-gray-600 mb-1">Time</label>
-                        <select name="time" class="w-full p-2 border border-gray-200 rounded-md" required>
+                        <select name="BookingTime" class="w-full p-2 border border-gray-200 rounded-md" required>
                             <option value="">Select a time</option>
                             <option value="morning">Morning (9:00 AM)</option>
                             <option value="afternoon">Afternoon (1:00 PM)</option>
                             <option value="evening">Evening (5:00 PM)</option>
                         </select>
+                    </div> --}}
+                    <div>
+                        <label class="block text-gray-600 mb-1">Phone number</label>
+                        <input name="PhoneNumber" class="w-full p-2 border border-gray-200 rounded-md" type="text" required>
                     </div>
                     <div>
                         <label class="block text-gray-600 mb-1">Number of Guests</label>
-                        <select name="quantity" class="w-full p-2 border border-gray-200 rounded-md" required>
-                            <option value="1">1 Guest</option>
-                            <option value="2">2 Guests</option>
-                            <option value="3">3 Guests</option>
-                            <option value="4">4 Guests</option>
-                            <option value="5">5+ Guests</option>
-                        </select>
+                        <input name="Quantity" class="w-full p-2 border border-gray-200 rounded-md" type="number" required>
                     </div>
+
                 </div>
                 
                 <div class="border-t border-gray-200 pt-4 mb-4">

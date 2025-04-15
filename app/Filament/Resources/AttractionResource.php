@@ -61,7 +61,7 @@ class AttractionResource extends Resource
                 TextColumn::make('AttractionName'),
                 TextColumn::make('EntryFee'),
                 TextColumn::make('governorate.Name'),
-                TextColumn::make('TicketType.Title')->label('Ticket type'),
+                TextColumn::make('ticketType.Title')->label('Ticket type'),
                 TextColumn::make('Status'),
             ])
             ->filters([

@@ -38,7 +38,11 @@ class TicketResource extends Resource
                 TextColumn::make('Quantity'),
                 TextColumn::make('PhoneNumber'),
                 TextColumn::make('VisitDate'),
-                TextColumn::make('attraction.AttractionName'),
+                TextColumn::make('attraction.AttractionName')
+                    ->label('Attraction')
+                    ->searchable()
+                    ->sortable()
+                    ->url(fn (Ticket $record): string => route('filament.admin.resources.attractions.edit', ['record' => $record->attraction->id])),
                 TextColumn::make('TotalCost'),
             ])
             ->filters([
