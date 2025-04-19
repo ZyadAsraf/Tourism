@@ -94,36 +94,57 @@
             </form>
         </div>
         
-        <nav class="hidden md:flex gap-6">
+        <nav class="hidden md:flex gap-6 items-center">
+            <!-- Home -->
             <a href="{{ route('home') }}" class="text-gray-600 hover:text-primary">Home</a>
+        
+            <!-- Attractions -->
             <a href="{{ route('attractions.index') }}" class="text-gray-600 hover:text-primary">Attractions</a>
+        
+            <!-- Categories Dropdown -->
             <div class="relative group">
-                <a href="#" class="text-gray-600 hover:text-primary flex items-center gap-1">
+                <button class="text-gray-600 hover:text-primary flex items-center gap-1 focus:outline-none">
                     Categories
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
-                </a>
+                </button>
                 <div class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block z-10">
                     <div class="py-1">
                         @foreach($categories ?? [] as $slug => $name)
-                            <a href="{{ route('attractions.category', $slug) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ $name }}</a>
+                            <a href="{{ route('attractions.category', $slug) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                {{ $name }}
+                            </a>
                         @endforeach
                     </div>
                 </div>
             </div>
-            <a href="{{ route('cart.index') }}" class="text-gray-600 hover:text-primary flex items-center gap-1">
+        
+            <!-- My Trip / Cart -->
+            <a href="{{ route('cart.index') }}" class="text-gray-600 hover:text-primary flex items-center gap-1 relative">
                 My Trip
                 @php
                     $cartCount = App\Http\Controllers\CartController::getCartCount();
                 @endphp
                 @if($cartCount > 0)
-                    <span class="bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">{{ $cartCount }}</span>
+                    <span class="absolute -top-2 -right-3 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                        {{ $cartCount }}
+                    </span>
                 @endif
             </a>
+        
+            <!-- Profile -->
             <a href="{{ route('profile.edit') }}" class="text-gray-600 hover:text-primary">Profile</a>
+        
+            <!-- Admin Dashboard (visible only to admin) -->
+            @auth
+            @if(auth()->user()->hasRole('Admin'))
+                <a href="{{ url('/admin') }}" class="text-gray-600 hover:text-primary">Admin Dashboard</a>
+            @endif
+            @endauth
 
         </nav>
+        
     
         <div class="flex items-center gap-4">
             @auth

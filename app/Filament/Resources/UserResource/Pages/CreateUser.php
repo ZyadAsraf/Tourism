@@ -24,9 +24,10 @@ class CreateUser extends CreateRecord
         $user = $this->record;
         $settings = app(MailSettings::class);
 
-        if (! method_exists($user, 'notify')) {
-            $userClass = $user::class;
+        // Send verification email if mail is configured
 
+        if (!method_exists($user, 'notify')) {
+            $userClass = $user::class;
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
 
@@ -38,11 +39,12 @@ class CreateUser extends CreateRecord
 
             $user->notify($notification);
 
-
             Notification::make()
                 ->title(__('resource.user.notifications.verify_sent.title'))
                 ->success()
                 ->send();
+
+
         } else {
             Notification::make()
                 ->title(__('resource.user.notifications.verify_warning.title'))
