@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 Route::get('/', [HomeController::class, 'index'])->name('home'); 
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
