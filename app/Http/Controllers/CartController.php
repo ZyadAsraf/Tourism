@@ -226,7 +226,7 @@ class CartController extends Controller
 
 
     public function store(Request $request){
-        $stripe = new \Stripe\StripeClient(env("STRIPE_SECRET"));
+        $stripe = new StripeClient(env("STRIPE_SECRET"));
 
         $charge = $stripe->charges->create([
             'amount' => $request->total *100,

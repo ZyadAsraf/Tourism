@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AttractionController;
+use App\Http\Controllers\Api\HomeController;
 
 Route::middleware('auth:sanctum')->post('/tokens/create', function (Request $request) {
     $token = $request->user()->createToken($request->token_name);
@@ -17,5 +18,18 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::group(['middleware'=>'api'], function () {
     Route::get('/get-attractions', [AttractionController::class, 'getAttractions']);
-    // More routes can go here later
+
+
+    Route::get('/categories', [AttractionController::class, 'getCategories']);
+    Route::get('/home', [AttractionController::class, 'homeApi']);
+    Route::get('/attractions', [AttractionController::class, 'indexApi']);
+    Route::get('/attractions/{slug}', [AttractionController::class, 'showApi']);
+    Route::get('/category/{category}', [AttractionController::class, 'byCategoryApi']);
+    Route::get('/search', [AttractionController::class, 'searchApi']);
+    Route::get('/booking/{attraction}', [AttractionController::class, 'bookingFormApi']);
+    Route::post('/payment/{attraction}', [AttractionController::class, 'paymentFormApi']);
+    Route::post('/process-booking/{attraction}', [AttractionController::class, 'processBookingApi']);
+
+    Route::get('/home', [HomeController::class, 'indexApi']);
+
 });
