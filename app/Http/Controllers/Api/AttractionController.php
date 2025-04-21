@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Attraction;
 use App\Models\Category;
 use Illuminate\Support\Str;
+use URL;
 
 class AttractionController extends Controller
 {
@@ -15,7 +16,8 @@ public function getAttractions(Request $request = null)
 {
     // Fetch attractions from the database that are marked as Available
     $query = Attraction::where('Status', 'Available')
-        ->with(['governorate', 'categories', 'admin']);
+        ->with(['governorate', 'categories', 'admin'])
+        ->select(['*']);
     
     // Apply filters if provided
     if ($request) {
@@ -98,7 +100,7 @@ public function getAttractions(Request $request = null)
             'longDescription' => strip_tags(Str::markdown($attraction->Description)),
             'image' => $attraction->Img ? '/storage/' . $attraction->Img : '/images/placeholder.jpg',
             'gallery' => $attraction->Img ? ['/storage/' . $attraction->Img] : ['/images/placeholder.jpg'],
-            'mapImage' => $attraction->LocationLink ?? '/images/map-placeholder.jpg',
+            'mapImage' => $attraction->LocationLink ?? url('/').'/images/map-placeholder.jpg',
             'category' => $attraction->categories->isNotEmpty() ? $attraction->categories->first()->Name : 'Attraction',
             'location' => $attraction->City ?? $attraction->governorate->Name ?? 'Egypt',
             'duration' => $duration,
@@ -124,7 +126,7 @@ public function getAttractions(Request $request = null)
             'longDescription' => 'This is a sample attraction. Please add real attractions through the admin panel.',
             'image' => '/images/placeholder.jpg',
             'gallery' => ['/images/placeholder.jpg'],
-            'mapImage' => '/images/map-placeholder.jpg',
+            'mapImage' => URL::to('/'),
             'category' => 'Attraction',
             'location' => 'Egypt',
             'duration' => 'Less than 3 hours',
