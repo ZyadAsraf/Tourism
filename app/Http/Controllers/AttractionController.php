@@ -190,19 +190,24 @@ public function show($slug)
     if (!isset($attractions[$slug])) {
         abort(404);
     }
-    
+
     // Get related attractions in the same category
     $category = $attractions[$slug]['category'];
     $related = array_filter($attractions, function($item) use ($category, $slug) {
         return $item['category'] === $category && $item['slug'] !== $slug;
     });
-    
+
+    // Fetch reviews for this attraction
+    $reviews = Review::where('attraction_id', $attractions[$slug]['id'])->latest()->get();
+
     return view('attraction.show', [
         'attraction' => $attractions[$slug],
         'related' => array_slice($related, 0, 3),
-        'categories' => $this->getCategories()
+        'categories' => $this->getCategories(),
+        'reviews' => $reviews, // pass the reviews to the view
     ]);
 }
+
 
 // Update the byCategory method to properly handle category slugs
 public function byCategory($category)

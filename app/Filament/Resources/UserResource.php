@@ -150,7 +150,7 @@ class UserResource extends Resource
                                     ->searchable()
                                     ->optionsLimit(5)
                                     ->columnSpanFull()
-                                    ->required(false), // 👈 this line makes it optional
+                                    ->required(false), // this line makes it optional
                             
                         
                             ])

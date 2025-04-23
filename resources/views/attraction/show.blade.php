@@ -169,11 +169,35 @@
         
     <div class="mb-12">
         <h2 class="text-2xl font-bold mb-4 text-gray-600">Reviews</h2>
+    
         <a href="{{ route('attractions.reviews', ['slug' => $attraction['slug']]) }}"
-        class="btn-primary  mb-4">
+           class="btn-primary mb-4 inline-block">
             Write Your Review
         </a>
+    
+        {{-- Display list of reviews --}}
+        @forelse ($reviews as $review)
+            <div class="border-b border-gray-200 py-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="font-semibold text-gray-700">
+                        <p class="text-lg">{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</p>
+                    </div>
+                    
+                    
+                    <div class="text-yellow-400">
+                        @for ($i = 1; $i <= 5; $i++)
+                            <span class="{{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">&#9733;</span>
+                        @endfor
+                    </div>
+                </div>
+                <p class="text-gray-600">{{ $review->comment }}</p>
+                <p class="text-sm text-gray-400 mt-1">{{ $review->created_at->diffForHumans() }}</p>
+            </div>
+        @empty
+            <p class="text-gray-500 mt-4">No reviews yet. Be the first to write one!</p>
+        @endforelse
     </div>
+    
     
 
     @if (isset($related) && count($related) > 0)
@@ -191,6 +215,7 @@
                                 </p>
                             </div>
                         </div>
+                        
                         <div class="p-4">
                             <div class="flex justify-between items-start mb-2">
                                 <h3 class="text-xl font-bold text-gray-600">{{ $relatedAttraction['title'] }}</h3>
