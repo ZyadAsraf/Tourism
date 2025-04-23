@@ -166,6 +166,15 @@
 
         </div>
     @endif
+        
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold mb-4 text-gray-600">Reviews</h2>
+        <a href="{{ route('attractions.reviews', ['slug' => $attraction['slug']]) }}"
+        class="btn-primary  mb-4">
+            Write Your Review
+        </a>
+    </div>
+    
 
     @if (isset($related) && count($related) > 0)
         <div class="mb-12">

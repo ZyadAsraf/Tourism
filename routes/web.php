@@ -20,6 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Attractions
     Route::get('/attractions', [AttractionController::class, 'index'])->name('attractions.index');
     Route::get('/attractions/{slug}', [AttractionController::class, 'show'])->name('attractions.show');
+    Route::get('/attractions/{slug}/reviews', [AttractionController::class, 'reviews'])->name('attractions.reviews');
+    Route::post('/attractions/{slug}/reviews', [AttractionController::class, 'addReview'])->name('attractions.reviews.store');
     Route::get('/categories/{category}', [AttractionController::class, 'byCategory'])->name('attractions.category');
     Route::get('/search', [AttractionController::class, 'search'])->name('attractions.search');
 
