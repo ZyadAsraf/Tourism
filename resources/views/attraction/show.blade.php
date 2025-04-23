@@ -166,36 +166,45 @@
 
         </div>
     @endif
-        
     <div class="mb-12">
-        <h2 class="text-2xl font-bold mb-4 text-gray-600">Reviews</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-600">Reviews</h2>
     
-        <a href="{{ route('attractions.reviews', ['slug' => $attraction['slug']]) }}"
-           class="btn-primary mb-4 inline-block">
-            Write Your Review
-        </a>
+        @if($reviews->count())
+            <div class="bg-white p-6 rounded-lg shadow border border-gray-200 space-y-6">
+                @foreach ($reviews as $review)
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <div>
+                                <p class="text-lg font-medium text-gray-700">
+                                    {{ $review->tourist?->firstname ?? 'Anonymous' }} {{ $review->tourist?->lastname ?? '' }}
+                                </p>
+                                <p class="text-sm text-gray-400">{{ $review->created_at->diffForHumans() }}</p>
+                            </div>
+                            <div class="text-yellow-400 text-xl">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <span class="{{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">&#9733;</span>
+                                @endfor
+                            </div>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed">{{ $review->comment }}</p>
     
-        {{-- Display list of reviews --}}
-        @forelse ($reviews as $review)
-            <div class="border-b border-gray-200 py-4">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="font-semibold text-gray-700">
-                        <p class="text-lg">{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</p>
+                        @if(!$loop->last)
+                            <hr class="my-4 border-gray-200">
+                        @endif
                     </div>
-                    
-                    
-                    <div class="text-yellow-400">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <span class="{{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">&#9733;</span>
-                        @endfor
-                    </div>
-                </div>
-                <p class="text-gray-600">{{ $review->comment }}</p>
-                <p class="text-sm text-gray-400 mt-1">{{ $review->created_at->diffForHumans() }}</p>
+                @endforeach
             </div>
-        @empty
-            <p class="text-gray-500 mt-4">No reviews yet. Be the first to write one!</p>
-        @endforelse
+        @else
+            <p class="text-gray-500 mb-6">No reviews yet. Be the first to write one!</p>
+        @endif
+    
+        {{-- Write Review Button --}}
+        <div class="mt-8 text-center">
+            <a href="{{ route('attractions.reviews', ['slug' => $attraction['slug']]) }}"
+               class="inline-block bg-yellow-400 text-white font-semibold px-6 py-2 rounded shadow hover:bg-yellow-500 transition duration-200">
+                Write Your Review
+            </a>
+        </div>
     </div>
     
     
