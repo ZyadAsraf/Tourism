@@ -57,9 +57,22 @@ class Attraction extends Model
         return $this->belongsTo(TicketType::class, 'ticket_types_id');
     }
 
+    
+
     public function reviews()
 {
     return $this->hasMany(Review::class,'attraction_id');
+    
+}
+
+protected static function boot()
+{
+    parent::boot();
+
+    static::deleting(function ($attraction) {
+        // Delete related reviews before deleting the attraction
+        $attraction->reviews()->delete();
+    });
 }
 
 }
