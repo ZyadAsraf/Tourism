@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Attraction;
 use App\Models\Category;
+use App\Models\Review;
 use Illuminate\Support\Str;
 
 class AttractionController extends Controller
@@ -189,19 +190,24 @@ public function show($slug)
     if (!isset($attractions[$slug])) {
         abort(404);
     }
-    
+
     // Get related attractions in the same category
     $category = $attractions[$slug]['category'];
     $related = array_filter($attractions, function($item) use ($category, $slug) {
         return $item['category'] === $category && $item['slug'] !== $slug;
     });
-    
+
+    // Fetch reviews for this attraction
+    $reviews = Review::where('attraction_id', $attractions[$slug]['id'])->latest()->get();
+
     return view('attraction.show', [
         'attraction' => $attractions[$slug],
         'related' => array_slice($related, 0, 3),
-        'categories' => $this->getCategories()
+        'categories' => $this->getCategories(),
+        'reviews' => $reviews, // pass the reviews to the view
     ]);
 }
+
 
 // Update the byCategory method to properly handle category slugs
 public function byCategory($category)
@@ -338,4 +344,52 @@ public function processBooking(Request $request, $attraction)
     // Redirect to confirmation page with success message
     return redirect()->route('attractions.show', $attraction)->with('success', 'Your booking has been confirmed! Payment was successful. Please check your email for confirmation details.');
 }
+
+public function reviews($slug)
+{
+    $attractions = $this->getAttractions();
+    
+    if (!isset($attractions[$slug])) {
+        abort(404);
+    }
+    
+    return view('attraction.review', [
+        'attraction' => $attractions[$slug],
+        'categories' => $this->getCategories()
+    ]);
+}
+
+
+public function addReview(Request $request, $slug)
+{
+    // Validate the incoming review data
+    $validated = $request->validate([
+        'rating' => 'required|integer|min:1|max:5',
+        'comment' => 'required|string|max:500',
+    ]);
+
+    // Find the attraction by matching the slug
+    $attraction = Attraction::all()->first(function ($attraction) use ($slug) {
+        return Str::slug($attraction->AttractionName) === $slug;
+    });
+
+    // If not found, abort with a 404
+    if (!$attraction) {
+        abort(404, 'Attraction not found.');
+    }
+
+    // Create a new review
+    $review = new Review();
+    $review->rating = $validated['rating'];
+    $review->comment = $validated['comment'];
+    $review->tourist_id = auth()->id(); // Assuming the user is authenticated
+    $review->attraction_id = $attraction->id;
+
+    // Save the review to the database
+    $review->save();
+
+    // Redirect back to the attraction page with a success message
+    return redirect()->route('attractions.show', $slug)->with('success', 'Your review has been submitted successfully!');
+}
+
 }

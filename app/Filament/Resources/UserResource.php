@@ -138,7 +138,7 @@ class UserResource extends Resource
                             ])
                             ->columns(2),
 
-                        Forms\Components\Tabs\Tab::make('Roles')
+                            Forms\Components\Tabs\Tab::make('Roles')
                             ->icon('fluentui-shield-task-48')
                             ->schema([
                                 Select::make('roles')
@@ -149,7 +149,10 @@ class UserResource extends Resource
                                     ->preload()
                                     ->searchable()
                                     ->optionsLimit(5)
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->required(false), // this line makes it optional
+                            
+                        
                             ])
                     ])
                     ->columnSpan([

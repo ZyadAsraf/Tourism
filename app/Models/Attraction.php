@@ -56,4 +56,10 @@ class Attraction extends Model
     {
         return $this->belongsTo(TicketType::class, 'TicketTypesId');
     }
+
+    public function reviews()
+{
+    return $this->hasMany(Review::class,'attraction_id');
+}
+
 }
