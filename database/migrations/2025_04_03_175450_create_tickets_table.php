@@ -22,7 +22,12 @@ return new class extends Migration
             $table->float('TotalCost');
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignId('AttractionId')->constrained('attractions', 'id')->restrictOnDelete();
-            $table->foreignUlid('AttractionStaffId')->constrained('users', 'id')->nullable()->restrictOnDelete();
+            $table->ulid('AttractionStaffId')->nullable(); // Step 1: make nullable column
+            $table->foreign('AttractionStaffId')           // Step 2: define FK manually
+                  ->references('id')
+                  ->on('users')
+                  ->restrictOnDelete();
+            
 
             $table->timestamps();
         });
