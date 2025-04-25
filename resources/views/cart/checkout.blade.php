@@ -198,31 +198,37 @@
 
             // Disable the submit button to prevent repeated clicks
             submitButton.disabled = true;
-            submitButton.textContent = 'Processing...';
 
             if (creditCardRadio.checked) {
-                // Handle credit card payment
+                // Create token with Stripe
                 stripe.createToken(cardElement).then(function(result) {
                     if (result.error) {
-                        // Show error in #card-errors element
+                        // Show error to your customer
                         var errorElement = document.getElementById('card-errors');
                         errorElement.textContent = result.error.message;
                         submitButton.disabled = false;
-                        submitButton.textContent = 'Complete Booking';
                     } else {
-                        // Send token to server
-                        document.getElementById('stripe-token').value = result.token.id;
+                        // Send the token to your server
+                        var tokenInput = document.getElementById('stripe-token');
+                        tokenInput.value = result.token.id;
+                        
+                        // Submit the form
                         form.submit();
                     }
                 });
-            } else if (paypalRadio.checked) {
-                // Handle PayPal payment
-                // In a real implementation, you would redirect to PayPal
-                // For now, we'll just submit the form
-                form.submit();
             } else {
-                // Handle pay on arrival
+                // For non-credit card payments, submit the form directly
                 form.submit();
+            }
+        });
+
+        // Handle card errors
+        cardElement.addEventListener('change', function(event) {
+            var displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
             }
         });
     </script>

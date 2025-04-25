@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Attraction;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Str;
+use Illuminate\Support\Date;
 
 use Stripe\Stripe;
 use Stripe\StripeClient;
@@ -224,17 +228,74 @@ class CartController extends Controller
         return count($cart);
     }
 
+    /**
+     * Ensure all cart items have a time field
+     */
+    private function ensureCartHasTime($cart)
+    {
+        foreach ($cart as $slug => &$item) {
+            if (!isset($item['time'])) {
+                $item['time'] = '00:00:00';
+            }
+        }
+        return $cart;
+    }
 
-    public function store(Request $request){
-        $stripe = new StripeClient(env("STRIPE_SECRET"));
+    public function store(Request $request)
+    {
+        try {
+            // Set your Stripe API key
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
 
-        $charge = $stripe->charges->create([
-            'amount' => $request->total *100,
-            'currency' => 'usd',
-            'source' => $request->stripeToken,
-            'description' => 'Payment from Massar.com'
-        ]);
-        // dd($charge);
-        return redirect()->route('cart.confirmation');
+            // Create a charge with the token
+            $charge = \Stripe\Charge::create([
+                'amount' => $request->total * 100, // Amount in cents
+                'currency' => 'usd',
+                'source' => $request->stripeToken,
+                'description' => 'Tourism App Payment',
+            ]);
+
+            // If we get here, the payment was successful
+            // Create tickets for each attraction in the cart
+            $cartItems = Session::get('cart', []);
+            $attractionController = new AttractionController();
+            $allAttractions = $attractionController->getAttractions();
+
+            foreach ($cartItems as $slug => $item) {
+                if (isset($allAttractions[$slug])) {
+                    $attraction = $allAttractions[$slug];
+                    
+                    // Create ticket for each quantity
+                    for ($i = 0; $i < $item['quantity']; $i++) {
+                        \App\Models\Ticket::create([
+                            'AttractionId' => $attraction['id'],
+                            'CustomerId' => Auth::id() ?? 1,
+                            'VisitDate' => $item['date'] . ' ' . ($item['time'] ?? '00:00:00'),
+                            'BookingTime' => now(),
+                            'QRCode' => Str::random(32),
+                            'AttractionStaffId' => Auth::id() ?? 1,
+                            'PaymentStatus' => 'paid',
+                            'PaymentMethod' => 'credit_card',
+                            'PaymentAmount' => $attraction['price'],
+                            'PaymentDate' => now(),
+                            'PaymentReference' => $charge->id,
+                        ]);
+                    }
+                }
+            }
+
+            // Clear the cart
+            Session::forget('cart');
+
+            return redirect()->route('cart.confirmation')
+                ->with('success', 'Payment successful! Your tickets have been created.');
+
+        } catch (\Stripe\Exception\CardException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            return back()->with('error', 'Invalid payment details. Please check your card information and try again.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Payment failed: ' . $e->getMessage());
+        }
     }
 }
