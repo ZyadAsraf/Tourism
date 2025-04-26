@@ -24,9 +24,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" viewBox="0 0 20 20"
                         fill="currentColor">
                         <path d="M9.049 2.927c.3-.921 1.603  viewBox="0 0 20 20" fill="currentColor">
-                          <path d=" M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371
-                            1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54
-                            1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0
+                                      <path d=" M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0
+                            00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755
+                            1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8
+                            2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0
                             00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                     <span class="text-white">{{ $attraction['rating'] ?? '0' }}
@@ -160,54 +161,178 @@
         </div>
     </div>
 
+    {{-- Location Map --}}
+    {{-- If the Location is set, display the map --}}
+
     @if (isset($attraction['mapImage']))
         <div class="mb-12">
             <h2 class="text-2xl font-bold mb-4 text-gray-600">Location</h2>
+            @php
+                $coords = null;
+                if (!empty($attraction['mapImage'])) {
+                    if (preg_match('/@(-?\d+\.\d+),(-?\d+\.\d+)/', $attraction['mapImage'], $matches)) {
+                        $coords = [$matches[1], $matches[2]];
+                    }
+                }
+            @endphp
 
+            {{-- If coordinates are found, display the map --}}
+
+            @if ($coords)
+                <style>
+                    .mapbox-wrapper {
+                        display: flex;
+                        justify-content: start;
+                        align-items: center;
+                        margin-top: 2rem;
+                    }
+
+                    .mapbox-card {
+                        background: #fff;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        border-radius: 10px;
+                        overflow: hidden;
+                        width: 800px;
+                        max-width: 100%;
+                        font-family: Arial, sans-serif;
+                    }
+
+                    .mapbox-header {
+                        padding: 16px;
+                        background: rgba(210, 172, 113, 1);
+                        color: rgb(255, 255, 255);
+                        font-size: 1.25rem;
+                        font-weight: bold;
+                        border-bottom: 1px solid #eee;
+                    }
+
+                    .mapbox-map {
+                        height: 350px;
+                        width: 100%;
+                    }
+
+                    .mapbox-footer {
+                        padding: 16px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        font-size: 0.95rem;
+                        color: #555;
+                    }
+
+                    .mapbox-button {
+                        text-align: center;
+                        padding: 10px;
+                        background-color: #0b7dda;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        transition: background 0.3s;
+                    }
+
+                    .mapbox-button:hover {
+                        background-color: #0b6cbb;
+                    }
+                </style>
+
+                <!-- Leaflet CSS -->
+                <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+                {{-- Mapbox --}}
+                <div class="mapbox-wrapper">
+                    <div class="mapbox-card">
+                        <div id="mapbox-map" class="mapbox-map"></div>
+                        <div class="mapbox-footer">
+                            <span>Map showing the location of
+                                {{ $attraction['AttractionName'] ?? $attraction['title'] }}.</span>
+                            <a class="mapbox-button" href="{{ $attraction['mapImage'] }}" target="_blank">
+                                📍 View in Google Maps
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Leaflet JS --}}
+                @push('scripts')
+                    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            const coords = [{{ $coords[0] ?? 'null' }}, {{ $coords[1] ?? 'null' }}];
+                            if (coords[0] && coords[1]) {
+                                const map = L.map('mapbox-map').setView(coords, 15);
+                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
+                                L.marker(coords).addTo(map)
+                                    .bindPopup('📍 {{ $attraction['AttractionName'] ?? $attraction['title'] }}')
+                                    .openPopup();
+                            } else {
+                                console.error("Invalid coordinates.");
+                            }
+                        });
+                    </script>
+                @endpush
+            @endif
         </div>
     @endif
+    {{-- End Of Map Section --}}
+
+    {{-- Reviews --}}
     <div class="mb-12">
         <h2 class="text-2xl font-bold mb-6 text-gray-600">Reviews</h2>
-    
-        @if($reviews->count())
-            <div class="bg-white p-6 rounded-lg shadow border border-gray-200 space-y-6">
-                @foreach ($reviews as $review)
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <div>
-                                <p class="text-lg font-medium text-gray-700">
-                                    {{ $review->tourist?->firstname ?? 'Anonymous' }} {{ $review->tourist?->lastname ?? '' }}
-                                </p>
-                                <p class="text-sm text-gray-400">{{ $review->created_at->diffForHumans() }}</p>
-                            </div>
-                            <div class="text-yellow-400 text-xl">
+
+        @if ($reviews->count())
+        <div class="max-w-2xl max-w bg-white p-6 rounded-lg shadow border border-gray-200 space-y-4">
+            @foreach ($reviews as $review)
+                <div>
+                    <div class="flex items-start space-x-4 mb-1">
+                        <!-- Image -->
+                        <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}"
+                            class="w-16 h-16 rounded-full object-cover border border-gray-300">
+        
+                        <!-- Name, date, rating -->
+                        <div>
+                            <p class="text-lg font-medium text-gray-700">
+                                {{ $review->tourist?->firstname ?? 'Anonymous' }}
+                                {{ $review->tourist?->lastname ?? '' }}
+                            </p>
+        
+                            <p class="text-sm text-gray-400">
+                                {{ $review->created_at->diffForHumans() }}
+                            </p>
+        
+                            <div class="text-yellow-400 text-lg ">
                                 @for ($i = 1; $i <= 5; $i++)
-                                    <span class="{{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">&#9733;</span>
+                                    <span class="{{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">
+                                        &#9733;
+                                    </span>
                                 @endfor
                             </div>
                         </div>
-                        <p class="text-gray-600 leading-relaxed">{{ $review->comment }}</p>
-    
-                        @if(!$loop->last)
-                            <hr class="my-4 border-gray-200">
-                        @endif
                     </div>
-                @endforeach
-            </div>
+        
+                    <!-- Comment -->
+                    <p class="text-gray-600 leading-relaxed">{{ $review->comment }}</p>
+        
+                    @if (!$loop->last)
+                        <hr class="my-4 border-gray-200">
+                    @endif
+                </div>
+            @endforeach
+        </div>
+        
         @else
             <p class="text-gray-500 mb-6">No reviews yet. Be the first to write one!</p>
         @endif
-    
+
         {{-- Write Review Button --}}
         <div class="mt-8 text-center">
             <a href="{{ route('attractions.reviews', ['slug' => $attraction['slug']]) }}"
-               class="inline-block bg-yellow-400 text-white font-semibold px-6 py-2 rounded shadow hover:bg-yellow-500 transition duration-200">
+                class="inline-block bg-yellow-400 text-white font-semibold px-6 py-2 rounded shadow hover:bg-yellow-500 transition duration-200">
                 Write Your Review
             </a>
         </div>
     </div>
-    
-    
+    {{-- End of Reviews --}}
+
 
     @if (isset($related) && count($related) > 0)
         <div class="mb-12">
@@ -224,7 +349,7 @@
                                 </p>
                             </div>
                         </div>
-                        
+
                         <div class="p-4">
                             <div class="flex justify-between items-start mb-2">
                                 <h3 class="text-xl font-bold text-gray-600">{{ $relatedAttraction['title'] }}</h3>

@@ -43,7 +43,7 @@ class AttractionResource extends Resource
                 TextInput::make('Address')->rules('max:49'),
                 TextInput::make('City')->rules('max:49'),
                 TextInput::make('Street')->rules('max:49'),
-                TextInput::make('Location Link')->url(),
+                TextInput::make('LocationLink')->label('Location Link')->url()->required(),
                 FileUpload::make('Img')->required()->directory('Imgs'),
                 MarkdownEditor::make('Description')->required(),
                 Select::make('GovernorateId')->options(Governorate::pluck('Name','id'))->required(),

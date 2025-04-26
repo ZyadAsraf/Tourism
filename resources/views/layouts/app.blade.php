@@ -264,4 +264,9 @@
     </footer>
 </div>
 </body>
+@stack('styles')
+@stack('scripts')
+
 </html>
+
+
