@@ -23,6 +23,8 @@ return new class extends Migration
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignId('AttractionId')->constrained('attractions', 'id')->restrictOnDelete();
             $table->foreignUlid('AttractionStaffId')->constrained('users', 'id')->restrictOnDelete()->nullable();
+            $table->foreignId('TicketTypesId')->constrained('ticket_types', 'id')->restrictOnDelete();
+
 
             $table->timestamps();
         });
