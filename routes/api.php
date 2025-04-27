@@ -29,7 +29,10 @@ Route::group(['middleware'=>'api'], function () {
     Route::get('/booking/{attraction}', [AttractionController::class, 'bookingFormApi']);
     Route::post('/payment/{attraction}', [AttractionController::class, 'paymentFormApi']);
     Route::post('/process-booking/{attraction}', [AttractionController::class, 'processBookingApi']);
+    Route::get('/attractions/{slug}/reviews', [AttractionController::class, 'getReviews']);
 
+    // Add a new review to an attraction
+    Route::post('/attractions/{slug}/reviews', [AttractionController::class, 'addReview']);
     Route::get('/home', [HomeController::class, 'indexApi']);
 
 });

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-
+use App\Models\Review;
 use App\Models\Attraction;
 use App\Models\Category;
 use Illuminate\Support\Str;
@@ -492,6 +492,59 @@ public function processBookingApi(Request $request, $attraction):JsonResponse
             'trace' => $e->getTrace()
         ], 500);
     }
+}
+public function getReviews($slug)
+{
+    // Get all attractions
+    $attractions = $this->getAttractions();
+    
+    // Check if attraction with given slug exists
+    if (!isset($attractions[$slug])) {
+        return response()->json([
+            'message' => 'Attraction not found.'
+        ], 404);
+    }
+
+    // Return the attraction and categories as JSON
+    return response()->json([
+        'attraction' => $attractions[$slug],
+        'categories' => $this->getCategories(),
+    ]);
+}
+
+public function addReview(Request $request, $slug)
+{
+    // Validate the incoming review data
+    $validated = $request->validate([
+        'rating' => 'required|integer|min:1|max:5',
+        'comment' => 'required|string|max:500',
+    ]);
+
+    // Find the attraction by matching the slug
+    $attraction = Attraction::all()->first(function ($attraction) use ($slug) {
+        return Str::slug($attraction->AttractionName) === $slug;
+    });
+
+    // If not found, return 404 JSON
+    if (!$attraction) {
+        return response()->json([
+            'message' => 'Attraction not found.'
+        ], 404);
+    }
+
+    // Create a new review
+    $review = new Review();
+    $review->rating = $validated['rating'];
+    $review->comment = $validated['comment'];
+    $review->tourist_id = auth()->id(); // Assuming the user is authenticated
+    $review->attraction_id = $attraction->id;
+    $review->save();
+
+    // Return success response
+    return response()->json([
+        'message' => 'Your review has been submitted successfully!',
+        'review' => $review
+    ], 201);
 }
 
 }
