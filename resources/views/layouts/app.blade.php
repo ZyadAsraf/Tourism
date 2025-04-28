@@ -137,9 +137,10 @@
             <!-- Profile -->
             <a href="{{ route('profile.edit') }}" class="text-gray-600 hover:text-primary">Profile</a>
         
-            <!-- Admin Dashboard (visible only to admin) -->
+            
             @auth
-            @if(auth()->user()->hasRole('Admin'))
+            @if(auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('admin'))
+                <!-- Admin Dashboard (visible only to admin) -->
                 <a href="{{ url('/admin') }}" class="text-gray-600 hover:text-primary">Admin Dashboard</a>
             @endif
             @endauth
