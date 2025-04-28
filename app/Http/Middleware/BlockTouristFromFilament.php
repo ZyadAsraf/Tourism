@@ -17,8 +17,8 @@ class BlockTouristFromFilament
     {
         $user = auth()->user();
     
-        if ($user && ($user->hasRole('Tourist') || $user->roles->isEmpty())) {
-            abort(403, 'Unauthorized');
+        if (!$user || $user && ($user->hasRole('Tourist') || $user->roles->isEmpty())) {
+            abort(404);
         }
     
         return $next($request);
