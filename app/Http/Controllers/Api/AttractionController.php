@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api; 
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -495,19 +495,43 @@ public function processBookingApi(Request $request, $attraction):JsonResponse
 }
 public function reviews($slug)
 {
-    $attractions = $this->getAttractions();
+    // Find attraction by slug
+    $attraction = Attraction::with(['reviews.tourist'])->get()->first(function ($item) use ($slug) {
+        return Str::slug($item->AttractionName) === $slug;
+    });
 
-    if (!isset($attractions[$slug])) {
+    if (!$attraction) {
         return response()->json([
             'message' => 'Attraction not found.'
         ], 404);
     }
 
+    // Format reviews
+    $reviews = $attraction->reviews->map(function ($review) {
+        return [
+            'id' => $review->id,
+            'rating' => $review->rating,
+            'comment' => $review->comment,
+            'tourist' => $review->tourist ? [
+                'id' => $review->tourist->id,
+                'name' => $review->tourist->name,
+                'email' => $review->tourist->email,
+            ] : null,
+            'created_at' => $review->created_at->toDateTimeString()
+        ];
+    });
+
     return response()->json([
-        'attraction' => $attractions[$slug],
-        'categories' => $this->getCategories()
+        'attraction' => [
+            'id' => $attraction->id,
+            'name' => $attraction->AttractionName,
+            'slug' => Str::slug($attraction->AttractionName),
+        ],
+        'reviews' => $reviews,
+        'categories' => $this->getCategories()->getData(true)['data']
     ]);
 }
+
 
 
 public function addReview(Request $request, $slug)
