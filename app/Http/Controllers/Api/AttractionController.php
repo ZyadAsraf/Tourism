@@ -493,24 +493,22 @@ public function processBookingApi(Request $request, $attraction):JsonResponse
         ], 500);
     }
 }
-public function getReviews($slug)
+public function reviews($slug)
 {
-    // Get all attractions
     $attractions = $this->getAttractions();
-    
-    // Check if attraction with given slug exists
+
     if (!isset($attractions[$slug])) {
         return response()->json([
             'message' => 'Attraction not found.'
         ], 404);
     }
 
-    // Return the attraction and categories as JSON
     return response()->json([
         'attraction' => $attractions[$slug],
-        'categories' => $this->getCategories(),
+        'categories' => $this->getCategories()
     ]);
 }
+
 
 public function addReview(Request $request, $slug)
 {
@@ -525,7 +523,7 @@ public function addReview(Request $request, $slug)
         return Str::slug($attraction->AttractionName) === $slug;
     });
 
-    // If not found, return 404 JSON
+    // If not found, return a 404 JSON response
     if (!$attraction) {
         return response()->json([
             'message' => 'Attraction not found.'
@@ -538,13 +536,15 @@ public function addReview(Request $request, $slug)
     $review->comment = $validated['comment'];
     $review->tourist_id = auth()->id(); // Assuming the user is authenticated
     $review->attraction_id = $attraction->id;
+
+    // Save the review
     $review->save();
 
-    // Return success response
+    // Return a JSON success response
     return response()->json([
         'message' => 'Your review has been submitted successfully!',
         'review' => $review
-    ], 201);
+    ], 201); // 201 Created
 }
 
 }
