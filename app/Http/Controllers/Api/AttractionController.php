@@ -543,11 +543,10 @@ public function addReview(Request $request, $slug)
     ]);
 
     // Find the attraction by matching the slug
-    $attraction = Attraction::all()->first(function ($attraction) use ($slug) {
+    $attraction = Attraction::with('reviews')->get()->first(function ($attraction) use ($slug) {
         return Str::slug($attraction->AttractionName) === $slug;
     });
 
-    // If not found, return a 404 JSON response
     if (!$attraction) {
         return response()->json([
             'message' => 'Attraction not found.'
@@ -558,17 +557,30 @@ public function addReview(Request $request, $slug)
     $review = new Review();
     $review->rating = $validated['rating'];
     $review->comment = $validated['comment'];
-    $review->tourist_id = auth()->id(); // Assuming the user is authenticated
+    $review->tourist_id = auth()->id(); // Assuming user is authenticated
     $review->attraction_id = $attraction->id;
-
-    // Save the review
     $review->save();
 
-    // Return a JSON success response
+    // Load the tourist relation (so tourist data is available immediately)
+    $review->load('tourist');
+
+    // Format the review
+    $formattedReview = [
+        'id' => $review->id,
+        'rating' => $review->rating,
+        'comment' => $review->comment,
+        'tourist' => $review->tourist ? [
+            'id' => $review->tourist->id,
+            'name' => $review->tourist->name,
+            'email' => $review->tourist->email,
+        ] : null,
+        'created_at' => $review->created_at->toDateTimeString()
+    ];
+
+    // Return JSON response
     return response()->json([
         'message' => 'Your review has been submitted successfully!',
-        'review' => $review
-    ], 201); // 201 Created
+        'review' => $formattedReview
+    ], 201);
 }
-
 }
