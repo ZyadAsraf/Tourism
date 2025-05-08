@@ -182,15 +182,15 @@
 </section>
 
 <!-- Testimonials Section -->
-<section class="container mx-auto px-4 mb-16">
+<!-- <section class="container mx-auto px-4 mb-16">
     <div class="text-center mb-12">
         <h2 class="text-3xl font-bold text-gray-700 mb-4">What Our Travelers Say</h2>
         <p class="text-gray-500 max-w-3xl mx-auto">Read authentic reviews from travelers who experienced the magic of Egypt with us</p>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8"> -->
         <!-- Testimonial 1 -->
-        <div class="bg-white rounded-xl p-6 shadow-md">
+        <!-- <div class="bg-white rounded-xl p-6 shadow-md">
             <div class="flex items-center mb-4">
                 <div class="h-12 w-12 rounded-full overflow-hidden mr-4">
                     <img src="images\pexels-lokmansevim-18731384.jpg" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
@@ -218,10 +218,10 @@
                 </svg>
             </div>
             <p class="text-gray-600 italic">"Our trip to Egypt was absolutely magical! The pyramids were breathtaking, and our guide was incredibly knowledgeable. Can't wait to come back!"</p>
-        </div>
+        </div> -->
         
         <!-- Testimonial 2 -->
-        <div class="bg-white rounded-xl p-6 shadow-md">
+        <!-- <div class="bg-white rounded-xl p-6 shadow-md">
             <div class="flex items-center mb-4">
                 <div class="h-12 w-12 rounded-full overflow-hidden mr-4">
                     <img src="images\pexels-gabby-k-5384429.jpg" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
@@ -246,10 +246,10 @@
                 </svg>
             </div>
             <p class="text-gray-600 italic">"The Nile cruise was the highlight of our trip. Watching the sunset over the river while enjoying Egyptian cuisine was an unforgettable experience."</p>
-        </div>
+        </div> -->
         
         <!-- Testimonial 3 -->
-        <div class="bg-white rounded-xl p-6 shadow-md">
+        <!-- <div class="bg-white rounded-xl p-6 shadow-md">
             <div class="flex items-center mb-4">
                 <div class="h-12 w-12 rounded-full overflow-hidden mr-4">
                     <img src="images\pexels-iamikeee-2709388.jpg" alt="Testimonial" class="h-full w-full object-cover" onerror="this.src='/images/placeholder.jpg'; this.onerror=null;">
@@ -279,7 +279,7 @@
             <p class="text-gray-600 italic">"The desert safari was incredible! Watching the sunset over the dunes and spending the night under the stars was a once-in-a-lifetime experience."</p>
         </div>
     </div>
-</section>
+</section> -->
 
 <!-- Why Choose Us Section -->
 <section class="container mx-auto px-4 mb-16">

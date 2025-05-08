@@ -99,7 +99,7 @@
             @endif
         </div>
 
-        <div class="lg:col-span-1">
+        <!-- <div class="lg:col-span-1">
             <div class="card p-6 sticky top-4">
                 <h2 class="text-xl font-bold mb-4 text-gray-600">Add to Your Trip</h2>
                 <form action="{{ route('cart.add', $attraction['slug']) }}" method="POST">
@@ -158,7 +158,7 @@
                     @endguest
                 </form>
             </div>
-        </div>
+        </div> -->
     </div>
 
     {{-- Location Map --}}
