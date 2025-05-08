@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Routing\ResponseFactory;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Schema;
@@ -29,6 +31,14 @@ class AppServiceProvider extends ServiceProvider
         // Keep the existing password reset URL customization
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
             return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
+        });
+
+        ResponseFactory::macro('api',function($data=null,$error=0,$message=''){
+            return response()->json([
+                'data' => $data,
+                'error' => $error,
+                'message' => $message,
+            ]);
         });
         
         // Force HTTPS for all URLs in production

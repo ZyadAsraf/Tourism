@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('Address', 50)->nullable();
             $table->string('City', 50)->nullable();
             $table->string('Street', 50)->nullable();
-            $table->text('LocationLink')->nullable();
+            $table->text('LocationLink');
             $table->string('Img');
             $table->float('EntryFee');
             $table->string('Status',50);

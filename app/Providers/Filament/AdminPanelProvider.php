@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Providers\Filament\BlockTouristFromFilament;
 use App\Filament\Pages\Auth\EmailVerification;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RequestPasswordReset;
@@ -13,6 +14,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation;
 use Filament\Pages;
+use Illuminate\Support\Facades\Auth;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Widgets;
@@ -89,6 +91,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\BlockTouristFromFilament::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -138,4 +141,12 @@ class AdminPanelProvider extends PanelProvider
                     ])
             ]);
     }
+    
+public function canAccessPanel(Panel $panel): bool
+{
+    $user = Auth::user();
+
+    // Block tourists
+    return $user && !$user->hasAnyRole(['tourist', 'Tourist']);
+}
 }
