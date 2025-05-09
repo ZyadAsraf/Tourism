@@ -13,17 +13,21 @@ class Ticket extends Model
 
     protected $primaryKey = 'id'; // UUID primary key
     public $incrementing = true;
+    protected $keyType = 'string';
+    
     protected $fillable = [
         'PhoneNumber',
-        'QRCode',
         'BookingTime',
         'Quantity',
-        'VisitDate',
         'TotalCost',
+        'state',
+        'TicketTypesId',
+        'AttractionStaffId',
+        'VisitDate',
         'TouristId',
-        'AttractionId',
-        'AttractionStaffId'
     ];
+    
+    
 
     /**
      * Define Relationships
@@ -36,14 +40,22 @@ class Ticket extends Model
     }
 
     // A Ticket belongs to an Attraction
-    public function attraction()
-    {
-        return $this->belongsTo(Attraction::class);
-    }
+// Ticket.php
+public function attractions()
+{
+    return $this->belongsToMany(Attraction::class)->withPivot('quantity', 'visit_date');
+}
+
 
     // A Ticket is managed by an Attraction Staff
     public function attractionStaff()
     {
         return $this->belongsTo(User::class, 'AttractionStaffId');
     }
+    public function ticketType()
+{
+    return $this->belongsTo(TicketType::class, 'TicketTypeId');
 }
+
+}
+

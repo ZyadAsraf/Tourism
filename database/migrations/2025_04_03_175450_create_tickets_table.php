@@ -12,20 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            //$table->uuid(column: 'id')->primary();
-            $table->id();
-            $table->string('PhoneNumber',20);
-            $table->text('QRCode');
-            $table->dateTime('BookingTime');
+            $table->uuid('id')->primary();
+            $table->string('PhoneNumber', 20);
+            $table->date('BookingTime');
             $table->integer('Quantity');
             $table->date('VisitDate');
             $table->float('TotalCost');
+            $table->string('state')->nullable();
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
-            $table->foreignId('AttractionId')->constrained('attractions', 'id')->restrictOnDelete();
-            $table->foreignUlid('AttractionStaffId')->constrained('users', 'id')->restrictOnDelete()->nullable();
+            $table->foreignUuid('AttractionStaffId')
+                ->nullable()
+                ->default('610c4d52-38fa-4540-9ffa-d92716dcac08')
+                ->constrained('users', 'id')
+                ->restrictOnDelete();
             $table->foreignId('TicketTypesId')->constrained('ticket_types', 'id')->restrictOnDelete();
-
-
             $table->timestamps();
         });
     }

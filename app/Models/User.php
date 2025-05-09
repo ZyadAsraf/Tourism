@@ -73,7 +73,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->getMedia('avatars')?->first()?->getUrl() ?? $this->getMedia('avatars')?->first()?->getUrl('thumb') ?? null;
+        $media = $this->getFirstMedia('avatars');
+    
+        return $media?->getUrl('thumb') ?? $media?->getUrl() ?? null;
     }
 
     // Define an accessor for the 'name' attribute

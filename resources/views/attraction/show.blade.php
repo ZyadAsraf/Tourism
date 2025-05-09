@@ -148,8 +148,7 @@
 
                     <div class="flex justify-between mt-4">
                         <a href="{{ route('cart.index') }}" class="text-primary hover:underline">View Trip Plan</a>
-                        <a href="{{ route('booking.form', $attraction['slug']) }}"
-                            class="text-primary hover:underline">Book Now</a>
+                        
                     </div>
 
                     @guest

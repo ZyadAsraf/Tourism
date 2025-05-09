@@ -49,11 +49,13 @@ class UserResource extends Resource
                 Forms\Components\Group::make()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('media')
-                            ->hiddenLabel()
-                            ->avatar()
-                            ->collection('avatars')
-                            ->alignCenter()
-                            ->columnSpanFull(),
+                        ->hiddenLabel()
+                        ->avatar()
+                        ->collection('avatars')
+                        ->dehydrated(true) // <-- أضف هذا السطر
+                        ->alignCenter()
+                        ->columnSpanFull(),
+                    
 
                         Forms\Components\Actions::make([
                             Action::make('resend_verification')
@@ -168,9 +170,14 @@ class UserResource extends Resource
         return $table
            // ->modifyQueryUsing(fn (Builder $query) => $query->where('email',"ashlynn88@example.com"))//user type
             ->columns([
-                SpatieMediaLibraryImageColumn::make('media')->label('Avatar')
-                    ->collection('avatars')
-                    ->wrap(),
+                SpatieMediaLibraryImageColumn::make('media')
+    ->collection('avatars')
+    ->label('Avatar')
+    ->rounded()
+    ->width(50)
+    ->height(50),
+
+            
                 Tables\Columns\TextColumn::make('username')->label('Username')
                     ->description(fn(Model $record) => $record->firstname . ' ' . $record->lastname)
                     ->searchable(),
