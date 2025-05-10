@@ -38,11 +38,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Stripe 
     Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
-
-    // Booking
-    Route::get('/booking/{attraction}', [AttractionController::class, 'bookingForm'])->name('booking.form');
-    Route::post('/booking/{attraction}/payment', [AttractionController::class, 'paymentForm'])->name('booking.payment');
-    Route::post('/booking/{attraction}/process', [AttractionController::class, 'processBooking'])->name('booking.process');
 });
 
 // Laravel Auth Routes 

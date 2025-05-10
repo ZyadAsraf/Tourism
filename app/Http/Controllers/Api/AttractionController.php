@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api; 
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-
+use App\Models\Review;
 use App\Models\Attraction;
 use App\Models\Category;
 use Illuminate\Support\Str;
@@ -493,5 +493,94 @@ public function processBookingApi(Request $request, $attraction):JsonResponse
         ], 500);
     }
 }
+public function reviews($slug)
+{
+    // Find attraction by slug
+    $attraction = Attraction::with(['reviews.tourist'])->get()->first(function ($item) use ($slug) {
+        return Str::slug($item->AttractionName) === $slug;
+    });
 
+    if (!$attraction) {
+        return response()->json([
+            'message' => 'Attraction not found.'
+        ], 404);
+    }
+
+    // Format reviews
+    $reviews = $attraction->reviews->map(function ($review) {
+        return [
+            'id' => $review->id,
+            'rating' => $review->rating,
+            'comment' => $review->comment,
+            'tourist' => $review->tourist ? [
+                'id' => $review->tourist->id,
+                'name' => $review->tourist->name,
+                'email' => $review->tourist->email,
+            ] : null,
+            'created_at' => $review->created_at->toDateTimeString()
+        ];
+    });
+
+    return response()->json([
+        'attraction' => [
+            'id' => $attraction->id,
+            'name' => $attraction->AttractionName,
+            'slug' => Str::slug($attraction->AttractionName),
+        ],
+        'reviews' => $reviews,
+        'categories' => $this->getCategories()->getData(true)['data']
+    ]);
+}
+
+
+
+public function addReview(Request $request, $slug)
+{
+    // Validate the incoming review data
+    $validated = $request->validate([
+        'rating' => 'required|integer|min:1|max:5',
+        'comment' => 'required|string|max:500',
+    ]);
+
+    // Find the attraction by matching the slug
+    $attraction = Attraction::with('reviews')->get()->first(function ($attraction) use ($slug) {
+        return Str::slug($attraction->AttractionName) === $slug;
+    });
+
+    if (!$attraction) {
+        return response()->json([
+            'message' => 'Attraction not found.'
+        ], 404);
+    }
+
+    // Create a new review
+    $review = new Review();
+    $review->rating = $validated['rating'];
+    $review->comment = $validated['comment'];
+    $review->tourist_id = auth()->id(); // Assuming user is authenticated
+    $review->attraction_id = $attraction->id;
+    $review->save();
+
+    // Load the tourist relation (so tourist data is available immediately)
+    $review->load('tourist');
+
+    // Format the review
+    $formattedReview = [
+        'id' => $review->id,
+        'rating' => $review->rating,
+        'comment' => $review->comment,
+        'tourist' => $review->tourist ? [
+            'id' => $review->tourist->id,
+            'name' => $review->tourist->name,
+            'email' => $review->tourist->email,
+        ] : null,
+        'created_at' => $review->created_at->toDateTimeString()
+    ];
+
+    // Return JSON response
+    return response()->json([
+        'message' => 'Your review has been submitted successfully!',
+        'review' => $formattedReview
+    ], 201);
+}
 }

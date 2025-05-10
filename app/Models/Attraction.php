@@ -33,15 +33,21 @@ class Attraction extends Model
      */
 
     // Relationship with Admin
+// Attraction.php
+public function tickets()
+{
+    return $this->belongsToMany(Ticket::class)->withPivot('quantity', 'visit_date');
+}
+
     public function admin()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'AdminId');
     }
 
     // Relationship with Governorate
     public function governorate()
     {
-        return $this->belongsTo(Governorate::class);
+        return $this->belongsTo(Governorate::class,'GovernorateId');
     }
 
     public function categories()

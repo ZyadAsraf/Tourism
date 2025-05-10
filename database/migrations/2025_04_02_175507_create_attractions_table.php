@@ -25,7 +25,6 @@ return new class extends Migration
             $table->string('Status',50);
             $table->foreignUuid('AdminId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignId('GovernorateId')->constrained('governorates', 'id')->restrictOnDelete();
-            $table->foreignId('TicketTypesId')->constrained('ticket_types', 'id')->restrictOnDelete();
             $table->timestamps();
         });
     }
