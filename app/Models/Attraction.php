@@ -47,7 +47,7 @@ public function tickets()
     // Relationship with Governorate
     public function governorate()
     {
-        return $this->belongsTo(Governorate::class,'GovernorateId');
+        return $this->belongsTo(Governorate::class,"id");
     }
 
     public function categories()
@@ -60,7 +60,7 @@ public function tickets()
 
     public function ticketType()
     {
-        return $this->belongsTo(TicketType::class, 'ticket_types_id');
+        return $this->belongsTo(TicketType::class, "id");
     }
 
     
