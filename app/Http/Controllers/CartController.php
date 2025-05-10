@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Session;
 use App\Models\Ticket;
 use App\Models\TicketType;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Stripe\StripeClient;
 
 class CartController extends Controller
@@ -182,7 +183,7 @@ class CartController extends Controller
             'VisitDate' => 'required|date', 
             'TotalCost' => 'required|numeric',
             'state' => 'required|string',
-            'AttractionStaffId' => 'required|exists:users,id',  
+            // 'AttractionStaffId' => 'required|exists:users,id',  
             'TicketTypesId' => 'required|exists:ticket_types,id', 
         ]);
 
@@ -193,12 +194,15 @@ class CartController extends Controller
         // Loop through cart items and attach attractions to the ticket
         $cartItems = Session::get('cart', []);
         foreach ($cartItems as $slug => $item) {
-            $attraction = Attraction::where('slug', $slug)->first();
-            if ($attraction) {
+            try {
+                $attraction = Attraction::where('slug', $slug)->firstOrFail();
                 $ticket->attractions()->attach($attraction->id, [
                     'quantity' => $item['quantity'],
                     'visit_date' => $item['date'],
                 ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to attach attraction with slug {$slug}: " . $e->getMessage());
+                continue;
             }
         }
 
