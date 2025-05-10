@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Ticket extends Model
 {
@@ -11,8 +13,8 @@ class Ticket extends Model
 
     protected $table = 'tickets'; // Ensures it matches the table name
 
-    protected $primaryKey = 'id'; // UUID primary key
-    public $incrementing = true;
+    // protected $primaryKey = 'id'; // UUID primary key
+    public $incrementing = false;
     protected $keyType = 'string';
     
     protected $fillable = [
@@ -40,11 +42,11 @@ class Ticket extends Model
     }
 
     // A Ticket belongs to an Attraction
-// Ticket.php
-public function attractions()
-{
-    return $this->belongsToMany(Attraction::class)->withPivot('quantity', 'visit_date');
-}
+    // Ticket.php
+    public function attractions()
+    {
+        return $this->belongsToMany(Attraction::class)->withPivot('quantity', 'visit_date');
+    }
 
 
     // A Ticket is managed by an Attraction Staff
@@ -53,9 +55,17 @@ public function attractions()
         return $this->belongsTo(User::class, 'AttractionStaffId');
     }
     public function ticketType()
-{
-    return $this->belongsTo(TicketType::class, 'TicketTypeId');
-}
-
+    {
+        return $this->belongsTo(TicketType::class, 'TicketTypeId');
+    }
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            // Only set if not already provided
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = Str::uuid()->toString();
+            }
+        });
+    }
 }
 

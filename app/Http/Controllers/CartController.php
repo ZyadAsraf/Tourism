@@ -184,14 +184,12 @@ class CartController extends Controller
             'state' => 'required|string',
             'AttractionStaffId' => 'required|exists:users,id',  
             'TicketTypesId' => 'required|exists:ticket_types,id', 
-          
         ]);
 
         $validated['TouristId'] = Auth::id(); // Set from current logged-in user
         $validated['BookingTime'] = date('Y-m-d H:i:s', strtotime($validated['BookingTime']));
         $ticket = Ticket::create($validated);
         
-
         // Loop through cart items and attach attractions to the ticket
         $cartItems = Session::get('cart', []);
         foreach ($cartItems as $slug => $item) {
@@ -203,6 +201,9 @@ class CartController extends Controller
                 ]);
             }
         }
+
+        // Clear the cart after successful checkout
+        Session::forget('cart');
 
         return redirect()->route('cart.confirmation')->with('success', 'Your booking is complete!');
     }

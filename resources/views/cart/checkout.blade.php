@@ -47,6 +47,10 @@
                             <input type="number" name="Quantity" class="w-full p-2 border border-gray-200 rounded-md" required>
                         </div>
                         <div>
+                            <label class="block text-gray-600 mb-1">AttractionStaffId</label>
+                            <input type="text" name="AttractionStaffId" class="w-full p-2 border border-gray-200 rounded-md" required>
+                        </div>
+                        <div>
                             <label class="block text-gray-600 mb-1">Visit Date</label>
                             <input type="date" name="VisitDate" class="w-full p-2 border border-gray-200 rounded-md" required>
                         </div>
@@ -172,17 +176,9 @@
         });
 
         function createToken() {
-            stripe.createToken(card).then(function(result) {
-                if (result.error) {
-                    var errorElement = document.getElementById('card-errors');
-                    errorElement.textContent = result.error.message;
-                } else {
-                    var form = document.getElementById('stripe-form');
-                    var tokenInput = document.getElementById('stripe-token');
-                    tokenInput.value = result.token.id;
-                    form.submit();
-                }
-            });
+            
+            var form = document.getElementById('stripe-form');
+            form.submit();
         }
     </script>
 @endsection
