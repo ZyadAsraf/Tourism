@@ -21,7 +21,7 @@ class BieWidgets extends ChartWidget
                 'datasets' => [
                     [
                         'label' => 'No Data Available',
-                        'data' => [100], // Placeholder data
+                        'data' => [50], // Placeholder data
                         'backgroundColor' => ['#CCCCCC'],
                     ],
                 ],
@@ -30,9 +30,9 @@ class BieWidgets extends ChartWidget
         }
 
         // Count occurrences of each ticket type using the foreign key
-        $ticketTypeCounts = Ticket::selectRaw('TicketTypeId, COUNT(*) as count')
-            ->groupBy('TicketTypeId')
-            ->pluck('count', 'TicketTypeId')
+        $ticketTypeCounts = Ticket::selectRaw('TicketTypesId, COUNT(*) as count')
+            ->groupBy('TicketTypesId')
+            ->pluck('count', 'TicketTypesId')
             ->toArray();
 
         // Get ticket type names
