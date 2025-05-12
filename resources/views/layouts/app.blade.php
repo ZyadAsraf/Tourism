@@ -1,115 +1,234 @@
-<br>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>@yield('title', 'Massar - Discover Egypt\'s Hidden Gems')</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<style>
-    :root {
-        --color-primary: #4b4f29;
-        --color-primary-dark: #3a3e1e;
-        --color-bg: #f6efe6;
-        --color-text: #717171;
-        --color-light-gray: #f3f3f3;
-    }
-    
-    body {
-        background-color: var(--color-bg);
-        color: var(--color-text);
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .btn-primary {
-        background-color: var(--color-primary);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        font-weight: 500;
-        transition: background-color 0.2s;
-        display: inline-block;
-        text-align: center;
-    }
-    
-    .btn-primary:hover {
-        background-color: var(--color-primary-dark);
-    }
-    
-    .btn-outline {
-        border: 1px solid white;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        font-weight: 500;
-        transition: background-color 0.2s;
-        display: inline-block;
-    }
-    
-    .btn-outline:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    .card {
-        background-color: white;
-        border-radius: 0.75rem;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .text-primary {
-        color: var(--color-primary);
-    }
-    
-    .bg-primary {
-        background-color: var(--color-primary);
-    }
-    
-    .star-rating {
-        color: var(--color-primary);
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Massar - Discover Egypt\'s Hidden Gems')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Reset and base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --color-gold: #D4AF37;
+            --color-gold-dark: #B38E2E;
+            --color-bg: #f3f1ed;
+            --color-text: #222;
+            --color-light-gray: #f3f3f3;
+        }
+
+        body {
+            font-family: 'Roboto', serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            font-size: 20px;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            color: #111;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            width: 100vw;
+            max-width: 100%;
+            background: var(--color-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 2vw 0.5rem 2vw;
+            border-bottom: 1px solid #e0e0e0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            color: var(--color-gold);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-right: 0.7rem;
+        }
+
+        .nav-search {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-search input {
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 0.4rem 1.2rem;
+            font-size: 1rem;
+            width: 420px;
+            outline: none;
+            background: #fafafa;
+            transition: border 0.2s;
+        }
+
+        .nav-search input:focus {
+            border: 1.5px solid var(--color-gold);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            list-style: none;
+            margin: 0 1.5rem 0 1.5rem;
+            padding: 0;
+        }
+
+        .nav-links li a {
+            text-decoration: none;
+            color: var(--color-text);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            padding: 0.2rem 0.5rem;
+        }
+
+        .nav-links li a:hover {
+            color: var(--color-gold);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-login, .btn-register {
+            background: var(--color-gold);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.3rem 1.1rem;
+            font-size: 1rem;
+            font-family: 'Playfair Display', serif;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login {
+            background: var(--color-gold);
+        }
+
+        .btn-register {
+            background: #e6d3a3;
+            color: #7a6a3a;
+            margin-left: 0.2rem;
+        }
+
+        .btn-login:hover {
+            background: var(--color-gold-dark);
+        }
+
+        .btn-register:hover {
+            background: var(--color-gold);
+            color: #fff;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1100px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+                padding: 0.5rem 1vw;
+            }
+            .nav-links {
+                margin: 0.5rem 0;
+                gap: 0.7rem;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+                padding: 0.5rem 1vw;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin: 0.5rem 0;
+            }
+            .nav-search input {
+                width: 120px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .nav-logo {
+                font-size: 1.1rem;
+            }
+            .nav-search input {
+                width: 70px;
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+            .nav-links li a {
+                font-size: 0.8rem;
+                padding: 0.1rem 0.2rem;
+            }
+            .btn-login, .btn-register {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+
+        /* Animation for navbar */
+        .fade-in {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            transition: opacity 1s cubic-bezier(0.4,0,0.2,1), transform 1s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .navbar {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    </style>
 </head>
 <body>
-
-<div class="container mx-auto px-4 py-8">
-    <header class="flex justify-between items-center mb-8">
-        <div class="flex items-center gap-2">
-            <a href="{{ route('home') }}">
-                <img src="images/massar-log.png" alt="Massar Logo" class="h-12">
-            </a>
-            <h1 class="text-2xl font-bold text-[#4b4f29]">Massar</h1>
-        </div>
-        
-        <div class="hidden md:block flex-1 max-w-md mx-4">
-            <form action="{{ route('attractions.search') }}" method="GET">
-                <div class="relative">
-                    <input type="text" name="query" placeholder="Search attractions, locations..." 
-                           class="w-full py-2 px-4 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <button type="submit" class="absolute right-3 top-2.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </button>
-                </div>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="{{ route('home') }}" class="nav-logo">Massar</a>
+            <form class="nav-search" action="{{ route('attractions.search') }}" method="GET">
+                <input type="text" name="query" placeholder="Search attractions, locations..." aria-label="Search">
             </form>
         </div>
-        
-        <nav class="hidden md:flex gap-6 items-center">
+        <ul class="nav-links">
             <!-- Home -->
-            <a href="{{ route('home') }}" class="text-gray-600 hover:text-primary">Home</a>
-        
+            <li><a href="{{ route('home') }}">Home</a></li>
             <!-- Attractions -->
-            <a href="{{ route('attractions.index') }}" class="text-gray-600 hover:text-primary">Attractions</a>
-        
+            <li><a href="{{ route('attractions.index') }}">Attractions</a></li>
             <!-- Categories Dropdown -->
-            <div class="relative group">
-                <button class="text-gray-600 hover:text-primary flex items-center gap-1 focus:outline-none">
+            <li>
+                <a href="#" class="flex items-center gap-1">
                     Categories
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <svg class="nav-arrow" width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 8L10 13L15 8" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                </button>
+                </a>
                 <div class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block z-10">
                     <div class="py-1">
                         @foreach($categories ?? [] as $slug => $name)
@@ -118,13 +237,11 @@
                             </a>
                         @endforeach
                     </div>
-                </div>
-            </div>
-        
+                </div>                
+            </li>
             <!-- My Trip / Cart -->
-            <a href="{{ route('cart.index') }}" class="text-gray-600 hover:text-primary flex items-center gap-1 relative">
-                My Trip
-                @php
+            <li><a href="{{ route('cart.index') }}">My Trip
+            @php
                     $cartCount = App\Http\Controllers\CartController::getCartCount();
                 @endphp
                 @if($cartCount > 0)
@@ -132,38 +249,33 @@
                         {{ $cartCount }}
                     </span>
                 @endif
-            </a>
-        
+            </a></li>
             <!-- Profile -->
-            <a href="{{ route('profile.edit') }}" class="text-gray-600 hover:text-primary">Profile</a>
-        
-            
+            <li><a href="{{ route('profile.edit') }}">Profile</a></li>
+
             @auth
             @if(auth()->user()->hasRole('super_admin') || auth()->user()->hasRole('admin'))
                 <!-- Admin Dashboard (visible only to admin) -->
-                <a href="{{ url('/admin') }}" class="text-gray-600 hover:text-primary">Admin Dashboard</a>
+                <a href="{{ url('/admin') }}" >Admin Dashboard</a>
             @endif
             @endauth
+        </ul>
 
-        </nav>
-        
-    
-        <div class="flex items-center gap-4">
+        <div class="nav-actions">
             @auth
                 <span class="text-gray-600">Welcome, {{ Auth::user()->firstname }}</span>
                 <!-- Profile Dropdown Link -->
-               
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="btn-primary">Logout</button>
+                    <button type="submit" class="btn-login">Logout</button>
                 </form>
             @else
-                <a href="{{ route('login') }}" class="btn-primary">Sign In</a>
-                <a href="{{ route('register') }}" class="btn-primary">Register</a>
+                <a href="{{ route('login') }}" class="btn-login">Sign In</a>
+                <a href="{{ route('register') }}" class="btn-register">Register</a>
             @endauth
         </div>
-    </header>
-    
+        
+    </nav>
 
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
@@ -178,96 +290,74 @@
     @endif
 
     @yield('content')
-    
-    <footer class="mt-12 py-6 border-t border-gray-200">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-                <div class="flex items-center gap-2 mb-4">
-                    <img src="{{ asset('images/massar-log.png') }}" alt="Massar Logo" class="h-12">
-                    <h2 class="text-xl font-bold text-[#4b4f29]">Massar</h2>
-                </div>
-                <p class="text-sm text-gray-500 mb-4">Discover the wonders of Egypt with our curated attractions and experiences.</p>
-                <div class="flex gap-4">
-                    <a href="#" class="text-primary hover:text-primary-dark">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="text-primary hover:text-primary-dark">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="text-primary hover:text-primary-dark">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-            
-            <div>
-                <h3 class="font-bold text-lg mb-4">Categories</h3>
-                <ul class="space-y-2">
-                    @foreach($categories ?? [] as $slug => $name)
-                        <li>
-                            <a href="{{ route('attractions.category', $slug) }}" class="text-gray-600 hover:text-primary">{{ $name }}</a>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-            
-            <div>
-                <h3 class="font-bold text-lg mb-4">Quick Links</h3>
-                <ul class="space-y-2">
-                    <li><a href="{{ route('home') }}" class="text-gray-600 hover:text-primary">Home</a></li>
-                    <li><a href="{{ route('attractions.index') }}" class="text-gray-600 hover:text-primary">All Attractions</a></li>
-                    <li><a href="{{ route('cart.index') }}" class="text-gray-600 hover:text-primary">My Trip Plan</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-primary">About Us</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-primary">Contact</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-primary">FAQs</a></li>
-                </ul>
-            </div>
-            
-            <div>
-                <h3 class="font-bold text-lg mb-4">Contact Us</h3>
-                <ul class="space-y-2">
-                    <li class="flex items-start gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>123 Tourism Street, Cairo, Egypt</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span>info@massar.com</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        <span>+20 123 456 7890</span>
-                    </li>
-                </ul>
+
+    <!-- Footer -->
+    <footer>
+    <div class="footer-content">
+        <div class="footer-brand">
+            <div class="footer-logo">Massar</div>
+            <p>Your journey begins with us.<br>Explore the world with confidence and comfort.</p>
+        </div>
+        <div class="footer-categories">
+            <div class="footer-categories-title">Categories</div>
+            <ul>
+                @foreach($categories ?? [] as $slug => $name)
+                    <li><a href="{{ route('attractions.category', $slug) }}">{{ $name }}</a></li>
+                @endforeach
+            </ul>
+        </div>
+        <div class="footer-links">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="{{ route('home') }}">Home</a></li>
+                <li><a href="#" >About Us</a></li>
+                <li><a href="{{ route('attractions.index') }}">Attractions</a></li>
+                <li><a href="{{ route('cart.index') }}">My Trip</a></li>
+                <li><a href="{{ route('profile.edit') }}">Profile</a></li>
+            </ul>
+        </div>
+        <div class="footer-contact">
+            <h4>Contact Us</h4>
+            <p>Email: info@massar.com<br>Phone: +1 (555) 123-4567</p>
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook">
+                    <svg width="40" height="40" fill="#cbb279" viewBox="0 0 24 24">
+                        <path d="M22.675 0h-21.35C.595 0 0 .592 0 1.326v21.348C0 23.408.595 24 1.325 24h11.495v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.918.001c-1.504 0-1.797.715-1.797 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116C23.406 24 24 23.408 24 22.674V1.326C24 .592 23.406 0 22.675 0"/>
+                    </svg>
+                </a>
+                <a href="#" aria-label="Twitter">
+                    <svg width="40" height="40" fill="#cbb279" viewBox="0 0 24 24">
+                        <path d="M24 4.557a9.83 9.83 0 0 1-2.828.775 4.932 4.932 0 0 0 2.165-2.724c-.951.564-2.005.974-3.127 1.195a4.916 4.916 0 0 0-8.38 4.482C7.691 8.095 4.066 6.13 1.64 3.161c-.542.929-.856 2.01-.857 3.17 0 2.188 1.115 4.117 2.823 5.254a4.904 4.904 0 0 1-2.229-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.936 4.936 0 0 1-2.224.084c.627 1.956 2.444 3.377 4.6 3.417A9.867 9.867 0 0 1 0 21.543a13.94 13.94 0 0 0 7.548 2.209c9.057 0 14.009-7.496 14.009-13.986 0-.21-.005-.423-.015-.633A9.936 9.936 0 0 0 24 4.557z"/>
+                    </svg>
+                </a>
+                <a href="#" aria-label="Instagram">
+                    <svg width="40" height="40" fill="#cbb279" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.974 1.246 2.241 1.308 3.608.058 1.266.069 1.646.069 4.85s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.974.974-2.241 1.246-3.608 1.308-1.266.058-1.646.069-4.85.069s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.974-1.246-2.241-1.308-3.608C2.175 15.647 2.163 15.267 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608.974-.974 2.241-1.246 3.608-1.308C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.775.131 4.602.425 3.635 1.392 2.668 2.359 2.374 3.532 2.315 4.808 2.256 6.088 2.243 6.497 2.243 12c0 5.503.013 5.912.072 7.192.059 1.276.353 2.449 1.32 3.416.967.967 2.14 1.261 3.416 1.32 1.28.059 1.689.072 7.192.072s5.912-.013 7.192-.072c1.276-.059 2.449-.353 3.416-1.32.967-.967 1.261-2.14 1.32-3.416.059-1.28.072-1.689.072-7.192s-.013-5.912-.072-7.192c-.059-1.276-.353-2.449-1.32-3.416C21.449.425 20.276.131 19 .072 17.72.013 17.311 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+                    </svg>
+                </a>
+                <a href="#" aria-label="LinkedIn">
+                    <svg width="40" height="40" fill="#cbb279" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11.75 20h-3v-10h3v10zm-1.5-11.25c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm15.25 11.25h-3v-5.5c0-1.381-.028-3.156-1.922-3.156-1.922 0-2.218 1.5-2.218 3.051v5.605h-3v-10h2.885v1.367h.041c.402-.762 1.384-1.563 2.848-1.563 3.045 0 3.607 2.005 3.607 4.614v5.582z"/>
+                    </svg>
+                </a>
             </div>
         </div>
-        
-        <div class="border-t border-gray-200 pt-6 flex flex-col md:flex-row justify-between items-center">
-            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} Massar. All rights reserved.</p>
-            <div class="flex gap-4 mt-4 md:mt-0">
-                <a href="#" class="text-sm text-gray-500 hover:text-primary">Privacy Policy</a>
-                <a href="#" class="text-sm text-gray-500 hover:text-primary">Terms of Service</a>
-            </div>
-        </div>
-    </footer>
-</div>
+    </div>
+    <div class="footer-bottom">
+        <p>@ 2025 Massar, All rights reserved,</p>
+    </div>
+</footer>
+
+    <script>
+        // Fade in navbar on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const navbar = document.querySelector('.navbar');
+            if (navbar) {
+                navbar.classList.add('fade-in');
+            }
+        });
+    </script>
 </body>
 @stack('styles')
 @stack('scripts')
-
 </html>
-
-
