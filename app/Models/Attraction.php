@@ -33,11 +33,6 @@ class Attraction extends Model
      */
 
     // Relationship with Admin
-// Attraction.php
-public function tickets()
-{
-    return $this->belongsToMany(Ticket::class)->withPivot('quantity', 'visit_date');
-}
 
     public function admin()
     {
@@ -55,30 +50,28 @@ public function tickets()
         return $this->belongsToMany(Category::class, 'attraction_category', 'AttractionId', 'CategoryId')->withTimestamps();
     }
     
-
-
-
     public function ticketType()
     {
         return $this->belongsTo(TicketType::class, "id");
     }
 
-    
-
     public function reviews()
-{
+    {
     return $this->hasMany(Review::class,'attraction_id');
-    
-}
+    }
 
-protected static function boot()
-{
-    parent::boot();
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'AttractionName', 'id');
+    }
+    protected static function boot()
+    {
+        parent::boot();
 
-    static::deleting(function ($attraction) {
-        // Delete related reviews before deleting the attraction
-        $attraction->reviews()->delete();
-    });
-}
+        static::deleting(function ($attraction) {
+            // Delete related reviews before deleting the attraction
+            $attraction->reviews()->delete();
+        });
+    }
 
 }

@@ -22,6 +22,7 @@ class Ticket extends Model
         'BookingTime',
         'Quantity',
         'TotalCost',
+        'Attraction',
         'state',
         'TicketTypesId',
         'AttractionStaffId',
@@ -41,13 +42,11 @@ class Ticket extends Model
         return $this->belongsTo(User::class);
     }
 
-    // A Ticket belongs to an Attraction
-    // Ticket.php
-    public function attractions()
-    {
-        return $this->belongsToMany(Attraction::class)->withPivot('quantity', 'visit_date');
-    }
 
+    public function attraction()
+    {
+        return $this->belongsTo(Attraction::class, 'AttractionName');
+    }
 
     // A Ticket is managed by an Attraction Staff
     public function attractionStaff()

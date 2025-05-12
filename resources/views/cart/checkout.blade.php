@@ -47,12 +47,19 @@
                             <input type="number" name="Quantity" class="w-full p-2 border border-gray-200 rounded-md" required>
                         </div>
                         <div>
+                            <label class="block text-gray-600 mb-1">Visit Date</label>
+                            <input type="date" name="VisitDate" class="w-full p-2 border border-gray-200 rounded-md" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
                             <label class="block text-gray-600 mb-1">AttractionStaffId</label>
                             <input type="text" name="AttractionStaffId" class="w-full p-2 border border-gray-200 rounded-md" required>
                         </div>
                         <div>
-                            <label class="block text-gray-600 mb-1">Visit Date</label>
-                            <input type="date" name="VisitDate" class="w-full p-2 border border-gray-200 rounded-md" required>
+                            <label class="block text-gray-600 mb-1">attraction_id</label>
+                            <input type="text" name="AttractionId" value="{{ $attractions[0]['id'] ?? '' }}" class="w-full p-2 border border-gray-200 rounded-md" required>
                         </div>
                     </div>
 
@@ -176,17 +183,6 @@
         });
 
         function createToken() {
-            stripe.createToken(card).then(function(result) {
-                if (result.error) {
-                    var errorElement = document.getElementById('card-errors');
-                    errorElement.textContent = result.error.message;
-                } else {
-                    var form = document.getElementById('stripe-form');
-                    var tokenInput = document.getElementById('stripe-token');
-                    tokenInput.value = result.token.id;
-                    form.submit();
-                }
-            });
             //Use these to bypass the stripe token generation
             // var form = document.getElementById('stripe-form');
             // form.submit();

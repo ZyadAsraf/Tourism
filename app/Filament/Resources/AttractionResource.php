@@ -46,6 +46,7 @@ class AttractionResource extends Resource
                 ->schema([
                 TextInput::make('AttractionName')
                 ->required()
+                ->unique()
                 ->rules('max:49'),
 
                 TextInput::make('EntryFee')

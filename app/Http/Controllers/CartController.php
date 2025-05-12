@@ -176,40 +176,65 @@ class CartController extends Controller
      */
     public function processCheckout(Request $request)
     {
+        // Validate common fields
         $validated = $request->validate([
             'PhoneNumber' => 'required|string',
-            'BookingTime' => 'required|date',
-            'Quantity' => 'required|integer|min:1',
-            'VisitDate' => 'required|date', 
-            'TotalCost' => 'required|numeric',
             'state' => 'required|string',
-            // 'AttractionStaffId' => 'required|exists:users,id',  
             'TicketTypesId' => 'required|exists:ticket_types,id', 
         ]);
 
-        $validated['TouristId'] = Auth::id(); // Set from current logged-in user
-        $validated['BookingTime'] = date('Y-m-d H:i:s', strtotime($validated['BookingTime']));
-        $ticket = Ticket::create($validated);
-        
-        // Loop through cart items and attach attractions to the ticket
+        // Get cart items
         $cartItems = Session::get('cart', []);
+        $ticketsCreated = 0;
+        
+        // Fetch all attractions to verify they exist
+        $attractionController = new AttractionController();
+        $allAttractions = $attractionController->getAttractions();
+        
+        // Create a ticket for each attraction in the cart
         foreach ($cartItems as $slug => $item) {
             try {
-                $attraction = Attraction::where('slug', $slug)->firstOrFail();
-                $ticket->attractions()->attach($attraction->id, [
-                    'quantity' => $item['quantity'],
-                    'visit_date' => $item['date'],
-                ]);
+                
+                // Check if the attraction exists in our list
+                if (!isset($allAttractions[$slug])) {
+                    Log::error("Attraction with slug {$slug} not found in attractions list");
+                    continue;
+                }
+                
+                // Create a new ticket for this attraction
+                $ticketData = [
+                    'TouristId' => Auth::id(),
+                    'PhoneNumber' => $validated['PhoneNumber'],
+                    'BookingTime' => now(),
+                    'Quantity' => $item['quantity'],
+                    'VisitDate' => $item['date'],
+                    // 'TimeSlot' => $item['time'], // Include the time slot
+                    'TotalCost' => $allAttractions[$slug]['price'] * $item['quantity'],
+                    'state' => $validated['state'],
+                    'Attraction' => $slug,
+                    'TicketTypesId' => $validated['TicketTypesId'],
+                ];
+                
+                Ticket::create($ticketData);
+                $ticketsCreated++;
             } catch (\Exception $e) {
-                Log::error("Failed to attach attraction with slug {$slug}: " . $e->getMessage());
-                continue;
+                Log::error("Failed to create ticket for attraction with slug {$slug}: " . $e->getMessage());
+                return redirect()->route('cart.index')
+                ->with('error', 'Failed to create ticket for attraction with slug {' . $slug . '}: ' . $e->getMessage());
+                
             }
         }
 
-        // Clear the cart after successful checkout
-        Session::forget('cart');
-
-        return redirect()->route('cart.confirmation')->with('success', 'Your booking is complete!');
+        // Redirect based on the result
+        if ($ticketsCreated > 0) {
+            // Clear the cart after successful checkout
+            Session::forget('cart');
+            return redirect()->route('cart.confirmation')
+                ->with('success', 'Your bookings are complete! Created ' . $ticketsCreated . ' tickets.');
+            } else {
+            return redirect()->route('cart.index')
+                ->with('error', 'Failed to create tickets. Cart data: ' . json_encode($cartItems));
+        }
     }
 
     /**
