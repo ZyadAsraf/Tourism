@@ -183,9 +183,23 @@
         });
 
         function createToken() {
-            //Use these to bypass the stripe token generation
+            
             // var form = document.getElementById('stripe-form');
             // form.submit();
+            // stripe.createToken(card).then(function(result) {
+            //     if (result.error) {
+            //         var errorElement = document.getElementById('card-errors');
+            //         errorElement.textContent = result.error.message;
+            //     } else {
+            //         var form = document.getElementById('stripe-form');
+            //         var tokenInput = document.getElementById('stripe-token');
+            //         tokenInput.value = result.token.id;
+            //         form.submit();
+            //     }
+            // });
+            //Use these to bypass the stripe token generation
+            var form = document.getElementById('stripe-form');
+            form.submit();
         }
     </script>
 @endsection
