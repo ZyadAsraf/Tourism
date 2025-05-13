@@ -33,7 +33,9 @@ class ReviewsResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('rating'),
+                TextColumn::make('rating')
+                    ->badge()
+                    ->colors(['success']),
                 TextColumn::make('comment'),
                 TextColumn::make('tourist.username')->label('tourist'),
                 TextColumn::make('attraction.AttractionName')->label('attraction'),

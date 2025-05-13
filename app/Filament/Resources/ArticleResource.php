@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ArticleResource\Pages;
 use App\Filament\Resources\ArticleResource\RelationManagers;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use App\Models\Admin;
 use App\Models\Article;
 use App\Models\articles;
@@ -58,8 +59,12 @@ class ArticleResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+            ->headerActions([
+                ExportAction::make(), 
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    ExportAction::make(), 
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

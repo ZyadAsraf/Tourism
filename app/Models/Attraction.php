@@ -33,15 +33,16 @@ class Attraction extends Model
      */
 
     // Relationship with Admin
+
     public function admin()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'AdminId');
     }
 
     // Relationship with Governorate
     public function governorate()
     {
-        return $this->belongsTo(Governorate::class, 'id');
+        return $this->belongsTo(Governorate::class,'GovernorateId');
     }
 
     public function categories()
@@ -49,30 +50,28 @@ class Attraction extends Model
         return $this->belongsToMany(Category::class, 'attraction_category', 'AttractionId', 'CategoryId')->withTimestamps();
     }
     
-
-
-
     public function ticketType()
     {
-        return $this->belongsTo(TicketType::class, 'TicketTypesId');
+        return $this->belongsTo(TicketType::class, "id");
     }
 
-    
-
     public function reviews()
-{
+    {
     return $this->hasMany(Review::class,'attraction_id');
-    
-}
+    }
 
-protected static function boot()
-{
-    parent::boot();
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'AttractionName', 'id');
+    }
+    protected static function boot()
+    {
+        parent::boot();
 
-    static::deleting(function ($attraction) {
-        // Delete related reviews before deleting the attraction
-        $attraction->reviews()->delete();
-    });
-}
+        static::deleting(function ($attraction) {
+            // Delete related reviews before deleting the attraction
+            $attraction->reviews()->delete();
+        });
+    }
 
 }

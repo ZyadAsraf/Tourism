@@ -12,26 +12,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            //$table->uuid(column: 'id')->primary();
-            $table->id();
-            $table->string('PhoneNumber',20);
-            $table->text('QRCode');
-            $table->dateTime('BookingTime')->nullable();
+            $table->uuid('id')->primary();
+            $table->string('PhoneNumber', 20);
+            $table->date('BookingTime');
             $table->integer('Quantity');
-            $table->dateTime('VisitDate');
+            $table->date('VisitDate');
             $table->float('TotalCost');
+            $table->string('Attraction');
+            $table->foreign('Attraction')->references('AttractionName')->on('attractions')->onDelete('cascade');
+            $table->string('state')->nullable();
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
-            $table->foreignId('AttractionId')->constrained('attractions', 'id')->restrictOnDelete();
-            $table->ulid('AttractionStaffId')->nullable(); // Step 1: make nullable column
-            $table->foreign('AttractionStaffId')           // Step 2: define FK manually
-                  ->references('id')
-                  ->on('users')
-                  ->restrictOnDelete();
-            
-
+            $table->foreignUuid('AttractionStaffId')
+                ->nullable()
+                ->default('610c4d52-38fa-4540-9ffa-d92716dcac08')
+                ->constrained('users', 'id')
+                ->restrictOnDelete();
+            $table->foreignId('TicketTypesId')->constrained('ticket_types', 'id')->restrictOnDelete();
             $table->timestamps();
         });
     }
+
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('tickets');
