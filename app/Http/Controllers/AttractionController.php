@@ -95,7 +95,6 @@ public function getAttractions(Request $request = null)
             'rating' => rand(4, 5) . '.' . rand(0, 9), // Generate random rating for now
             'reviewCount' => rand(1000, 10000), // Generate random review count for now
             'description' => strip_tags(Str::markdown($attraction->Description)),
-            'longDescription' => strip_tags(Str::markdown($attraction->Description)),
             'image' => $attraction->Img ? '/storage/' . $attraction->Img : '/images/placeholder.jpg',
             'gallery' => $attraction->Img ? ['/storage/' . $attraction->Img] : ['/images/placeholder.jpg'],
             'mapImage' => $attraction->LocationLink ?? '/images/map-placeholder.jpg',
