@@ -16,19 +16,15 @@ class AttractionController extends Controller
 // Get attractions from the database
 public function getAttractions(Request $request = null)
 {
-    // Fetch attractions from the database that are marked as Available
     $query = Attraction::where('Status', 'Available')
-        ->with(['governorate', 'categories', 'admin'])
-        ->select(['*']);
-    
-    // Apply filters if provided
+        ->with(['governorate', 'categories', 'admin']);
+
+    // Apply filters
     if ($request) {
-        // Filter by categories
         if ($request->has('categories') && !empty($request->categories)) {
             $categoryNames = [];
             $categories = Category::all();
-            
-            // Convert slugs to actual category names
+
             foreach ($request->categories as $slug) {
                 foreach ($categories as $category) {
                     if (Str::slug($category->Name) === $slug) {
@@ -36,99 +32,122 @@ public function getAttractions(Request $request = null)
                     }
                 }
             }
-            
+
             if (!empty($categoryNames)) {
-                $query->whereHas('categories', function($q) use ($categoryNames) {
+                $query->whereHas('categories', function ($q) use ($categoryNames) {
                     $q->whereIn('Name', $categoryNames);
                 });
             }
         }
-        
-        // Filter by price range
+
         if ($request->has('min_price') && is_numeric($request->min_price)) {
             $query->where('EntryFee', '>=', $request->min_price);
         }
-        
+
         if ($request->has('max_price') && is_numeric($request->max_price)) {
             $query->where('EntryFee', '<=', $request->max_price);
         }
     }
-    
+
     $attractions = $query->get();
-    
     $formattedAttractions = [];
-    
-    // Map duration values to attraction IDs (in a real app, this would come from the database)
+
     $durationMap = [
-        // Assign durations to attractions based on ID
-        // This is a placeholder - in a real app, you'd have this in the database
-        1 => 'short',  // Less than 3 hours
-        2 => 'medium', // 3-5 hours
-        3 => 'full_day', // Full day
-        4 => 'multi_day', // Multi-day
+        1 => 'short',
+        2 => 'medium',
+        3 => 'full_day',
+        4 => 'multi_day',
     ];
-    
-    // Map duration types to human-readable text
+
     $durationText = [
         'short' => 'Less than 3 hours',
         'medium' => '3-5 hours',
         'full_day' => 'Full day',
-        'multi_day' => 'Multi-day'
+        'multi_day' => 'Multi-day',
     ];
-    
+
     foreach ($attractions as $attraction) {
-        $slug = Str::slug($attraction->AttractionName);
-        
-        // Assign a duration type based on attraction ID (or any other logic)
-        // In a real app, this would come from the database
+        // Handle title
+        $rawTitle = $attraction->AttractionName;
+        $title = ['en' => '', 'ar' => ''];
+
+        if (is_string($rawTitle)) {
+            $decoded = json_decode($rawTitle, true);
+            if (is_array($decoded)) {
+                $title = $decoded;
+            } else {
+                $title['en'] = $rawTitle;
+            }
+        } elseif (is_array($rawTitle)) {
+            $title = $rawTitle;
+        }
+
+        // Handle description
+        $rawDesc = $attraction->Description;
+        $description = ['en' => '', 'ar' => ''];
+
+        if (is_string($rawDesc)) {
+            $decoded = json_decode($rawDesc, true);
+            if (is_array($decoded)) {
+                $description = $decoded;
+            } else {
+                $description['en'] = $rawDesc;
+            }
+        } elseif (is_array($rawDesc)) {
+            $description = $rawDesc;
+        }
+
+        $slug = Str::slug($title['en'] ?? 'attraction');
+
         $durationType = $durationMap[$attraction->id % 4 + 1] ?? 'medium';
         $duration = $durationText[$durationType];
-        
-        // Filter by duration if requested
+
         if ($request && $request->has('durations') && !empty($request->durations)) {
             if (!in_array($durationType, $request->durations)) {
-                continue; // Skip this attraction as it doesn't match the duration filter
+                continue;
             }
         }
-        
+
         $formattedAttractions[$slug] = [
             'id' => $attraction->id,
-            'title' => $attraction->AttractionName,
+            'title_en' => $title['en'] ?? '',
+            'title_ar' => $title['ar'] ?? '',
             'slug' => $slug,
             'price' => $attraction->EntryFee,
-            'rating' => rand(4, 5) . '.' . rand(0, 9), // Generate random rating for now
-            'reviewCount' => rand(1000, 10000), // Generate random review count for now
-            'description' => strip_tags(Str::markdown($attraction->Description)),
-            'longDescription' => strip_tags(Str::markdown($attraction->Description)),
+            'rating' => rand(4, 5) . '.' . rand(0, 9),
+            'reviewCount' => rand(1000, 10000),
+            'description_en' => $description['en'] ?? '',
+            'description_ar' => $description['ar'] ?? '',
             'image' => $attraction->Img ? '/storage/' . $attraction->Img : '/images/placeholder.jpg',
             'gallery' => $attraction->Img ? ['/storage/' . $attraction->Img] : ['/images/placeholder.jpg'],
-            'mapImage' => $attraction->LocationLink ?? url('/').'/images/map-placeholder.jpg',
+            'mapImage' => $attraction->LocationLink ?? '/images/map-placeholder.jpg',
             'category' => $attraction->categories->isNotEmpty() ? $attraction->categories->first()->Name : 'Attraction',
             'location' => $attraction->City ?? $attraction->governorate->Name ?? 'Egypt',
             'duration' => $duration,
-            'durationType' => $durationType, // Store the duration type for filtering
+            'durationType' => $durationType,
             'included' => ['Entrance fees', 'Guide'],
             'notIncluded' => ['Transportation', 'Meals', 'Gratuities'],
             'featured' => true
         ];
     }
-    
-    // If no attractions found and we're not filtering, return a placeholder
-    if (empty($formattedAttractions) && (!$request || 
-        (!$request->has('categories') && !$request->has('durations') && 
-         !$request->has('min_price') && !$request->has('max_price')))) {
+
+    if (empty($formattedAttractions) && (!$request || (!$request->has('categories') && !$request->has('durations') && !$request->has('min_price') && !$request->has('max_price')))) {
         $formattedAttractions['sample-attraction'] = [
             'id' => 1,
-            'title' => 'Sample Attraction',
+            'title_en' => 'Sample Attraction',
+            'title_ar' => 'معلم تجريبي',
+            'title' => app()->getLocale() === 'ar' ? 'معلم تجريبي' : 'Sample Attraction',
             'slug' => 'sample-attraction',
             'price' => 100,
             'rating' => 4.5,
             'reviewCount' => 1000,
-            'description' => 'This is a sample attraction. Please add real attractions through the admin panel.',
+            'description_en' => 'This is a sample attraction.',
+            'description_ar' => 'هذا معلم سياحي تجريبي.',
+            'description' => app()->getLocale() === 'ar' ? 'هذا معلم سياحي تجريبي.' : 'This is a sample attraction.',
             'longDescription' => 'This is a sample attraction. Please add real attractions through the admin panel.',
             'image' => '/images/placeholder.jpg',
             'gallery' => ['/images/placeholder.jpg'],
-            'mapImage' => URL::to('/'),
+            'mapImage' => '/images/map-placeholder.jpg',
             'category' => 'Attraction',
             'location' => 'Egypt',
             'duration' => 'Less than 3 hours',
@@ -138,9 +157,10 @@ public function getAttractions(Request $request = null)
             'featured' => true
         ];
     }
-    
-    return response()->json($formattedAttractions);
+
+    return $formattedAttractions;
 }
+
 
 public function getCategories(): JsonResponse
 {
@@ -331,10 +351,15 @@ public function searchApi(Request $request): JsonResponse
 
         if ($query) {
             $filtered = array_filter($attractions, function ($attraction) use ($query) {
-                return stripos($attraction['title'], $query) !== false ||
-                       stripos($attraction['description'], $query) !== false ||
-                       stripos($attraction['location'], $query) !== false;
-            });
+    $title = is_array($attraction['title']) ? ($attraction['title']['en'] ?? reset($attraction['title'])) : $attraction['title'];
+    $description = is_array($attraction['description']) ? ($attraction['description']['en'] ?? reset($attraction['description'])) : $attraction['description'];
+    $location = $attraction['location'] ?? '';
+
+    return stripos($title, $query) !== false ||
+           stripos($description, $query) !== false ||
+           stripos($location, $query) !== false;
+});
+
         } else {
             $filtered = $attractions;
         }
@@ -473,7 +498,7 @@ public function processBookingApi(Request $request, $attraction):JsonResponse
                 'success' => true,
                 'message' => 'Your booking has been confirmed! Payment was successful. Please check your email for confirmation details.',
                 'data' => [
-                    'attraction' => $this->getAttractions()[$attraction], // Assuming you have a method to get attraction details
+                    'attraction' => $this->getAttractions()->getData(true)[$attraction], // Assuming you have a method to get attraction details
                     'booking_details' => $validated,
                 ]
             ]);

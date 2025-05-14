@@ -20,16 +20,16 @@ Route::group(['middleware'=>'api'], function () {
     Route::get('/get-attractions', [AttractionController::class, 'getAttractions']);
 
 
-    Route::get('/categories', [AttractionController::class, 'getCategories']);
-    Route::get('/home', [AttractionController::class, 'homeApi']);
-    Route::get('/attractions', [AttractionController::class, 'indexApi']);
-    Route::get('/attractions/{slug}', [AttractionController::class, 'showApi']);
-    Route::get('/category/{category}', [AttractionController::class, 'byCategoryApi']);
-    Route::get('/search', [AttractionController::class, 'searchApi']);
-    Route::get('/booking/{attraction}', [AttractionController::class, 'bookingFormApi']);
-    Route::post('/payment/{attraction}', [AttractionController::class, 'paymentFormApi']);
-    Route::post('/process-booking/{attraction}', [AttractionController::class, 'processBookingApi']);
+    // Route::get('/categories', [AttractionController::class, 'getCategories']);
+    // Route::get('/home', [AttractionController::class, 'homeApi']);
+    // Route::get('/attractions', [AttractionController::class, 'indexApi']);
+    // Route::get('/attractions/{slug}', [AttractionController::class, 'showApi']);
+    // Route::get('/category/{category}', [AttractionController::class, 'byCategoryApi']);
+    // Route::get('/search', [AttractionController::class, 'searchApi']);
+    // Route::get('/booking/{attraction}', [AttractionController::class, 'bookingFormApi']);
+    // Route::post('/payment/{attraction}', [AttractionController::class, 'paymentFormApi']);
+    // Route::post('/process-booking/{attraction}', [AttractionController::class, 'processBookingApi']);
 
-    Route::get('/home', [HomeController::class, 'indexApi']);
+    // Route::get('/home', [HomeController::class, 'indexApi']);
 
 });

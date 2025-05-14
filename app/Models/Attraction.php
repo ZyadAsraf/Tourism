@@ -38,6 +38,12 @@ class Attraction extends Model
         return $this->belongsTo(User::class);
     }
 
+    protected $casts = [
+    'AttractionName' => 'array',
+    'Description' => 'array',
+    ];
+
+
     // Relationship with Governorate
     public function governorate()
     {

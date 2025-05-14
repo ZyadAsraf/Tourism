@@ -27,7 +27,10 @@ class HomeController extends Controller
         $featured = [];
         
         foreach ($attractions as $attraction) {
-            $slug = Str::slug($attraction->AttractionName);
+            $decodedName = json_decode($attraction->AttractionName, true);
+            $rawName = is_array($decodedName) ? ($decodedName['en'] ?? reset($decodedName)) : $decodedName;
+            $slug = Str::slug($rawName);
+
             
             $featured[] = [
                 'id' => $attraction->id,

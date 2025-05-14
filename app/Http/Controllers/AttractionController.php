@@ -72,42 +72,65 @@ public function getAttractions(Request $request = null)
         'multi_day' => 'Multi-day'
     ];
     
-    foreach ($attractions as $attraction) {
-        $slug = Str::slug($attraction->AttractionName);
-        
-        // Assign a duration type based on attraction ID (or any other logic)
-        // In a real app, this would come from the database
-        $durationType = $durationMap[$attraction->id % 4 + 1] ?? 'medium';
-        $duration = $durationText[$durationType];
-        
-        // Filter by duration if requested
-        if ($request && $request->has('durations') && !empty($request->durations)) {
-            if (!in_array($durationType, $request->durations)) {
-                continue; // Skip this attraction as it doesn't match the duration filter
-            }
-        }
-        
-        $formattedAttractions[$slug] = [
-            'id' => $attraction->id,
-            'title' => $attraction->AttractionName,
-            'slug' => $slug,
-            'price' => $attraction->EntryFee,
-            'rating' => rand(4, 5) . '.' . rand(0, 9), // Generate random rating for now
-            'reviewCount' => rand(1000, 10000), // Generate random review count for now
-            'description' => strip_tags(Str::markdown($attraction->Description)),
-            'image' => $attraction->Img ? '/storage/' . $attraction->Img : '/images/placeholder.jpg',
-            'gallery' => $attraction->Img ? ['/storage/' . $attraction->Img] : ['/images/placeholder.jpg'],
-            'mapImage' => $attraction->LocationLink ?? '/images/map-placeholder.jpg',
-            'category' => $attraction->categories->isNotEmpty() ? $attraction->categories->first()->Name : 'Attraction',
-            'location' => $attraction->City ?? $attraction->governorate->Name ?? 'Egypt',
-            'duration' => $duration,
-            'durationType' => $durationType, // Store the duration type for filtering
-            'included' => ['Entrance fees', 'Guide'],
-            'notIncluded' => ['Transportation', 'Meals', 'Gratuities'],
-            'featured' => true
-        ];
-    }
+        foreach ($attractions as $attraction) {
+    // Handling AttractionName to ensure it's a string
+    $rawName = $attraction->AttractionName;
     
+    // If it's a JSON string, decode it
+    if (is_string($rawName)) {
+        $decodedName = json_decode($rawName, true); 
+        $rawName = $decodedName ?? $rawName; // Fallback to the original if decoding fails
+    } elseif (is_array($rawName)) {
+        // If it's an array, take the first value (or handle as needed)
+        $rawName = reset($rawName);
+    }
+
+    // Ensure that $rawName is a string at this point
+    $slug = Str::slug($rawName);
+    
+    // Assign a duration type based on attraction ID (or any other logic)
+    $durationType = $durationMap[$attraction->id % 4 + 1] ?? 'medium';
+    $duration = $durationText[$durationType];
+    
+    // Filter by duration if requested
+    if ($request && $request->has('durations') && !empty($request->durations)) {
+        if (!in_array($durationType, $request->durations)) {
+            continue; // Skip this attraction as it doesn't match the duration filter
+        }
+    }
+
+    // Handling Description field to avoid array-to-string conversion errors
+    $description = $attraction->Description;
+    if (is_string($description)) {
+        // Decode the string if it's JSON
+        $description = json_decode($description, true) ?? $description;
+    } elseif (is_array($description)) {
+        // Convert array to string (adjust this based on how you want to present the description)
+        $description = implode(' ', $description); // Converts array to a space-separated string
+    }
+
+    // Now, ensure that $description is a string
+    $formattedAttractions[$slug] = [
+        'id' => $attraction->id,
+        'title' => $rawName, // Use decoded or original name
+        'slug' => $slug,
+        'price' => $attraction->EntryFee,
+        'rating' => rand(4, 5) . '.' . rand(0, 9), // Generate random rating for now
+        'reviewCount' => rand(1000, 10000), // Generate random review count for now
+        'description' => $description,
+        'image' => $attraction->Img ? '/storage/' . $attraction->Img : '/images/placeholder.jpg',
+        'gallery' => $attraction->Img ? ['/storage/' . $attraction->Img] : ['/images/placeholder.jpg'],
+        'mapImage' => $attraction->LocationLink ?? '/images/map-placeholder.jpg',
+        'category' => $attraction->categories->isNotEmpty() ? $attraction->categories->first()->Name : 'Attraction',
+        'location' => $attraction->City ?? $attraction->governorate->Name ?? 'Egypt',
+        'duration' => $duration,
+        'durationType' => $durationType, // Store the duration type for filtering
+        'included' => ['Entrance fees', 'Guide'],
+        'notIncluded' => ['Transportation', 'Meals', 'Gratuities'],
+        'featured' => true
+    ];
+}
+
     // If no attractions found and we're not filtering, return a placeholder
     if (empty($formattedAttractions) && (!$request || 
         (!$request->has('categories') && !$request->has('durations') && 

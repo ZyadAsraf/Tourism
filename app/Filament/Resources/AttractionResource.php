@@ -37,7 +37,23 @@ class AttractionResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('AttractionName')->required()->rules('max:49'),
+
+            // Multilingual name fields
+            TextInput::make('AttractionName.en')
+                ->label('Name (English)')
+                ->required(),
+            TextInput::make('AttractionName.ar')
+                ->label('Name (Arabic)')
+                ->required(),
+
+            // Multilingual description fields
+            MarkdownEditor::make('Description.en')
+                ->label('Description (English)')
+                ->required(),
+            MarkdownEditor::make('Description.ar')
+                ->label('Description (Arabic)')
+                ->required(),
+
                 TextInput::make('EntryFee')->numeric()->rules(rules: 'min:0')->validationMessages(['min'=>'The entry fee cannot be negative.'])->required(),
                 Select::make('AdminId')->options(User::pluck('email','id'))->required(),
                 TextInput::make('Address')->rules('max:49'),
@@ -45,7 +61,6 @@ class AttractionResource extends Resource
                 TextInput::make('Street')->rules('max:49'),
                 TextInput::make('LocationLink')->label('Location Link')->url()->required(),
                 FileUpload::make('Img')->required()->directory('Imgs'),
-                MarkdownEditor::make('Description')->required(),
                 Select::make('GovernorateId')->options(Governorate::pluck('Name','id'))->required(),
                 Select::make('TicketTypesId')->options(TicketType::pluck( 'title' , 'id'))->required(),
                 Select::make('Status')->options(['Available'=>'Available' ,'Not available'=>'Not available']),
@@ -58,7 +73,7 @@ class AttractionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id'),
-                TextColumn::make('AttractionName'),
+                TextColumn::make('AttractionName.' . app()->getLocale())->label('Attraction Name'),
                 TextColumn::make('EntryFee'),
                 TextColumn::make('user.email')->label('Admin'),
                 TextColumn::make('Governorate.Name')->label('Governrates'),
