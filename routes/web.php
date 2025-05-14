@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\ArticlesController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home'); 
 
@@ -39,6 +40,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Stripe 
     Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
 });
+
+// Public Articles routes
+Route::resource('articles', ArticlesController::class)->only(['index', 'show']);
 
 // Laravel Auth Routes 
 require __DIR__.'/auth.php';

@@ -102,6 +102,9 @@
             <!-- Attractions -->
             <a href="{{ route('attractions.index') }}" class="text-gray-600 hover:text-primary">Attractions</a>
         
+            <!-- Articles -->
+            <a href="{{ route('articles.index') }}" class="text-gray-600 hover:text-primary">Articles</a>
+        
             <!-- Categories Dropdown -->
             <div class="relative group">
                 <button class="text-gray-600 hover:text-primary flex items-center gap-1 focus:outline-none">
