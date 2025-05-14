@@ -73,5 +73,14 @@ class Attraction extends Model
             $attraction->reviews()->delete();
         });
     }
+    public function images()
+    {
+        return $this->hasMany(AttractionImage::class);
+    }
+
+    public function images360()
+    {
+        return $this->hasMany(Attraction360Image::class);
+    }
 
 }
