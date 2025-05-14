@@ -140,7 +140,8 @@ class AttractionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ImagesRelationManager::class,
+            RelationManagers\Images360RelationManager::class,
         ];
     }
 
