@@ -3,6 +3,9 @@
 @section('title', $attraction['title'] . ' - Massar')
 
 @section('content')
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css" />
     <div class="mb-6">
         <a href="{{ route('attractions.index') }}" class="inline-flex items-center gap-2 text-gray-600 hover:text-primary">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -273,6 +276,31 @@
         </div>
     @endif
     {{-- End Of Map Section --}}
+
+    <div>
+        <div id="viewer" style="width: 80%; height: 100vh; margin-left: auto; margin-right: auto;"></div>
+        <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
+                "@photo-sphere-viewer/core": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { Viewer } from '@photo-sphere-viewer/core';
+
+        const viewer = new Viewer({
+            container: document.querySelector('#viewer'),
+            panorama: 'https://photo-sphere-viewer-data.netlify.app/assets/sphere.jpg',
+            caption: 'Pyramids of Giza',
+            loadingImg: 'https://photo-sphere-viewer-data.netlify.app/assets/loader.gif',
+            touchmoveTwoFingers: true,
+            mousewheelCtrlKey: true,
+        });
+    </script>
+    </div>
 
     {{-- Reviews --}}
     <div class="mb-12">

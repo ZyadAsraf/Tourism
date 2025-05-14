@@ -183,9 +183,6 @@
         });
 
         function createToken() {
-            
-            // var form = document.getElementById('stripe-form');
-            // form.submit();
             // stripe.createToken(card).then(function(result) {
             //     if (result.error) {
             //         var errorElement = document.getElementById('card-errors');
