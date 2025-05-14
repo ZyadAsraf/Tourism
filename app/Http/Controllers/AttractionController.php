@@ -185,13 +185,43 @@ public function index(Request $request)
 public function show($slug)
 {
     $attractions = $this->getAttractions();
+    $attraction = $attractions[$slug];
     
-    if (!isset($attractions[$slug])) {
-        abort(404);
+    if (!isset($attraction)) {
+        abort(404); //TODO: Handle 404 error
     }
+    
+    $attractionModel = Attraction::find($attraction['id']);
 
+    if ($attractionModel) {
+        // Get regular images
+        $regularImages = $attractionModel->images()->get();
+        $galleryImages = [];
+        
+        foreach ($regularImages as $image) {
+            $galleryImages[] = '/storage/' . $image->filename;
+        }
+        
+        // Add existing gallery images if available
+        if (!empty($galleryImages)) {
+            $attraction['gallery'] = $galleryImages;
+        }
+        
+        // Get 360° images
+        $images360 = $attractionModel->images360()->get();
+        $panoramaImages = [];
+        
+        foreach ($images360 as $image) {
+            $panoramaImages[] = [
+                'url' => '/storage/' . $image->filename,
+                'caption' => $image->alt_text ?? $attraction['title']
+            ];
+        }
+        
+        $attraction['panorama_images'] = $panoramaImages;
+    }
     // Get related attractions in the same category
-    $category = $attractions[$slug]['category'];
+    $category = $attraction['category'];
     $related = array_filter($attractions, function($item) use ($category, $slug) {
         return $item['category'] === $category && $item['slug'] !== $slug;
     });
@@ -200,7 +230,7 @@ public function show($slug)
     $reviews = Review::where('attraction_id', $attractions[$slug]['id'])->latest()->get();
 
     return view('attraction.show', [
-        'attraction' => $attractions[$slug],
+        'attraction' => $attraction,
         'related' => array_slice($related, 0, 3),
         'categories' => $this->getCategories(),
         'reviews' => $reviews, // pass the reviews to the view

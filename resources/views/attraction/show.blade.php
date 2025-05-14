@@ -277,88 +277,301 @@
     @endif
     {{-- End Of Map Section --}}
 
-    <div>
-        <div id="viewer" style="width: 80%; height: 100vh; margin-left: auto; margin-right: auto;"></div>
-        <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
-                "@photo-sphere-viewer/core": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.module.js"
+    
+    {{-- Replace the separate Gallery, 360 Experience and Reviews sections with this tabbed interface --}}
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold mb-4 text-gray-600">Explore {{ $attraction['title'] }}</h2>
+        
+        {{-- Tab Navigation --}}
+        <div class="border-b border-gray-200 mb-6">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="attraction-tabs" role="tablist">
+                @if (isset($attraction['gallery']) && count($attraction['gallery']) > 0)
+                <li class="mr-2" role="presentation">
+                    <button class="tab-btn inline-block p-4 border-b-2 rounded-t-lg active" id="gallery-tab" data-target="gallery-content" type="button" role="tab" aria-selected="true">
+                        Gallery
+                    </button>
+                </li>
+                @endif
+                
+                @if(!empty($attraction['panorama_images']))
+                <li class="mr-2" role="presentation">
+                    <button class="tab-btn inline-block p-4 border-b-2 rounded-t-lg" id="experience-tab" data-target="experience-content" type="button" role="tab" aria-selected="false">
+                        360° Experience
+                    </button>
+                </li>
+                @endif
+
+                <li class="mr-2" role="presentation">
+                    <button class="tab-btn inline-block p-4 border-b-2 rounded-t-lg" id="reviews-tab" data-target="reviews-content" type="button" role="tab" aria-selected="false">
+                        Reviews ({{ $reviews->count() }})
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        {{-- Tab Content --}}
+        <div class="tab-content">
+            {{-- Gallery Tab Content --}}
+            @if (isset($attraction['gallery']) && count($attraction['gallery']) > 0)
+            <div id="gallery-content" class="tab-panel active">
+                <div class="carousel-container relative shadow-lg rounded-lg overflow-hidden" style="max-height: 500px;">
+                    <div class="carousel-slides flex transition-transform duration-500 ease-in-out">
+                        @foreach ($attraction['gallery'] as $index => $image)
+                            <div class="carousel-slide min-w-full">
+                                <img src="{{ $image }}" alt="{{ $attraction['title'] }} - Image {{ $index + 1 }}" 
+                                    class="w-full object-contain mx-auto" style="max-height: 500px;">
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <button class="carousel-control prev absolute top-1/2 left-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none z-10">
+                        &#10094;
+                    </button>
+                    <button class="carousel-control next absolute top-1/2 right-2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 focus:outline-none z-10">
+                        &#10095;
+                    </button>
+
+                    <div class="carousel-indicators absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                        @foreach ($attraction['gallery'] as $index => $image)
+                            <button class="carousel-indicator h-3 w-3 bg-gray-400 rounded-full hover:bg-gray-600 {{ $index == 0 ? 'active bg-gray-800' : '' }}" data-slide-to="{{ $index }}"></button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+            
+            {{-- 360° Experience Tab Content --}}
+            @if(!empty($attraction['panorama_images']))
+            <div id="experience-content" class="tab-panel hidden">
+                <div id="viewer" style="width: 100%; height: 500px;"></div>
+                <script type="importmap">
+                {
+                    "imports": {
+                        "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
+                        "@photo-sphere-viewer/core": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.module.js"
+                    }
+                }
+                </script>
+            </div>
+            @endif
+            
+            {{-- Reviews Tab Content --}}
+            <div id="reviews-content" class="tab-panel hidden">
+                @if ($reviews->count())
+                <div class="max-w-2xl max-w bg-white p-6 rounded-lg shadow border border-gray-200 space-y-4">
+                    @foreach ($reviews as $review)
+                        <div>
+                            <div class="flex items-start space-x-4 mb-1">
+                                <!-- Image -->
+                                <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}"
+                                    class="w-16 h-16 rounded-full object-cover border border-gray-300">
+                
+                                <!-- Name, date, rating -->
+                                <div>
+                                    <p class="text-lg font-medium text-gray-700">
+                                        {{ $review->tourist?->firstname ?? 'Anonymous' }}
+                                        {{ $review->tourist?->lastname ?? '' }}
+                                    </p>
+                
+                                    <p class="text-sm text-gray-400">
+                                        {{ $review->created_at->diffForHumans() }}
+                                    </p>
+                
+                                    <div class="text-yellow-400 text-lg ">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <span class="{{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">
+                                                &#9733;
+                                            </span>
+                                        @endfor
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Comment -->
+                            <p class="text-gray-600 leading-relaxed">{{ $review->comment }}</p>
+                
+                            @if (!$loop->last)
+                                <hr class="my-4 border-gray-200">
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+                @else
+                    <p class="text-gray-500 mb-6">No reviews yet. Be the first to write one!</p>
+                @endif
+
+                {{-- Write Review Button --}}
+                <div class="mt-8 text-center">
+                    <a href="{{ route('attractions.reviews', ['slug' => $attraction['slug']]) }}"
+                        class="inline-block bg-yellow-400 text-white font-semibold px-6 py-2 rounded shadow hover:bg-yellow-500 transition duration-200">
+                        Write Your Review
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Tab and Carousel JavaScript --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab Functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        let viewer = null;
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                
+                // Update active tab button
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active', 'border-primary', 'text-primary');
+                    btn.classList.add('border-transparent', 'hover:border-gray-300');
+                    btn.setAttribute('aria-selected', 'false');
+                });
+                
+                this.classList.add('active', 'border-primary', 'text-primary');
+                this.classList.remove('border-transparent', 'hover:border-gray-300');
+                this.setAttribute('aria-selected', 'true');
+                
+                // Update active tab panel
+                tabPanels.forEach(panel => {
+                    panel.classList.add('hidden');
+                    panel.classList.remove('active');
+                });
+                
+                document.getElementById(targetId).classList.remove('hidden');
+                document.getElementById(targetId).classList.add('active');
+                
+                // Initialize 360 viewer if that tab is selected
+                if (targetId === 'experience-content' && !viewer) {
+                    initializeViewer();
+                }
+            });
+        });
+        
+        // Carousel Functionality
+        const container = document.querySelector('.carousel-container');
+        if (container) {
+            const slidesContainer = container.querySelector('.carousel-slides');
+            const slides = container.querySelectorAll('.carousel-slide');
+            const prevBtn = container.querySelector('.prev');
+            const nextBtn = container.querySelector('.next');
+            const indicators = container.querySelectorAll('.carousel-indicator');
+            
+            let currentIndex = 0;
+            const slideCount = slides.length;
+            
+            // Move to specific slide
+            function goToSlide(index) {
+                if (index < 0) {
+                    currentIndex = slideCount - 1;
+                } else if (index >= slideCount) {
+                    currentIndex = 0;
+                } else {
+                    currentIndex = index;
+                }
+                
+                slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+                updateIndicators();
+            }
+            
+            // Update indicators
+            function updateIndicators() {
+                indicators.forEach((indicator, index) => {
+                    if (index === currentIndex) {
+                        indicator.classList.add('active', 'bg-gray-800');
+                        indicator.classList.remove('bg-gray-400');
+                    } else {
+                        indicator.classList.remove('active', 'bg-gray-800');
+                        indicator.classList.add('bg-gray-400');
+                    }
+                });
+            }
+            
+            // Event listeners
+            prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+            nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+            
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => goToSlide(index));
+            });
+        }
+        
+        // Initialize 360 viewer
+        function initializeViewer() {
+            if (document.getElementById('viewer') && typeof window.Viewer === 'undefined') {
+                import('@photo-sphere-viewer/core').then(module => {
+                    const { Viewer } = module;
+                    const panoramas = @json($attraction['panorama_images'] ?? []);
+                    
+                    if (panoramas.length > 0) {
+                        viewer = new Viewer({
+                            container: document.querySelector('#viewer'),
+                            panorama: panoramas[0].url,
+                            caption: panoramas[0].caption,
+                            loadingImg: 'https://photo-sphere-viewer-data.netlify.app/assets/loader.gif',
+                            touchmoveTwoFingers: true,
+                            mousewheelCtrlKey: true,
+                        });
+                        
+                        // Add navigation buttons if multiple panoramas
+                        if (panoramas.length > 1) {
+                            const container = document.querySelector('#viewer').parentElement;
+                            const navDiv = document.createElement('div');
+                            navDiv.className = 'flex justify-center mt-4 gap-4';
+                            
+                            panoramas.forEach((panorama, index) => {
+                                const btn = document.createElement('button');
+                                btn.className = 'px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition';
+                                btn.textContent = 'View ' + (index + 1);
+                                btn.onclick = () => {
+                                    viewer.setPanorama(panorama.url, { caption: panorama.caption });
+                                };
+                                navDiv.appendChild(btn);
+                            });
+                            
+                            container.appendChild(navDiv);
+                        }
+                    }
+                });
             }
         }
+        
+        // Initialize first tab
+        const firstActiveTab = document.querySelector('.tab-btn.active');
+        if (firstActiveTab) {
+            const targetId = firstActiveTab.getAttribute('data-target');
+            if (targetId === 'experience-content') {
+                // Small delay to ensure DOM is fully loaded
+                setTimeout(initializeViewer, 100);
+            }
+        }
+    });
     </script>
 
-    <script type="module">
-        import { Viewer } from '@photo-sphere-viewer/core';
+    <style>
+    /* Tab styling */
+    .tab-btn {
+        transition: color 0.3s, border-color 0.3s;
+    }
 
-        const viewer = new Viewer({
-            container: document.querySelector('#viewer'),
-            panorama: 'https://photo-sphere-viewer-data.netlify.app/assets/sphere.jpg',
-            caption: 'Pyramids of Giza',
-            loadingImg: 'https://photo-sphere-viewer-data.netlify.app/assets/loader.gif',
-            touchmoveTwoFingers: true,
-            mousewheelCtrlKey: true,
-        });
-    </script>
-    </div>
+    .tab-btn.active {
+        border-bottom-color: rgba(210, 172, 113, 1); /* Primary color */
+        color: rgba(210, 172, 113, 1); /* Primary color */
+        border-bottom-width: 2px;
+    }
 
-    {{-- Reviews --}}
-    <div class="mb-12">
-        <h2 class="text-2xl font-bold mb-6 text-gray-600">Reviews</h2>
+    .tab-btn:not(.active) {
+        border-bottom-color: transparent;
+        color: #666;
+    }
 
-        @if ($reviews->count())
-        <div class="max-w-2xl max-w bg-white p-6 rounded-lg shadow border border-gray-200 space-y-4">
-            @foreach ($reviews as $review)
-                <div>
-                    <div class="flex items-start space-x-4 mb-1">
-                        <!-- Image -->
-                        <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}"
-                            class="w-16 h-16 rounded-full object-cover border border-gray-300">
-        
-                        <!-- Name, date, rating -->
-                        <div>
-                            <p class="text-lg font-medium text-gray-700">
-                                {{ $review->tourist?->firstname ?? 'Anonymous' }}
-                                {{ $review->tourist?->lastname ?? '' }}
-                            </p>
-        
-                            <p class="text-sm text-gray-400">
-                                {{ $review->created_at->diffForHumans() }}
-                            </p>
-        
-                            <div class="text-yellow-400 text-lg ">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <span class="{{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">
-                                        &#9733;
-                                    </span>
-                                @endfor
-                            </div>
-                        </div>
-                    </div>
-        
-                    <!-- Comment -->
-                    <p class="text-gray-600 leading-relaxed">{{ $review->comment }}</p>
-        
-                    @if (!$loop->last)
-                        <hr class="my-4 border-gray-200">
-                    @endif
-                </div>
-            @endforeach
-        </div>
-        
-        @else
-            <p class="text-gray-500 mb-6">No reviews yet. Be the first to write one!</p>
-        @endif
-
-        {{-- Write Review Button --}}
-        <div class="mt-8 text-center">
-            <a href="{{ route('attractions.reviews', ['slug' => $attraction['slug']]) }}"
-                class="inline-block bg-yellow-400 text-white font-semibold px-6 py-2 rounded shadow hover:bg-yellow-500 transition duration-200">
-                Write Your Review
-            </a>
-        </div>
-    </div>
-    {{-- End of Reviews --}}
+    .tab-btn:hover:not(.active) {
+        border-bottom-color: #ddd;
+        color: #444;
+    }
+    </style>
 
 
     @if (isset($related) && count($related) > 0)
