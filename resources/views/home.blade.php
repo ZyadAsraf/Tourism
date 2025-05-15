@@ -15,6 +15,7 @@
             <h1 class="text-5xl md:text-6xl font-bold mb-4 leading-tight">Experience the Magic of <span class="text-primary">Egypt</span></h1>
             <p class="text-xl md:text-2xl mb-8 text-gray-100">Discover ancient wonders, breathtaking landscapes, and unforgettable experiences in the land of the pharaohs</p>
             <div class="flex flex-wrap gap-4">
+                <a href="{{ route('attractions.index') }}" class="btn-primary text-lg px-8 py-3 rounded-full">Explore Attractions</a>
                 @if(isset($categories['historical']))
                     <a href="{{ route('attractions.category', 'historical') }}" class="btn-outline text-lg px-8 py-3 rounded-full">Historical Sites</a>
                 @endif
