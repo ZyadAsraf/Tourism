@@ -25,7 +25,8 @@ class Attraction extends Model
         'AdminId',
         'Status',
         'GovernorateId',
-        'TicketTypesId' 
+        'TicketTypesId',
+        'expected_duration'
     ];
 
     /**

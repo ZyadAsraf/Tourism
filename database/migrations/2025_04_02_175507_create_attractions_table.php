@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('Status',50);
             $table->foreignUuid('AdminId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignId('GovernorateId')->constrained('governorates', 'id')->restrictOnDelete();
+            $table->integer('expected_duration')->nullable(); //In minutes
             $table->timestamps();
         });
     }
