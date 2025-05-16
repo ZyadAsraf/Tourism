@@ -241,6 +241,33 @@ public function showApi($slug): JsonResponse
         $attraction = $attractions[$slug];
         $category = $attraction['category'];
 
+        $attractionModel = Attraction::find($attraction['id']);
+
+        $regularImages = $attractionModel->images()->get();
+        $galleryImages = [];
+        
+        foreach ($regularImages as $image) {
+            $galleryImages[] = '/storage/' . $image->filename;
+        }
+        
+        // Add existing gallery images if available
+        if (!empty($galleryImages)) {
+            $attraction['gallery'] = $galleryImages;
+        }
+        
+        // Get 360° images
+        $images360 = $attractionModel->images360()->get();
+        $panoramaImages = [];
+        
+        foreach ($images360 as $image) {
+            $panoramaImages[] = [
+                'url' => '/storage/' . $image->filename,
+                'caption' => $image->alt_text ?? $attraction['title']
+            ];
+        }
+        
+        $attraction['panorama_images'] = $panoramaImages;
+
         // Get related attractions in the same category
         $related = array_filter($attractions, function ($item) use ($category, $slug) {
             return $item['category'] === $category && $item['slug'] !== $slug;
