@@ -6,10 +6,10 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AttractionController;
 use App\Http\Controllers\Api\HomeController;
 
-Route::middleware('auth:sanctum')->post('/tokens/create', function (Request $request) {
-    $token = $request->user()->createToken($request->token_name);
-    return ['token' => $token->plainTextToken];
-});
+// Route::middleware('auth:sanctum')->post('/tokens/create', function (Request $request) {
+//     $token = $request->user()->createToken($request->token_name);
+//     return ['token' => $token->plainTextToken];
+// });
 
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -31,7 +31,17 @@ Route::group(['middleware'=>'api'], function () {
     Route::post('/process-booking/{attraction}', [AttractionController::class, 'processBookingApi']);
     
     Route::get('/attractions/{slug}/reviews', [AttractionController::class, 'reviews']);
-    Route::post('/attractions/{slug}/reviews', [AttractionController::class, 'addReview']);
     Route::get('/home', [HomeController::class, 'indexApi']);
 
+});
+
+// Routes that require authentication
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/attractions/{slug}/reviews', [AttractionController::class, 'addReview']);
+
+    // If you want only authenticated users to see tokens/create:
+    Route::post('/tokens/create', function (Request $request) {
+        $token = $request->user()->createToken($request->token_name);
+        return ['token' => $token->plainTextToken];
+    });
 });
