@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('itinerary_items', function (Blueprint $table) {
             $table->uuid('uuid')->primary();
-            $table->foreignUuid('itinerary_id')->constrained('itineraries')->onDelete('cascade');
-            $table->foreignUuid('attraction_id')->constrained('attractions')->onDelete('cascade');
+            $table->foreignUuid('itinerary_id')->constrained('itineraries', 'uuid')->onDelete('cascade');
+            $table->foreignId('attraction_id')->constrained('attractions')->onDelete('cascade');
             $table->date('date');
             $table->time('time')->nullable();
             $table->unsignedInteger('quantity')->default(1);
-            $table->foreignId('TicketTypesId')->constrained('ticket_types', 'id')->restrictOnDelete();
+            $table->foreignId('TicketTypeId')->constrained('ticket_types', 'id')->restrictOnDelete();
             $table->unsignedInteger('position'); //index
             $table->timestamps();
         });

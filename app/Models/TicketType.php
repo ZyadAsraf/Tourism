@@ -28,4 +28,9 @@ class TicketType extends Model
     {
         return $this->hasMany(Attraction::class);
     }
+    
+    public function itineraryItems()
+    {
+        return $this->hasMany(ItineraryItem::class, 'TicketTypeId');
+    }
 }
