@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Attraction;
 use App\Models\Category;
 use App\Models\Banner;
+use App\Models\Itinerary;
+use App\Models\User;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -55,6 +57,76 @@ class HomeController extends Controller
             ->orderBy('sort')
             ->get();
         
+        // Get most liked public itineraries
+        $mostLikedItineraries = Itinerary::with(['type', 'user', 'items.attraction'])
+            ->where('public', true)
+            ->orderBy('likes', 'desc')
+            ->take(3)
+            ->get();
+            
+        // Process itineraries to include first image and stats
+        $attractionController = new AttractionController();
+        $allAttractions = $attractionController->getAttractions();
+        
+        $itineraryController = new ItineraryController();
+        foreach ($mostLikedItineraries as $itinerary) {
+            $itinerary->groupedItems = $itineraryController->getItineraryItemsByDay($itinerary, $allAttractions);
+            $itinerary->stats = $itineraryController->calculateItineraryStats($itinerary->groupedItems, $allAttractions);
+        }
+        
+        // Get admin/official itineraries
+        // Find users with the 'admin' role (this will depend on your user roles structure)
+        // For now, let's get itineraries created by users with IDs 1 or 2 (assuming these are admin users)
+        $adminIds = ['05e740fd-8714-459e-b1d1-095266338a12', 2]; // This should be replaced with actual admin ID detection
+        
+        $officialItineraries = Itinerary::with(['type', 'user', 'items.attraction'])
+            ->whereIn('user_id', $adminIds)
+            ->where('public', true)
+            ->latest()
+            ->take(3)
+            ->get();
+            
+        // Process official itineraries too
+        foreach ($officialItineraries as $itinerary) {
+            $itinerary->groupedItems = $itineraryController->getItineraryItemsByDay($itinerary, $allAttractions);
+            $itinerary->stats = $itineraryController->calculateItineraryStats($itinerary->groupedItems, $allAttractions);
+        }
+        
+        // Get most liked public itineraries
+        $mostLikedItineraries = Itinerary::with(['type', 'user', 'items.attraction'])
+            ->where('public', true)
+            ->orderBy('likes', 'desc')
+            ->take(3)
+            ->get();
+            
+        // Process itineraries to include first image and stats
+        $attractionController = new AttractionController();
+        $allAttractions = $attractionController->getAttractions();
+        
+        $itineraryController = new ItineraryController();
+        foreach ($mostLikedItineraries as $itinerary) {
+            $itinerary->groupedItems = $itineraryController->getItineraryItemsByDay($itinerary, $allAttractions);
+            $itinerary->stats = $itineraryController->calculateItineraryStats($itinerary->groupedItems, $allAttractions);
+        }
+        
+        // Get admin/official itineraries
+        // Find users with the 'admin' role (this will depend on your user roles structure)
+        // For now, let's get itineraries created by users with IDs 1 or 2 (assuming these are admin users)
+        $adminIds = ['05e740fd-8714-459e-b1d1-095266338a12', 2]; // This should be replaced with actual admin ID detection
+        
+        $officialItineraries = Itinerary::with(['type', 'user', 'items.attraction'])
+            ->whereIn('user_id', $adminIds)
+            ->where('public', true)
+            ->latest()
+            ->take(3)
+            ->get();
+            
+        // Process official itineraries too
+        foreach ($officialItineraries as $itinerary) {
+            $itinerary->groupedItems = $itineraryController->getItineraryItemsByDay($itinerary, $allAttractions);
+            $itinerary->stats = $itineraryController->calculateItineraryStats($itinerary->groupedItems, $allAttractions);
+        }
+        
         // Get authenticated user data (if logged in)
         $user = Auth::user();
 
@@ -66,6 +138,12 @@ class HomeController extends Controller
             'featured' => $featured,
             'categories' => $formattedCategories,
             'banners' => $banners,
+            'user' => $user,
+            'mostLikedItineraries' => $mostLikedItineraries,
+            'officialItineraries' => $officialItineraries
+            'user' => $user,
+            'mostLikedItineraries' => $mostLikedItineraries,
+            'officialItineraries' => $officialItineraries
             'user' => $user,
             'articles' => $articles
         ]);

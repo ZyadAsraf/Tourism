@@ -48,7 +48,7 @@
 @section('content')
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-600 mb-2">Itinerary Designer</h1>
-    <p class="text-gray-500">Create your perfect Aswan 2026 adventure</p>
+    <p class="text-gray-500">Create your perfect adventure</p>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

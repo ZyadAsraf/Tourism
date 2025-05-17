@@ -16,7 +16,7 @@
         </div>
         @auth
             @if($itinerary->user_id === Auth::id())
-                <a href="{{ route('itinerary.designer') }}" class="btn-primary">Edit Itinerary</a>
+                <a href="{{ route('itinerary.designer', $itinerary->uuid) }}" class="btn-primary">Edit Itinerary</a>
             @endif
         @endauth
     </div>

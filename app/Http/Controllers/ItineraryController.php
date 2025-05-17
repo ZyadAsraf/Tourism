@@ -115,7 +115,7 @@ class ItineraryController extends Controller
     /**
      * Add an attraction to the itinerary
      */
-    public function addAttraction(Request $request)
+    public function addAttraction(Request $requestm, $itineraryUuid = null)
     {
         $validated = $request->validate([
             'attraction_id' => 'required|exists:attractions,id',
@@ -126,9 +126,15 @@ class ItineraryController extends Controller
             'day' => 'required|integer|min:1',
         ]);
         
-        // Get or create itinerary
-        $itinerary = $this->getOrCreateItinerary();
-        
+        if ($itineraryUuid) {
+            // If itinerary UUID is provided, find that specific itinerary
+            $itinerary = Itinerary::where('uuid', $itineraryUuid)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+        } else {
+            // If no UUID is provided, get or create a new itinerary
+            $itinerary = $this->getOrCreateItinerary();
+        }
         // Calculate position (get max position for the day and add 1)
         $maxPosition = ItineraryItem::where('itinerary_id', $itinerary->uuid)
             ->whereDate('date', Carbon::parse($validated['date']))
@@ -315,11 +321,10 @@ class ItineraryController extends Controller
         
         return $createdTypes;
     }
-    
-    /**
+      /**
      * Group itinerary items by day
      */
-    private function getItineraryItemsByDay($itinerary, $allAttractions)
+    public function getItineraryItemsByDay($itinerary, $allAttractions)
     {
         $items = ItineraryItem::where('itinerary_id', $itinerary->uuid)
             ->orderBy('date')
@@ -361,11 +366,10 @@ class ItineraryController extends Controller
         
         return $groupedItems;
     }
-    
-    /**
+      /**
      * Calculate itinerary stats (total cost, duration, number of attractions)
      */
-    private function calculateItineraryStats($itineraryItems, $allAttractions)
+    public function calculateItineraryStats($itineraryItems, $allAttractions)
     {
         $totalCost = 0;
         $totalAttractions = 0;
