@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Article extends Model
 {
     protected $fillable = [
-        "ArticleLinks",
         "ArticleHeading",
         'ArticleBody',
         'Img',
@@ -16,5 +15,8 @@ class Article extends Model
     
     public function admin(){
         return $this->belongsTo(User::class);
+    }
+    public function attractions() {
+        return $this->belongsToMany(Attraction::class, 'article_links', 'article_id', 'attraction_id');
     }
 }
