@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attraction;
 use App\Models\Category;
 use App\Models\Banner;
+use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth; 
@@ -57,12 +58,16 @@ class HomeController extends Controller
         // Get authenticated user data (if logged in)
         $user = Auth::user();
 
+        // Get latest 6 articles
+        $articles = Article::with('admin')->latest()->take(6)->get();
+
         return view('home', [
             'attractions' => $attractions,
             'featured' => $featured,
             'categories' => $formattedCategories,
             'banners' => $banners,
-            'user' => $user 
+            'user' => $user,
+            'articles' => $articles
         ]);
     }
 }

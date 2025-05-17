@@ -101,6 +101,10 @@
         
             <!-- Attractions -->
             <a href="{{ route('attractions.index') }}" class="text-gray-600 hover:text-primary">Attractions</a>
+
+            <!-- Articles -->
+            <a href="{{ route('articles.index') }}" class="text-gray-600 hover:text-primary">Articles</a>
+
             
             <!-- Itineraries -->
             <a href="{{ route('itineraries.index') }}" class="text-gray-600 hover:text-primary {{ request()->routeIs('itineraries.*') ? 'font-semibold text-primary' : '' }}">Itineraries</a>

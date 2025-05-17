@@ -43,8 +43,14 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <div class="lg:col-span-2">
-            <h2 class="text-2xl font-bold mb-4 text-gray-600">About {{ $attraction['title'] }}</h2>
-            <p class="text-gray-600 mb-6">{!! $attraction['description'] ?? 'No description available.' !!}</p>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-600">About {{ $attraction['title'] }}</h2>
+                <button id="ttsButton" class="btn-primary flex items-center gap-2">
+                    <i class="fas fa-volume-up"></i>
+                    <span>Listen to Description</span>
+                </button>
+            </div>
+            <p id="attractionDescription" class="text-gray-600 mb-6">{!! $attraction['description'] ?? 'No description available.' !!}</p>
 
             @if (isset($attraction['longDescription']))
                 <p class="text-gray-600 mb-6">{!! $attraction['longDescription'] !!}</p>
@@ -548,6 +554,25 @@
             }
         }
     });
+
+    // Create TTS object when page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+        const tts = new TextToSpeech();
+        await tts.init();
+
+        // Add event listener for play button
+        const ttsButton = document.getElementById('ttsButton');
+        if (ttsButton) {
+            ttsButton.addEventListener('click', () => {
+                const description = document.getElementById('attractionDescription').textContent;
+                if (tts.isPlaying) {
+                    tts.stop();
+                } else {
+                    tts.speak(description);
+                }
+            });
+        }
+    });
     </script>
 
     <style>
@@ -610,4 +635,8 @@
             </div>
         </div>
     @endif
+
+    @push('scripts')
+    <script src="{{ asset('js/tts.js') }}"></script>
+    @endpush
 @endsection
