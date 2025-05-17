@@ -10,6 +10,8 @@ use App\Models\TicketType;
 class BieWidgets extends ChartWidget
 {
     protected static ?string $heading = 'Ticket Type Distribution';
+
+    protected static ?string $pollingInterval = null;
     protected int | string | array $columnSpan = 1;
     protected function getData(): array
     {

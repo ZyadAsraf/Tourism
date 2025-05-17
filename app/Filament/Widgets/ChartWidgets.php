@@ -10,6 +10,9 @@ class ChartWidgets extends ChartWidget
 {
     protected static ?string $heading = 'Most Visited Attractions';
 
+    protected static ?string $pollingInterval = null;
+
+
     protected function getData(): array
     {
         // Count the number of tickets per attraction
