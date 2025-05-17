@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'My Trip Plan - Massar')
+@section('title', 'Cart - Massar')
 
 @section('content')
 <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-600 mb-2">My Trip Plan</h1>
-    <p class="text-gray-500">Plan your perfect Egyptian adventure</p>
+    <h1 class="text-3xl font-bold text-gray-600 mb-2">My Cart</h1>
+    <p class="text-gray-500">Review your cart before purchase</p>
 </div>
 
 @if(count($attractions) > 0)
@@ -19,7 +19,7 @@
                     <div class="w-full md:w-3/4">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-xl font-bold text-gray-600">{{ $attraction['title'] }}</h3>
-                            <a href="{{ route('cart.remove', $attraction['slug']) }}" class="text-red-500 hover:text-red-700" onclick="return confirm('Are you sure you want to remove this attraction from your trip plan?')">
+                            <a href="{{ route('cart.remove', $attraction['slug']) }}" class="text-red-500 hover:text-red-700" onclick="return confirm('Are you sure you want to remove this attraction from your cart?')">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>
@@ -66,18 +66,18 @@
                     </svg>
                     Continue Shopping
                 </a>
-                <a href="{{ route('cart.clear') }}" class="text-red-500 hover:text-red-700 flex items-center" onclick="return confirm('Are you sure you want to clear your entire trip plan?')">
+                <a href="{{ route('cart.clear') }}" class="text-red-500 hover:text-red-700 flex items-center" onclick="return confirm('Are you sure you want to clear your entire cart?')">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                     </svg>
-                    Clear Trip Plan
+                    Clear Cart
                 </a>
             </div>
         </div>
         
         <div class="lg:col-span-1">
             <div class="card p-6 sticky top-4">
-                <h2 class="text-xl font-bold mb-4 text-gray-600">Trip Summary</h2>
+                <h2 class="text-xl font-bold mb-4 text-gray-600">Cart Summary</h2>
                 
                 <div class="space-y-4 mb-6">
                     <div class="flex justify-between">
@@ -101,7 +101,7 @@
                 <a href="{{ route('cart.checkout') }}" class="btn-primary w-full block text-center">Proceed to Checkout</a>
                 
                 <div class="mt-6 text-sm text-gray-500">
-                    <p class="mb-2"><strong>Note:</strong> Your trip plan will be saved for 30 days. Prices and availability are subject to change.</p>
+                    <p class="mb-2"><strong>Note:</strong>Prices and availability are subject to change.</p>
                     <p>Need help? <a href="#" class="text-primary hover:underline">Contact our support team</a></p>
                 </div>
             </div>
@@ -112,8 +112,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
-        <h2 class="text-2xl font-bold text-gray-600 mb-2">Your Trip Plan is Empty</h2>
-        <p class="text-gray-500 mb-6">Start planning your Egyptian adventure by adding attractions to your trip plan.</p>
+        <h2 class="text-2xl font-bold text-gray-600 mb-2">Your Cart is Empty</h2>
+        <p class="text-gray-500 mb-6">Start planning your Egyptian adventure by adding attractions to your cart.</p>
         <a href="{{ route('attractions.index') }}" class="btn-primary">Browse Attractions</a>
     </div>
 @endif
