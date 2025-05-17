@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home'); 
@@ -38,6 +39,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Stripe 
     Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
+    
+    // Itinerary Designer Routes
+    Route::get('/itinerary/designer', [ItineraryController::class, 'designer'])->name('itinerary.designer');
+    Route::post('/itinerary/add-attraction', [ItineraryController::class, 'addAttraction'])->name('itinerary.add-attraction');
+    Route::post('/itinerary/update-attraction/{uuid}', [ItineraryController::class, 'updateAttraction'])->name('itinerary.update-attraction');
+    Route::delete('/itinerary/remove-attraction/{uuid}', [ItineraryController::class, 'removeAttraction'])->name('itinerary.remove-attraction');
+    Route::post('/itinerary/update', [ItineraryController::class, 'updateItinerary'])->name('itinerary.update');
 });
 
 // Laravel Auth Routes 
