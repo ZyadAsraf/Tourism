@@ -31,18 +31,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/search', [AttractionController::class, 'search'])->name('attractions.search');
 
     // Cart & Trip Plan
-    Route::get('/trip-plan', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/trip-plan/add/{slug}', [CartController::class, 'add'])->name('cart.add');
-    Route::post('/trip-plan/update/{slug}', [CartController::class, 'update'])->name('cart.update');
-    Route::get('/trip-plan/remove/{slug}', [CartController::class, 'remove'])->name('cart.remove');
-    Route::get('/trip-plan/clear', [CartController::class, 'clear'])->name('cart.clear');
-    Route::get('/trip-plan/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-    Route::post('/trip-plan/process-checkout', [CartController::class, 'processCheckout'])->name('cart.process-checkout');
-    Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
-    Route::get('/trip-plan/confirmation', [CartController::class, 'confirmation'])->name('cart.confirmation');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{slug}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update/{slug}', [CartController::class, 'update'])->name('cart.update');
+    Route::get('/cart/remove/{slug}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::get('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::post('/cart/process-checkout', [CartController::class, 'processCheckout'])->name('cart.process-checkout');
+    Route::post('/cart/confirmation', [CartController::class, 'store'])->name('cart.store');
+    Route::get('/cart/confirmation', [CartController::class, 'confirmation'])->name('cart.confirmation');
 
     // Stripe 
-    Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
+    Route::post('/cart/confirmation', [CartController::class, 'store'])->name('cart.store');
     
     // Itinerary Designer Routes
     Route::get('/itinerary/designer', [ItineraryController::class, 'createNewItinerary'])->name('itinerary.newItinerary');
