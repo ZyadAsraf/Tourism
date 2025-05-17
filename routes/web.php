@@ -6,8 +6,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\ArticlesController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home'); 
+// Public Articles routes
+Route::resource('articles', ArticlesController::class)->only(['index', 'show']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
     
