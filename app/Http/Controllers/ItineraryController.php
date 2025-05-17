@@ -17,7 +17,7 @@ class ItineraryController extends Controller
     /**
      * Display the itinerary designer page
      */
-    public function designer(Request $request)
+    public function designer(Request $request, $uuid = null)
     {
         // Get attraction controller instance to use its methods
         $attractionController = new AttractionController();
@@ -32,8 +32,20 @@ class ItineraryController extends Controller
             $itineraryTypes = ItineraryType::all();
         }
         
-        // Get or create a default itinerary for the current user
-        $itinerary = $this->getOrCreateItinerary();
+        $itinerary = Itinerary::where('uuid', $uuid)->first();
+        
+        // If itinerary exists but doesn't belong to current user
+        if ($itinerary && $itinerary->user_id !== Auth::id()) {
+            return view('itinerary.copy-prompt', [
+                'itinerary' => $itinerary,
+                'categories' => $attractionController->getCategories(),
+            ]);
+        }
+        
+        // If itinerary doesn't exist, create a new one
+        if (!$itinerary) {
+            $itinerary = $this->getOrCreateItinerary();
+        }
         
         // Get itinerary items grouped by day
         $itineraryItems = $this->getItineraryItemsByDay($itinerary, $allAttractions);
@@ -50,7 +62,56 @@ class ItineraryController extends Controller
             'stats' => $stats,
         ]);
     }
-    
+
+    /**
+     * Copy an existing itinerary and its items and link it to the current user
+     * 
+     * @param string $uuid UUID of the itinerary to copy
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function copyItinerary($uuid)
+    {
+        // Ensure user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        
+        // Find the original itinerary
+        $originalItinerary = Itinerary::where('uuid', $uuid)->firstOrFail();
+        
+        // Create a new itinerary with the same details but new UUID
+        $newItinerary = new Itinerary([
+            'uuid' => (string) Str::uuid(),
+            'user_id' => Auth::id(),
+            'type_id' => $originalItinerary->type_id,
+            'name' => 'Copy of ' . $originalItinerary->name,
+            'description' => $originalItinerary->description,
+            'public' => false, // Default to private for copied itineraries
+        ]);
+        
+        $newItinerary->save();
+        
+        // Copy all itinerary items
+        $originalItems = ItineraryItem::where('itinerary_id', $originalItinerary->uuid)->get();
+        
+        foreach ($originalItems as $originalItem) {
+            $newItem = new ItineraryItem([
+                'uuid' => (string) Str::uuid(),
+                'itinerary_id' => $newItinerary->uuid,
+                'attraction_id' => $originalItem->attraction_id,
+                'date' => $originalItem->date,
+                'time' => $originalItem->time,
+                'quantity' => $originalItem->quantity,
+                'TicketTypeId' => $originalItem->TicketTypeId,
+                'position' => $originalItem->position,
+            ]);
+            
+            $newItem->save();
+        }
+        
+        return redirect()->route('itinerary.designer', $newItinerary->uuid)
+            ->with('success', 'Itinerary copied successfully!');
+    }
     /**
      * Add an attraction to the itinerary
      */
@@ -79,7 +140,7 @@ class ItineraryController extends Controller
             'itinerary_id' => $itinerary->uuid,
             'attraction_id' => $validated['attraction_id'],
             'date' => $validated['date'],
-            'time' => null,
+            'time' => null  ,
             'quantity' => $validated['quantity'],
             'TicketTypeId' => $validated['ticket_type_id'],
             'position' => $maxPosition + 1,
@@ -87,7 +148,7 @@ class ItineraryController extends Controller
         
         $item->save();
         
-        return redirect()->route('itinerary.designer')
+        return redirect()->route('itinerary.designer', $itinerary->uuid)
             ->with('success', 'Attraction added to your itinerary!');
     }
     
@@ -117,7 +178,7 @@ class ItineraryController extends Controller
             'TicketTypeId' => $validated['ticket_type_id'],
         ]);
         
-        return redirect()->route('itinerary.designer')
+        return redirect()->route('itinerary.designer', $item->itinerary_id)
             ->with('success', 'Itinerary item updated!');
     }
     
@@ -132,7 +193,7 @@ class ItineraryController extends Controller
             
         $item->delete();
         
-        return redirect()->route('itinerary.designer')
+        return redirect()->route('itinerary.designer', $item->itinerary_id)
             ->with('success', 'Attraction removed from your itinerary!');
     }
     
@@ -151,40 +212,87 @@ class ItineraryController extends Controller
         $itinerary = $this->getOrCreateItinerary();
         $itinerary->update($validated);
         
-        return redirect()->route('itinerary.designer')
+        return redirect()->route('itinerary.designer', $itinerary->uuid)
             ->with('success', 'Itinerary details updated!');
     }
     
     /**
      * Get or create an itinerary for the current user
      */
-    private function getOrCreateItinerary()
-    {
-        $itinerary = Itinerary::where('user_id', Auth::id())
-            ->latest()
+    private function getOrCreateItinerary($uuid = null)
+{
+    // If UUID is provided, try to find that specific itinerary
+    if ($uuid) {
+        $itinerary = Itinerary::where('uuid', $uuid)
+            ->where('user_id', Auth::id())
             ->first();
             
-        if (!$itinerary) {
-            // Get the first itinerary type or create a default one
-            $typeId = ItineraryType::first()->id ?? $this->createDefaultItineraryTypes()->first()->id;
-            
-            $itinerary = new Itinerary([
-                'uuid' => (string) Str::uuid(),
-                'user_id' => Auth::id(),
-                'type_id' => $typeId,
-                'name' => 'My Aswan Trip ' . date('Y'),
-                'description' => 'My custom Egypt itinerary',
-                'public' => false,
-            ]);
-            
-            $itinerary->save();
+        if ($itinerary) {
+            return $itinerary;
         }
+    }
+    
+    // If no UUID or itinerary not found, look for the user's most recent itinerary
+    $itinerary = Itinerary::where('user_id', Auth::id())
+        ->latest()
+        ->first();
+        
+    // If still no itinerary, create a new one
+    if (!$itinerary) {
+        $typeId = ItineraryType::first()->id ?? $this->createDefaultItineraryTypes()->first()->id;
+        
+        $itinerary = new Itinerary([
+            'uuid' => (string) Str::uuid(),
+            'user_id' => Auth::id(),
+            'type_id' => $typeId,
+            'name' => 'My Trip ' . date('Y'),
+            'description' => 'My custom Egypt itinerary',
+            'public' => false,
+        ]);
+        
+        $itinerary->save();
+    }
+    
+    return $itinerary;
+}
+
+/**
+ * Creates a new itinerary regardless of existing ones
+ */
+    private function addItinerary()
+    {
+        // Get the first itinerary type or create a default one
+        $typeId = ItineraryType::first()->id ?? $this->createDefaultItineraryTypes()->first()->id;
+        
+        $itinerary = new Itinerary([
+            'uuid' => (string) Str::uuid(),
+            'user_id' => Auth::id(),
+            'type_id' => $typeId,
+            'name' => 'My Trip ' . date('Y'),
+            'description' => 'My custom Egypt itinerary',
+            'public' => false,
+        ]);
+        
+        $itinerary->save();
         
         return $itinerary;
+    }
+
+    /**
+     * Create a new itinerary and redirect to the designer
+     * 
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function createNewItinerary()
+    {
+        $newItinerary = $this->addItinerary();
+
+        return redirect()->route('itinerary.designer', $newItinerary->uuid);
     }
     
     /**
      * Create default itinerary types
+     * TODO: This should be managed in filament
      */
     private function createDefaultItineraryTypes()
     {
@@ -194,6 +302,7 @@ class ItineraryController extends Controller
             'Family Holiday',
             'Solo Adventure',
             'Cultural Exploration',
+            'Custom'
         ];
         
         $createdTypes = collect();
@@ -287,8 +396,7 @@ class ItineraryController extends Controller
             'durationText' => $this->formatDuration($totalDuration)
         ];
     }
-    
-    /**
+      /**
      * Format duration in hours as human-readable text
      */
     private function formatDuration($hours)
@@ -305,5 +413,141 @@ class ItineraryController extends Controller
                 return $days . ' day' . ($days > 1 ? 's' : '');
             }
         }
+    }
+    
+    /**
+     * Display a listing of public itineraries
+     */
+    public function index(Request $request)
+    {
+        // Get attraction controller instance to use its methods
+        $attractionController = new AttractionController();
+        $allAttractions = $attractionController->getAttractions();
+        
+        // Get public itineraries with their relationships
+        $query = Itinerary::with(['type', 'user', 'items.attraction', 'items.ticketType'])
+            ->where('public', true)
+            ->latest();
+            
+        // Filter by type if requested
+        if ($request->has('type') && $request->type) {
+            $query->where('type_id', $request->type);
+        }
+        
+        // Filter by search query if requested
+        if ($request->has('query') && $request->query) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->query . '%')
+                  ->orWhere('description', 'like', '%' . $request->query . '%');
+            });
+        }
+            
+        $itineraries = $query->paginate(9);
+        
+        // Process each itinerary to calculate stats
+        foreach ($itineraries as $itinerary) {
+            // Group items by day for each itinerary
+            $itinerary->groupedItems = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+            
+            // Calculate stats for each itinerary
+            $itinerary->stats = $this->calculateItineraryStats($itinerary->groupedItems, $allAttractions);
+        }
+        
+        $itineraryTypes = ItineraryType::all();
+        
+        return view('itinerary.publicItineraries', [
+            'itineraries' => $itineraries,
+            'itineraryTypes' => $itineraryTypes,
+            'categories' => $attractionController->getCategories(),
+            'currentType' => $request->type,
+            'query' => $request->query
+        ]);
+    }
+
+    /**
+     * Display a listing of user's itineraries
+     */
+    public function userItineraries(Request $request)
+    {
+        // Ensure user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        
+        // Get attraction controller instance to use its methods
+        $attractionController = new AttractionController();
+        $allAttractions = $attractionController->getAttractions();
+        
+        // Get the current user's itineraries with their relationships
+        $query = Itinerary::with(['type', 'user', 'items.attraction', 'items.ticketType'])
+            ->where('user_id', Auth::id())
+            ->latest();
+            
+        // Filter by type if requested
+        if ($request->has('type') && $request->type) {
+            $query->where('type_id', $request->type);
+        }
+        
+        // Filter by search query if requested
+        if ($request->has('query') && $request->query) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->query . '%')
+                  ->orWhere('description', 'like', '%' . $request->query . '%');
+            });
+        }
+            
+        $itineraries = $query->paginate(9);
+        
+        // Process each itinerary to calculate stats
+        foreach ($itineraries as $itinerary) {
+            // Group items by day for each itinerary
+            $itinerary->groupedItems = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+            
+            // Calculate stats for each itinerary
+            $itinerary->stats = $this->calculateItineraryStats($itinerary->groupedItems, $allAttractions);
+        }
+        
+        $itineraryTypes = ItineraryType::all();
+        
+        return view('itinerary.myItineraries', [
+            'itineraries' => $itineraries,
+            'itineraryTypes' => $itineraryTypes,
+            'categories' => $attractionController->getCategories(),
+            'currentType' => $request->type,
+            'query' => $request->query
+        ]);
+    }
+    
+    /**
+     * Show a specific public itinerary
+     */
+    public function show($uuid)
+    {
+        // Get attraction controller instance to use its methods
+        $attractionController = new AttractionController();
+        $allAttractions = $attractionController->getAttractions();
+        
+        // Get the itinerary with its relationships
+        $itinerary = Itinerary::with(['type', 'user', 'items.attraction', 'items.ticketType'])
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+            
+        // Only show if public or belongs to current user
+        if (!$itinerary->public && (!Auth::check() || $itinerary->user_id != Auth::id())) {
+            abort(403, 'This itinerary is private.');
+        }
+        
+        // Group items by day
+        $groupedItems = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+        
+        // Calculate stats
+        $stats = $this->calculateItineraryStats($groupedItems, $allAttractions);
+        
+        return view('itinerary.show', [
+            'itinerary' => $itinerary,
+            'itineraryItems' => $groupedItems,
+            'stats' => $stats,
+            'categories' => $attractionController->getCategories()
+        ]);
     }
 }

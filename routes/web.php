@@ -10,6 +10,10 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home'); 
 
+// Public itineraries
+Route::get('/itineraries', [ItineraryController::class, 'index'])->name('itineraries.index');
+Route::get('/itineraries/{uuid}', [ItineraryController::class, 'show'])->name('itineraries.show');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     
 
@@ -41,11 +45,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
     
     // Itinerary Designer Routes
-    Route::get('/itinerary/designer', [ItineraryController::class, 'designer'])->name('itinerary.designer');
+    Route::get('/itinerary/designer', [ItineraryController::class, 'createNewItinerary'])->name('itinerary.newItinerary');
+    Route::get('/itinerary/designer/{uuid}', [ItineraryController::class, 'designer'])->name('itinerary.designer');
     Route::post('/itinerary/add-attraction', [ItineraryController::class, 'addAttraction'])->name('itinerary.add-attraction');
     Route::post('/itinerary/update-attraction/{uuid}', [ItineraryController::class, 'updateAttraction'])->name('itinerary.update-attraction');
     Route::delete('/itinerary/remove-attraction/{uuid}', [ItineraryController::class, 'removeAttraction'])->name('itinerary.remove-attraction');
     Route::post('/itinerary/update', [ItineraryController::class, 'updateItinerary'])->name('itinerary.update');
+    Route::get('/itinerary/copy/{uuid}', [ItineraryController::class, 'copyItinerary'])->name('itinerary.copy');
+    
+    // Public Itineraries
+    Route::get('/itineraries', [ItineraryController::class, 'index'])->name('itineraries.index');
+    Route::get('/my-itineraries', [ItineraryController::class, 'userItineraries'])->name('itineraries.my-itineraries');
+    Route::get('/itineraries/{uuid}', [ItineraryController::class, 'show'])->name('itineraries.show');
 });
 
 // Laravel Auth Routes 

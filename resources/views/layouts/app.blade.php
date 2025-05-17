@@ -101,6 +101,9 @@
         
             <!-- Attractions -->
             <a href="{{ route('attractions.index') }}" class="text-gray-600 hover:text-primary">Attractions</a>
+            
+            <!-- Itineraries -->
+            <a href="{{ route('itineraries.index') }}" class="text-gray-600 hover:text-primary {{ request()->routeIs('itineraries.*') ? 'font-semibold text-primary' : '' }}">Itineraries</a>
         
             <!-- Categories Dropdown -->
             <div class="relative group">
@@ -120,11 +123,6 @@
                     </div>
                 </div>
             </div>
-        
-            <!-- Itinerary Designer -->
-            <a href="{{ route('itinerary.designer') }}" class="text-gray-600 hover:text-primary">
-                Itinerary Designer
-            </a>
 
             <!-- My Trip / Cart -->
             <a href="{{ route('cart.index') }}" class="text-gray-600 hover:text-primary flex items-center gap-1 relative">
@@ -227,7 +225,7 @@
                 <ul class="space-y-2">
                     <li><a href="{{ route('home') }}" class="text-gray-600 hover:text-primary">Home</a></li>
                     <li><a href="{{ route('attractions.index') }}" class="text-gray-600 hover:text-primary">All Attractions</a></li>
-                    <li><a href="{{ route('itinerary.designer') }}" class="text-gray-600 hover:text-primary">Itinerary Designer</a></li>
+                    <li><a href="{{ route('itineraries.index') }}" class="text-gray-600 hover:text-primary">Itineraries</a></li>
                     <li><a href="{{ route('cart.index') }}" class="text-gray-600 hover:text-primary">My Trip Plan</a></li>
                     <li><a href="#" class="text-gray-600 hover:text-primary">About Us</a></li>
                     <li><a href="#" class="text-gray-600 hover:text-primary">Contact</a></li>
