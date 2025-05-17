@@ -12,7 +12,11 @@
         @if($article->Img)
             <img src="{{ '/storage/' . $article->Img }}" alt="{{ $article->ArticleHeading }}" class="w-full h-64 object-cover rounded mb-6">
         @endif
-        <div class="prose max-w-none mb-6">
+        <button id="ttsButton" class="btn-primary flex items-center gap-2">
+            <i class="fas fa-volume-up"></i>
+            <span>Listen to Article</span>
+        </button>
+        <div id="articleBody" class="prose max-w-none mb-6">
             {!! nl2br(e($article->ArticleBody)) !!}
         </div>
         @if($article->admin)
@@ -22,4 +26,27 @@
         @endif
     </div>
 </div>
+<script>
+    // Create TTS object when page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+        const tts = new TextToSpeech();
+        await tts.init();
+
+        // Add event listener for play button
+        const ttsButton = document.getElementById('ttsButton');
+        if (ttsButton) {
+            ttsButton.addEventListener('click', () => {
+                const description = document.getElementById('articleBody').textContent;
+                if (tts.isPlaying) {
+                    tts.stop();
+                } else {
+                    tts.speak(description);
+                }
+            });
+        }
+    });
+</script>
+@push('scripts')
+<script src="{{ asset('js/tts.js') }}"></script>
+@endpush
 @endsection 

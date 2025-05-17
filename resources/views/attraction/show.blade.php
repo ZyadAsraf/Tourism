@@ -554,6 +554,25 @@
             }
         }
     });
+
+    // Create TTS object when page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+        const tts = new TextToSpeech();
+        await tts.init();
+
+        // Add event listener for play button
+        const ttsButton = document.getElementById('ttsButton');
+        if (ttsButton) {
+            ttsButton.addEventListener('click', () => {
+                const description = document.getElementById('attractionDescription').textContent;
+                if (tts.isPlaying) {
+                    tts.stop();
+                } else {
+                    tts.speak(description);
+                }
+            });
+        }
+    });
     </script>
 
     <style>
