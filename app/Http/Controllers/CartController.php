@@ -117,7 +117,6 @@ class CartController extends Controller
         if ($cartItem) {
             // Update existing cart item
             $cartItem->quantity += $validated['quantity'];
-            $cartItem->subtotal = $price * $cartItem->quantity; // Recalculate subtotal
             $cartItem->save();
         } else {
             // Create new cart item
@@ -126,11 +125,8 @@ class CartController extends Controller
                 'attraction_id' => $attraction->id,
                 'ticket_type_id' => $validated['ticket_type_id'],
                 'quantity' => $validated['quantity'],
-                'price' => $price, // Store price
-                'subtotal' => $price * $validated['quantity'], // Calculate and store subtotal
                 'date' => $validated['date'],
                 'time' => $validated['time'],
-                'uuid' => Str::uuid(), // Add UUID if not already present
             ]);
         }
 
@@ -138,77 +134,81 @@ class CartController extends Controller
     }
     
     /**
-     * Add multiple attractions to the cart at once
+     * Add all attractions from an itinerary to the cart
      */
-    public function massAdd(Request $request)
+    public function addItinerary(Request $request)
     {
         // Check if the user is authenticated
         if (!Auth::check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please login to add attractions to your Cart.',
-            ], 401);
+            return redirect()->route('login')->with('error', 'Please login to add attractions to your Cart.');
         }
 
         // Validate request
         $validated = $request->validate([
-            'items' => 'required|array',
-            'items.*.attraction_id' => 'required|exists:attractions,id',
-            'items.*.date' => 'required|date',
-            'items.*.time' => 'required',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.ticket_type_id' => 'required|exists:ticket_types,id',
+            'itinerary_uuid' => 'required|exists:itineraries,uuid',
         ]);
         
-        $addedItems = 0;
+        // Get itinerary
+        $itinerary = \App\Models\Itinerary::where('uuid', $validated['itinerary_uuid'])->first();
         
-        foreach ($validated['items'] as $item) {
+        if (!$itinerary) {
+            return redirect()->back()->with('error', 'Itinerary not found.');
+        }
+        
+        // Get all itinerary items
+        $itineraryItems = \App\Models\ItineraryItem::where('itinerary_id', $itinerary->uuid)->get();
+        
+        if ($itineraryItems->isEmpty()) {
+            return redirect()->back()->with('error', 'This itinerary is empty. Add attractions before adding to cart.');
+        }
+        
+        $addedItems = 0;
+        $errors = [];
+        // dd($itineraryItems);
+        foreach ($itineraryItems as $item) {
             // Find the attraction
-            $attraction = Attraction::find($item['attraction_id']);
+            $attraction = Attraction::find($item->attraction_id);
             
             if (!$attraction) {
+                $errors[] = "One of the attractions could not be found.";
                 continue;
             }
-            
-            // For authenticated users, store in database
-            $price = $attraction->price;
             
             // Check if the attraction is already in the user's cart
             $cartItem = CartItem::where('user_id', Auth::id())
                 ->where('attraction_id', $attraction->id)
-                ->where('date', $item['date'])
-                ->where('time', $item['time'])
-                ->where('ticket_type_id', $item['ticket_type_id']) // Added ticket_type_id condition
+                ->where('date', $item->date)
+                ->where('time', $item->time)
+                ->where('ticket_type_id', $item->ticket_type_id)
                 ->first();
-                    
+            
+            // Get attraction price
+            $price = $attraction->price;
+            
             if ($cartItem) {
                 // Update existing cart item
-                $cartItem->quantity += $item['quantity'];
-                $cartItem->subtotal = $price * $cartItem->quantity;
+                $cartItem->quantity += $item->quantity;
                 $cartItem->save();
+                $addedItems++;
             } else {
                 // Create new cart item
                 CartItem::create([
                     'user_id' => Auth::id(),
                     'attraction_id' => $attraction->id,
-                    'ticket_type_id' => $item['ticket_type_id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $price,
-                    'subtotal' => $price * $item['quantity'],
-                    'date' => $item['date'],
-                    'time' => $item['time'],
-                    'uuid' => Str::uuid(),
+                    'ticket_type_id' => $item->TicketTypeId,
+                    'quantity' => $item->quantity,
+                    'date' => $item->date,
+                    'time' => $item->time,
                 ]);
+                $addedItems++;
             }
-            
-            $addedItems++;
         }
         
-        return response()->json([
-            'success' => true,
-            'message' => $addedItems . ' attractions added to your Cart!',
-            'items_added' => $addedItems
-        ]);
+        if ($addedItems > 0) {
+            return redirect()->route('cart.index')->with('success', "Added {$addedItems} attractions from your itinerary to your cart.");
+        } else {
+            return redirect()->back()->with('error', 'Failed to add items to cart: ' . implode(' ', $errors));
+        }
     }
 
     /**

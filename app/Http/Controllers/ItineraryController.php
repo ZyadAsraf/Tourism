@@ -481,10 +481,13 @@ class ItineraryController extends Controller
             }
         }
         
+        // Count the number of unique days in the itinerary
+        $totalDays = isset($itineraryData['days']) ? count($itineraryData['days']) : count($itineraryItems);
         return [
             'totalCost' => $totalCost,
             'totalAttractions' => $totalAttractions,
             'totalDuration' => $totalDuration,
+            'totalDays' => $totalDays,
             'durationText' => $this->formatDuration($totalDuration)
         ];
     }
@@ -494,16 +497,17 @@ class ItineraryController extends Controller
      */
     private function formatDuration($hours)
     {
-        if ($hours < 24) {
+        // Use the actual days count from the stats instead of calculating from hours
+        if ($hours < 8) {
             return $hours . ' hours';
         } else {
-            $days = floor($hours / 24);
-            $remainingHours = $hours % 24;
+            // Convert to full days plus hours format
+            $days = ceil($hours / 8); // Most attractions are visited during ~8 hour days
             
-            if ($remainingHours > 0) {
-                return $days . ' day' . ($days > 1 ? 's' : '') . ' ' . $remainingHours . ' hour' . ($remainingHours > 1 ? 's' : '');
+            if ($days == 1) {
+                return '1 day';
             } else {
-                return $days . ' day' . ($days > 1 ? 's' : '');
+                return $days . ' days';
             }
         }
     }

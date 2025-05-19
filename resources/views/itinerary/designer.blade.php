@@ -3,6 +3,7 @@
 @section('title', 'Itinerary Designer - Aswan 2026')
 
 @push('styles')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
     .day-tab {
         transition: all 0.3s ease;
@@ -246,7 +247,7 @@
                 </div>
             </div>
             
-            <a href="#" class="btn-primary w-full block text-center">Export Itinerary</a>
+            <button id="add-all-to-cart-btn" class="btn-primary w-full block text-center">Add All to Cart</button>
         </div>
     </div>
 </div>
@@ -333,20 +334,11 @@
 </form>
 
 @push('scripts')
-<script>
+<script type="text/javascript">
     let currentDay = 1;
-    
-    // Initialize to show day 1
-    document.addEventListener('DOMContentLoaded', function() {
-        selectDay(1);
-    });
     
     // Function to select a day tab
     function selectDay(day) {
-        // Ensure day is treated as a number
-        day = parseInt(day, 10);
-        console.log("Selecting day: " + day);
-        
         currentDay = day;
         
         // Hide all day content
@@ -355,11 +347,9 @@
         });
         
         // Show selected day content
-        var selectedDayContent = document.getElementById('day-content-' + day);
+        const selectedDayContent = document.getElementById('day-content-' + day);
         if (selectedDayContent) {
             selectedDayContent.style.display = 'block';
-        } else {
-            console.log("Warning: Content for day " + day + " not found");
         }
         
         // Update active tab styling
@@ -368,146 +358,82 @@
             tab.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
         });
         
-        var activeTab = document.getElementById('day-tab-' + day);
+        const activeTab = document.getElementById('day-tab-' + day);
         if (activeTab) {
             activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
             activeTab.classList.add('bg-primary', 'text-white');
-        } else {
-            console.log("Warning: Tab for day " + day + " not found");
         }
         
-        // Update the selected day in the add attraction form
+        // Update the selected day in the Add Attraction form
         document.getElementById('selected-day').value = day;
     }
-    // Function to add a new day
-    function addNewDay() {
-        const tabsContainer = document.getElementById('tabs-container');
-        const dayTabs = tabsContainer.querySelectorAll('.day-tab');
-        
-        // Count actual day tabs (exclude the "Add Day" button)
-        var lastDay = 0;
-        dayTabs.forEach(function(tab) {
-            const dayMatch = tab.id.match(/day-tab-(\d+)/);
-            if (dayMatch) {
-                const dayNum = parseInt(dayMatch[1], 10);
-                if (dayNum > lastDay) {
-                    lastDay = dayNum;
-                }
-            }
-        });
-        
-        const newDay = lastDay + 1;
-        console.log("Creating new day: " + newDay);
-        
-        // Get the current date
-        const currentDate = new Date();
-        // Add days to the current date based on the new day number
-        currentDate.setDate(currentDate.getDate() + (newDay - 1));
-        const formattedDate = currentDate.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
-        });
-        const dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
-        
-        // Add new day tab with date information
-        const newTabButton = document.createElement('button');
-        newTabButton.id = 'day-tab-' + newDay;
-        newTabButton.classList.add('day-tab', 'whitespace-nowrap', 'px-4', 'py-2', 'rounded-md', 'font-medium', 'text-sm', 'bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
-        
-        // Create content with day of week and date
-        const dayOfWeekDiv = document.createElement('div');
-        dayOfWeekDiv.className = 'text-xs';
-        dayOfWeekDiv.textContent = dayOfWeek;
-        
-        const dayNumberDiv = document.createElement('div');
-        dayNumberDiv.textContent = 'Day ' + newDay;
-        
-        const dateDiv = document.createElement('div');
-        dateDiv.className = 'text-xs';
-        dateDiv.textContent = formattedDate;
-        
-        newTabButton.appendChild(dayOfWeekDiv);
-        newTabButton.appendChild(dayNumberDiv);
-        newTabButton.appendChild(dateDiv);
-        
-        newTabButton.onclick = function() { selectDay(parseInt(newDay, 10)); };
-        
-        // Insert before the "Add Day" button
-        tabsContainer.insertBefore(newTabButton, tabsContainer.lastElementChild);
-        
-        // Create empty day content container if it doesn't exist
-        if (!document.getElementById('day-content-' + newDay)) {
-            const mainContainer = document.querySelector('.lg\\:col-span-2');
-            const newDayContent = document.createElement('div');
-            newDayContent.id = 'day-content-' + newDay;
-            newDayContent.className = 'day-content';
-            newDayContent.style.display = 'none';
-            
-            newDayContent.innerHTML = `
-                <div class="mb-6 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-gray-600">Day ${newDay} - ${formattedDate} - ${document.querySelector('input[name="name"]').value || 'My Trip'}</h2>
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('attractions.index') }}" class="btn-sm bg-gray-600 text-white rounded-md p-2 flex items-center" title="Browse Attractions">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                            </svg>
-                        </a>
-                        <button class="btn-sm bg-primary text-white rounded-md p-2" onclick="showAddAttractionModal(${newDay})">
-                            Add Attraction
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="attractions-container-${newDay}" class="space-y-4">
-                    <div class="text-center p-6 bg-gray-50 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <h3 class="text-lg font-medium text-gray-600 mb-2">No Attractions Added for Day ${newDay}</h3>
-                        <p class="text-gray-500 mb-4">Start building your itinerary by adding attractions for this day.</p>
-                        <button class="btn-primary" onclick="showAddAttractionModal(${newDay})">Add Attraction</button>
-                    </div>
-                </div>
-            `;
-            
-            mainContainer.appendChild(newDayContent);
-        }
-        
-        // Switch to the new day
-        selectDay(parseInt(newDay, 10));
-    }
-      // Function to show the add attraction modal
+
+    // Function to show the Add Attraction modal
     function showAddAttractionModal(day) {
-        document.getElementById('add-attraction-modal').style.display = 'flex';
-        
-        // Ensure day is treated as a number
-        day = parseInt(day, 10);
-        console.log("Opening modal for day: " + day);
-        
-        // Set the selected day in the form
+        currentDay = day;
         document.getElementById('selected-day').value = day;
-        
-        // Set the date input to the current date plus (day-1) days
-        const dateInput = document.querySelector('#add-attraction-form input[name="date"]');
-        const currentDate = new Date();
-        currentDate.setDate(currentDate.getDate() + (day - 1));
-        dateInput.value = currentDate.toISOString().split('T')[0];
+        document.getElementById('add-attraction-modal').style.display = 'flex';
     }
-    
-    // Function to close the add attraction modal
+
+    // Function to close the Add Attraction modal
     function closeAddAttractionModal() {
         document.getElementById('add-attraction-modal').style.display = 'none';
     }
-    
+
     // Function to remove an attraction
-    function removeAttraction(uuid) {
+    function removeAttraction(id) {
         if (confirm('Are you sure you want to remove this attraction from your itinerary?')) {
             const form = document.getElementById('remove-attraction-form');
-            form.action = form.action.replace('ID_TO_REPLACE', uuid);
+            form.action = form.action.replace('ID_TO_REPLACE', id);
             form.submit();
         }
     }
+
+    // Function to add a new day
+    function addNewDay() {
+        // Logic will be handled by the controller
+        // This is just a placeholder function for the button
+    }
+
+    // Add all itinerary items to cart
+    // Initialize variables for JavaScript with PHP data
+    document.addEventListener('DOMContentLoaded', function() {
+        const addAllToCartBtn = document.getElementById('add-all-to-cart-btn');
+
+        if (addAllToCartBtn) {
+            addAllToCartBtn.addEventListener('click', function() {
+                // Disable button to prevent multiple clicks
+                addAllToCartBtn.disabled = true;
+                addAllToCartBtn.textContent = 'Adding...';
+                
+                // Get itinerary UUID for direct controller method
+                const itineraryUuid = "{{ $itinerary->uuid }}";
+                
+                // Create a form to submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{{ route('cart.add-itinerary') }}";
+                
+                // Add CSRF token
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                form.appendChild(csrfToken);
+                
+                // Add itinerary UUID
+                const itineraryInput = document.createElement('input');
+                itineraryInput.type = 'hidden';
+                itineraryInput.name = 'itinerary_uuid';
+                itineraryInput.value = itineraryUuid;
+                form.appendChild(itineraryInput);
+                
+                // Add to DOM and submit
+                document.body.appendChild(form);
+                form.submit();
+            });
+        }
+    });
 </script>
 @endpush
 

@@ -125,17 +125,18 @@
                     <span class="text-gray-500 font-medium mr-2">Type:</span>
                     <span class="text-gray-600">{{ $itinerary->type->name ?? 'Custom' }}</span>
                 </div>
-                
-                @if(Auth::check() && $itinerary->user_id != Auth::id())
-                    <form action="{{ route('itinerary.copy', $itinerary->uuid) }}" method="POST" class="mb-4">
-                        @csrf
-                        <button type="submit" class="btn-primary w-full">Copy to My Itineraries</button>
-                    </form>
+                @if (Auth::check())
+                    
+                    @if($itinerary->user_id != Auth::id())
+                        <form action="{{ route('itinerary.copy', $itinerary->uuid) }}" method="POST" class="mb-4">
+                            @csrf
+                            <button type="submit" class="btn-primary w-full">Copy to My Itineraries</button>
+                        </form>
+                    @else()
+                        <a href="{{ route('itinerary.designer', $itinerary->uuid) }}" class="btn-primary w-full block text-center mb-4">Edit Itinerary</a>
+                    @endif
                 @endif
                 
-                @if(Auth::check() && $itinerary->user_id == Auth::id())
-                    <a href="{{ route('itinerary.designer', $itinerary->uuid) }}" class="btn-primary w-full block text-center mb-4">Edit Itinerary</a>
-                @endif
             </div>
             
             <div class="space-y-4 mb-6">
@@ -155,8 +156,13 @@
                 </div>
             </div>
             
-            <a href="#" class="btn-primary w-full block text-center">Export Itinerary</a>
-        </div>
+                @if (Auth::check())
+                    <form action="{{ route('cart.add-itinerary') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="itinerary_uuid" value="{{ $itinerary->uuid }}">
+                        <button type="submit" class="btn-primary w-full block text-center mb-4">Add All to Cart</button>
+                    </form>
+                @endif
     </div>
 </div>
 
@@ -187,6 +193,44 @@
             activeTab.classList.add('bg-primary', 'text-white');
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const addAllToCartBtn = document.getElementById('add-all-to-cart-btn');
+
+        if (addAllToCartBtn) {
+            addAllToCartBtn.addEventListener('click', function() {
+                // Disable button to prevent multiple clicks
+                addAllToCartBtn.disabled = true;
+                addAllToCartBtn.textContent = 'Adding...';
+                
+                // Get itinerary UUID for direct controller method
+                const itineraryUuid = "{{ $itinerary->uuid }}";
+                
+                // Create a form to submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{{ route('cart.add-itinerary') }}";
+                
+                // Add CSRF token
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                form.appendChild(csrfToken);
+                
+                // Add itinerary UUID
+                const itineraryInput = document.createElement('input');
+                itineraryInput.type = 'hidden';
+                itineraryInput.name = 'itinerary_uuid';
+                itineraryInput.value = itineraryUuid;
+                form.appendChild(itineraryInput);
+                
+                // Add to DOM and submit
+                document.body.appendChild(form);
+                form.submit();
+            });
+        }
+    });
 </script>
 @endpush
 
