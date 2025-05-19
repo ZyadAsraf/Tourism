@@ -117,7 +117,7 @@
                         <div>
                             <label class="block text-gray-600 mb-1">Date</label>
                             <input type="date" name="date" class="w-full p-2 border border-gray-200 rounded-md"
-                                required>
+                                required value="{{ date('Y-m-d') }}">
                         </div>
                         <div>
                             <label class="block text-gray-600 mb-1">Number of Guests</label>
@@ -127,6 +127,22 @@
                                 <option value="3">3 Guests</option>
                                 <option value="4">4 Guests</option>
                                 <option value="5">5+ Guests</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">Time</label>
+                            <select name="time" class="w-full p-2 border border-gray-200 rounded-md">
+                                <option value="morning">Morning (9:00 AM)</option>
+                                <option value="afternoon">Afternoon (1:00 PM)</option>
+                                <option value="evening">Evening (5:00 PM)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">Ticket Type</label>
+                            <select name="ticket_type_id" class="w-full p-2 border border-gray-200 rounded-md" required>
+                                @foreach($ticketTypes as $ticketType)
+                                    <option value="{{ $ticketType->id }}">{{ $ticketType->Title }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>

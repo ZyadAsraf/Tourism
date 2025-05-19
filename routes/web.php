@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cart & Trip Plan
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add/{slug}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/mass-add', [CartController::class, 'massAdd'])->name('cart.mass-add');
     Route::post('/cart/update/{slug}', [CartController::class, 'update'])->name('cart.update');
     Route::get('/cart/remove/{slug}', [CartController::class, 'remove'])->name('cart.remove');
     Route::get('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');

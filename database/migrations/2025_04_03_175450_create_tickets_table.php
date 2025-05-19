@@ -24,7 +24,6 @@ return new class extends Migration
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignUuid('AttractionStaffId')
                 ->nullable()
-                ->default('610c4d52-38fa-4540-9ffa-d92716dcac08')
                 ->constrained('users', 'id')
                 ->restrictOnDelete();
             $table->foreignId('TicketTypesId')->constrained('ticket_types', 'id')->restrictOnDelete();
