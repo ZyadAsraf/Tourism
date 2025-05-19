@@ -19,12 +19,10 @@ return new class extends Migration
             $table->date('VisitDate');
             $table->float('TotalCost');
             $table->string('Attraction');
-            $table->foreign('Attraction')->references('AttractionName')->on('attractions')->onDelete('cascade');
             $table->string('state')->nullable();
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignUuid('AttractionStaffId')
                 ->nullable()
-                ->default('610c4d52-38fa-4540-9ffa-d92716dcac08')
                 ->constrained('users', 'id')
                 ->restrictOnDelete();
             $table->foreignId('TicketTypesId')->constrained('ticket_types', 'id')->restrictOnDelete();
