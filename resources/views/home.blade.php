@@ -113,6 +113,161 @@
     </div>
 </section>
 
+<!-- Most Liked Itineraries Section -->
+<section class="container mx-auto px-4 mb-16">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-700">Most Popular Itineraries</h2>
+            <p class="text-gray-500 mt-2">Top-rated travel plans from our community</p>
+        </div>
+        <a href="{{ route('itineraries.index') }}" class="text-primary font-medium hover:underline flex items-center">
+            View All
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        @forelse($mostLikedItineraries as $itinerary)
+            <div class="card">
+                <div class="relative bg-gray-100 h-48 flex items-center justify-center">
+                    @if(isset($itinerary->groupedItems[1][0]['image']))
+                        <img src="{{ $itinerary->groupedItems[1][0]['image'] }}" alt="{{ $itinerary->name }}" class="w-full h-full object-cover opacity-70">
+                    @endif
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-gray-700 opacity-60"></div>
+                    <div class="absolute bottom-4 left-4 right-4 text-white">
+                        <p class="font-bold">{{ $itinerary->name }}</p>
+                        <p class="text-sm">{{ $itinerary->type->name }}</p>
+                    </div>
+                    <div class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
+                        <p class="text-gray-600 font-medium text-sm">
+                            {{ count($itinerary->groupedItems) }} days
+                        </p>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-bold text-gray-600">{{ $itinerary->name }}</h3>
+                        <div class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-sm text-gray-600">{{ $itinerary->likes }}</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4 line-clamp-2">{{ $itinerary->description }}</p>
+                    <div class="flex justify-between items-center">
+                        <div class="space-y-1">
+                            <div class="flex items-center text-sm text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {{ $itinerary->stats['durationText'] }}
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                {{ $itinerary->stats['totalCost'] }}£E
+                            </div>
+                        </div>
+                        <a href="{{ route('itineraries.show', $itinerary->uuid) }}" class="btn-primary">View Plan</a>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="col-span-3 text-center py-12">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h2 class="text-2xl font-bold text-gray-600 mb-2">No popular itineraries yet</h2>
+                <p class="text-gray-500 mb-6">Be the first to create and share your travel plans with the community.</p>
+                <a href="{{ route('itinerary.newItinerary') }}" class="btn-primary">Create Itinerary</a>
+            </div>
+        @endforelse
+    </div>
+</section>
+
+<!-- Official Itineraries Section -->
+<section class="container mx-auto px-4 mb-16">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-700">Official Travel Plans</h2>
+            <p class="text-gray-500 mt-2">Curated itineraries by our Egypt tourism experts</p>
+        </div>
+        <a href="{{ route('itineraries.index') }}" class="text-primary font-medium hover:underline flex items-center">
+            View All
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        @forelse($officialItineraries as $itinerary)
+            <div class="card border-2 border-primary">
+                <div class="relative bg-gray-100 h-48 flex items-center justify-center">
+                    @if(isset($itinerary->groupedItems[1][0]['image']))
+                        <img src="{{ $itinerary->groupedItems[1][0]['image'] }}" alt="{{ $itinerary->name }}" class="w-full h-full object-cover opacity-70">
+                    @endif
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-gray-700 opacity-60"></div>
+                    <div class="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full">
+                        <p class="text-xs font-bold">Official</p>
+                    </div>
+                    <div class="absolute bottom-4 left-4 right-4 text-white">
+                        <p class="font-bold">{{ $itinerary->name }}</p>
+                        <p class="text-sm">{{ $itinerary->type->name }}</p>
+                    </div>
+                    <div class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
+                        <p class="text-gray-600 font-medium text-sm">
+                            {{ count($itinerary->groupedItems) }} days
+                        </p>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-bold text-gray-600">{{ $itinerary->name }}</h3>
+                        <div class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                            </svg>
+                            <span class="text-sm font-medium text-primary">Verified</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4 line-clamp-2">{{ $itinerary->description }}</p>
+                    <div class="flex justify-between items-center">
+                        <div class="space-y-1">
+                            <div class="flex items-center text-sm text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {{ $itinerary->stats['durationText'] }}
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                {{ $itinerary->stats['totalCost'] }}£E
+                            </div>
+                        </div>
+                        <a href="{{ route('itineraries.show', $itinerary->uuid) }}" class="btn-primary">View Plan</a>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="col-span-3 text-center py-12">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h2 class="text-2xl font-bold text-gray-600 mb-2">No official itineraries yet</h2>
+                <p class="text-gray-500 mb-6">Our team is working on curating the best travel experiences for you.</p>
+                <a href="{{ route('attractions.index') }}" class="btn-primary">Explore Attractions</a>
+            </div>
+        @endforelse
+    </div>
+</section>
+
 <!-- Experience Egypt Section -->
 <section class="py-16 bg-gray-50 mb-16">
     <div class="container mx-auto px-4">
@@ -353,4 +508,8 @@
         </div>
     </div>
 </section>
+
+
+
+
 @endsection

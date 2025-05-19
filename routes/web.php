@@ -5,12 +5,17 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\ArticlesController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home'); 
 // Public Articles routes
 Route::resource('articles', ArticlesController::class)->only(['index', 'show']);
+
+// Public itineraries
+Route::get('/itineraries', [ItineraryController::class, 'index'])->name('itineraries.index');
+Route::get('/itineraries/{uuid}', [ItineraryController::class, 'show'])->name('itineraries.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     
@@ -29,18 +34,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/search', [AttractionController::class, 'search'])->name('attractions.search');
 
     // Cart & Trip Plan
-    Route::get('/trip-plan', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/trip-plan/add/{slug}', [CartController::class, 'add'])->name('cart.add');
-    Route::post('/trip-plan/update/{slug}', [CartController::class, 'update'])->name('cart.update');
-    Route::get('/trip-plan/remove/{slug}', [CartController::class, 'remove'])->name('cart.remove');
-    Route::get('/trip-plan/clear', [CartController::class, 'clear'])->name('cart.clear');
-    Route::get('/trip-plan/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-    Route::post('/trip-plan/process-checkout', [CartController::class, 'processCheckout'])->name('cart.process-checkout');
-    Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
-    Route::get('/trip-plan/confirmation', [CartController::class, 'confirmation'])->name('cart.confirmation');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{slug}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/add-itinerary', [CartController::class, 'addItinerary'])->name('cart.add-itinerary');
+    Route::post('/cart/update/{slug}', [CartController::class, 'update'])->name('cart.update');
+    Route::get('/cart/remove/{slug}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::get('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::post('/cart/process-checkout', [CartController::class, 'processCheckout'])->name('cart.process-checkout');
+    Route::post('/cart/confirmation', [CartController::class, 'store'])->name('cart.store');
+    Route::get('/cart/confirmation', [CartController::class, 'confirmation'])->name('cart.confirmation');
 
     // Stripe 
-    Route::post('/trip-plan/confirmation', [CartController::class, 'store'])->name('cart.store');
+    Route::post('/cart/confirmation', [CartController::class, 'store'])->name('cart.store');
+    
+    // Itinerary Designer Routes
+    Route::get('/itinerary/designer', [ItineraryController::class, 'createNewItinerary'])->name('itinerary.newItinerary');
+    Route::get('/itinerary/designer/{uuid}', [ItineraryController::class, 'designer'])->name('itinerary.designer');
+    Route::post('/itinerary/add-attraction', [ItineraryController::class, 'addAttraction'])->name('itinerary.add-attraction');
+    Route::post('/itinerary/update-attraction/{uuid}', [ItineraryController::class, 'updateAttraction'])->name('itinerary.update-attraction');
+    Route::delete('/itinerary/remove-attraction/{uuid}', [ItineraryController::class, 'removeAttraction'])->name('itinerary.remove-attraction');
+    Route::post('/itinerary/update', [ItineraryController::class, 'updateItinerary'])->name('itinerary.update');
+    Route::get('/itinerary/copy/{uuid}', [ItineraryController::class, 'copyItinerary'])->name('itinerary.copy');
+    
+    // Public Itineraries
+    Route::get('/itineraries', [ItineraryController::class, 'index'])->name('itineraries.index');
+    Route::get('/my-itineraries', [ItineraryController::class, 'userItineraries'])->name('itineraries.my-itineraries');
+    Route::get('/itineraries/{uuid}', [ItineraryController::class, 'show'])->name('itineraries.show');
 });
 
 // Laravel Auth Routes 

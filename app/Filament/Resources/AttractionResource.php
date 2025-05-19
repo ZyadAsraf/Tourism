@@ -72,6 +72,15 @@ class AttractionResource extends Resource
                 ->label('Location Link')
                 ->url()
                 ->required(),
+                
+                TextInput::make('expected_duration')
+                ->label('Expected Duration (minutes)')
+                ->numeric()
+                ->integer()
+                ->minValue(1)
+                ->rules('nullable')
+                ->suffix('minutes')
+                ->helperText('Approximate time visitors spend at this attraction'),
 
                 FileUpload::make('Img')
                 ->required()
