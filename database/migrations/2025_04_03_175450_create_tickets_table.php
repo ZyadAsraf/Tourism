@@ -19,7 +19,6 @@ return new class extends Migration
             $table->date('VisitDate');
             $table->float('TotalCost');
             $table->string('Attraction');
-            $table->foreign('Attraction')->references('AttractionName')->on('attractions')->onDelete('cascade');
             $table->string('state')->nullable();
             $table->foreignUuid('TouristId')->constrained('users', 'id')->restrictOnDelete();
             $table->foreignUuid('AttractionStaffId')
