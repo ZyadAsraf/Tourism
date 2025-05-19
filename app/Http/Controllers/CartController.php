@@ -37,19 +37,38 @@ class CartController extends Controller
         
         foreach ($cartItems as $item) {
             $attraction = Attraction::find($item->attraction_id);
-            if ($attraction && isset($allAttractions[$attraction->slug])) {
-                $attractionData = $allAttractions[$attraction->slug];
-                $attractionData['quantity'] = $item->quantity;
-                $attractionData['date'] = $item->date;
-                $attractionData['time'] = $item->time;
-                $attractionData['ticket_type_id'] = $item->ticket_type_id;
+            if ($attraction) {
+                // Try to find attraction data by slug or AttractionName
+                $attractionSlug = $attraction->slug ?? $attraction->AttractionName ?? null;
+                $attractionData = null;
                 
-                // Calculate subtotal from attraction price
-                $subtotal = $attraction->price * $item->quantity;
-                $attractionData['subtotal'] = $subtotal;
+                // Check direct match
+                if ($attractionSlug && isset($allAttractions[$attractionSlug])) {
+                    $attractionData = $allAttractions[$attractionSlug];
+                } else {
+                    // Search through attractions for a match
+                    foreach ($allAttractions as $slug => $data) {
+                        if ($data['id'] == $attraction->id) {
+                            $attractionData = $data;
+                            break;
+                        }
+                    }
+                }
                 
-                $attractions[] = $attractionData;
-                $total += $subtotal;
+                // If we found the attraction data, add it to the cart
+                if ($attractionData) {
+                    $attractionData['quantity'] = $item->quantity;
+                    $attractionData['date'] = $item->date;
+                    $attractionData['time'] = $item->time;
+                    $attractionData['ticket_type_id'] = $item->ticket_type_id;
+                    
+                    // Calculate subtotal from attraction price
+                    $subtotal = $attractionData['price'] * $item->quantity;
+                    $attractionData['subtotal'] = $subtotal;
+                    
+                    $attractions[] = $attractionData;
+                    $total += $subtotal;
+                }
             }
         }
 
@@ -79,7 +98,7 @@ class CartController extends Controller
         ]);
         
         // Find the attraction
-        $attraction = Attraction::where('slug', $slug)->first();
+        $attraction = Attraction::where('AttractionName', $slug)->first();
         
         if (!$attraction) {
             return redirect()->route('cart.index')->with('error', 'Attraction not found.');
@@ -93,9 +112,12 @@ class CartController extends Controller
             ->where('ticket_type_id', $validated['ticket_type_id'])
             ->first();
         
+        $price = $attraction->price; // Get attraction price
+
         if ($cartItem) {
             // Update existing cart item
             $cartItem->quantity += $validated['quantity'];
+            $cartItem->subtotal = $price * $cartItem->quantity; // Recalculate subtotal
             $cartItem->save();
         } else {
             // Create new cart item
@@ -104,8 +126,11 @@ class CartController extends Controller
                 'attraction_id' => $attraction->id,
                 'ticket_type_id' => $validated['ticket_type_id'],
                 'quantity' => $validated['quantity'],
+                'price' => $price, // Store price
+                'subtotal' => $price * $validated['quantity'], // Calculate and store subtotal
                 'date' => $validated['date'],
                 'time' => $validated['time'],
+                'uuid' => Str::uuid(), // Add UUID if not already present
             ]);
         }
 
@@ -117,6 +142,14 @@ class CartController extends Controller
      */
     public function massAdd(Request $request)
     {
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please login to add attractions to your Cart.',
+            ], 401);
+        }
+
         // Validate request
         $validated = $request->validate([
             'items' => 'required|array',
@@ -137,56 +170,35 @@ class CartController extends Controller
                 continue;
             }
             
-            if (!Auth::check()) {
-                // For guests, use session storage
-                $cart = Session::get('cart', []);
-                $slug = $attraction->slug;
-                
-                // Add or update item in cart
-                if (isset($cart[$slug])) {
-                    $cart[$slug]['quantity'] += $item['quantity'];
-                } else {
-                    $cart[$slug] = [
-                        'quantity' => $item['quantity'],
-                        'date' => $item['date'],
-                        'time' => $item['time'],
-                        'uuid' => Str::uuid(),
-                        'ticket_type_id' => $item['ticket_type_id'],
-                    ];
-                }
-                
-                // Save cart back to session
-                Session::put('cart', $cart);
-            } else {
-                // For authenticated users, store in database
-                $price = $attraction->price;
-                
-                // Check if the attraction is already in the user's cart
-                $cartItem = CartItem::where('user_id', Auth::id())
-                    ->where('attraction_id', $attraction->id)
-                    ->where('date', $item['date'])
-                    ->where('time', $item['time'])
-                    ->first();
+            // For authenticated users, store in database
+            $price = $attraction->price;
+            
+            // Check if the attraction is already in the user's cart
+            $cartItem = CartItem::where('user_id', Auth::id())
+                ->where('attraction_id', $attraction->id)
+                ->where('date', $item['date'])
+                ->where('time', $item['time'])
+                ->where('ticket_type_id', $item['ticket_type_id']) // Added ticket_type_id condition
+                ->first();
                     
-                if ($cartItem) {
-                    // Update existing cart item
-                    $cartItem->quantity += $item['quantity'];
-                    $cartItem->subtotal = $price * $cartItem->quantity;
-                    $cartItem->save();
-                } else {
-                    // Create new cart item
-                    CartItem::create([
-                        'user_id' => Auth::id(),
-                        'attraction_id' => $attraction->id,
-                        'ticket_type_id' => $item['ticket_type_id'],
-                        'quantity' => $item['quantity'],
-                        'price' => $price,
-                        'subtotal' => $price * $item['quantity'],
-                        'date' => $item['date'],
-                        'time' => $item['time'],
-                        'uuid' => Str::uuid(),
-                    ]);
-                }
+            if ($cartItem) {
+                // Update existing cart item
+                $cartItem->quantity += $item['quantity'];
+                $cartItem->subtotal = $price * $cartItem->quantity;
+                $cartItem->save();
+            } else {
+                // Create new cart item
+                CartItem::create([
+                    'user_id' => Auth::id(),
+                    'attraction_id' => $attraction->id,
+                    'ticket_type_id' => $item['ticket_type_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $price,
+                    'subtotal' => $price * $item['quantity'],
+                    'date' => $item['date'],
+                    'time' => $item['time'],
+                    'uuid' => Str::uuid(),
+                ]);
             }
             
             $addedItems++;
@@ -204,46 +216,61 @@ class CartController extends Controller
      */
     public function update(Request $request, $slug = null, $uuid = null)
     {
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please login to update your Cart.');
+        }
+
         $validated = $request->validate([
             'quantity' => 'required|integer|min:1',
         ]);
 
-        if (Auth::check()) {
-            // For authenticated users, update from database
-            // If UUID is provided, use it. Otherwise, find by attraction slug
-            $query = CartItem::where('user_id', Auth::id());
-            
-            if ($uuid) {
-                $query->where('uuid', $uuid);
-            } else {
-                $attraction = Attraction::where('slug', $slug)->first();
-                if (!$attraction) {
-                    return redirect()->route('cart.index')->with('error', 'Attraction not found.');
-                }
-                $query->where('attraction_id', $attraction->id);
+        // For authenticated users, update from database
+        // If UUID is provided, use it. Otherwise, find by attraction slug
+        $query = CartItem::where('user_id', Auth::id());
+        
+        if ($uuid) {
+            $query->where('uuid', $uuid);
+        } elseif ($slug) {
+            $attraction = Attraction::where('AttractionName', $slug)->first();
+            if (!$attraction) {
+                return redirect()->route('cart.index')->with('error', 'Attraction not found.');
             }
-            
-            $cartItem = $query->first();
-            
-            if ($cartItem) {
-                $cartItem->quantity = $validated['quantity'];
-                $cartItem->subtotal = $cartItem->price * $validated['quantity'];
-                $cartItem->save();
-                
-                return redirect()->route('cart.index')->with('success', 'Cart updated!');
-            }
+            $query->where('attraction_id', $attraction->id);
         } else {
-            // For guests, use session storage
-            $cart = Session::get('cart', []);
-
-            if (isset($cart[$slug])) {
-                $cart[$slug]['quantity'] = $validated['quantity'];
-
-                // Save cart back to session
-                Session::put('cart', $cart);
-
-                return redirect()->route('cart.index')->with('success', 'Cart updated!');
+            // Neither slug nor UUID provided
+            return redirect()->route('cart.index')->with('error', 'Attraction identifier missing.');
+        }
+        
+        $cartItem = $query->first();
+        
+        if ($cartItem) {
+            // Get attraction data from AttractionController to get the correct price
+            $attraction = Attraction::find($cartItem->attraction_id);
+            if (!$attraction) {
+                return redirect()->route('cart.index')->with('error', 'Could not find attraction for cart item.');
             }
+            
+            // Get price from AttractionController which has the correct price data
+            $attractionController = new AttractionController();
+            $allAttractions = $attractionController->getAttractions();
+            
+            // Try to get price from attractions data
+            $price = null;
+            if (isset($allAttractions[$slug])) {
+                $price = $allAttractions[$slug]['price'];
+            } else {
+                // Fallback to the stored price or default
+                $price = $cartItem->price ?? 0;
+            }
+            if (!$price) {
+                return redirect()->route('cart.index')->with('error', 'Could not determine price for cart item.');
+            }
+            
+            $cartItem->quantity = $validated['quantity'];
+            $cartItem->save();
+            
+            return redirect()->route('cart.index')->with('success', 'Cart updated!');
         }
 
         return redirect()->route('cart.index')->with('error', 'Attraction not found in your Cart.');
@@ -254,47 +281,35 @@ class CartController extends Controller
      */
     public function remove($identifierParam)
     {
-        if (Auth::check()) {
-            // For authenticated users, remove from database
-            // First check if $identifierParam is a UUID
-            $cartItem = CartItem::where('user_id', Auth::id())
-                               ->where('uuid', $identifierParam)
-                               ->first();
-            
-            if (!$cartItem) {
-                // Try to find by attraction slug
-                $attraction = Attraction::where('slug', $identifierParam)->first();
-                
-                if ($attraction) {
-                    $cartItem = CartItem::where('user_id', Auth::id())
-                                       ->where('attraction_id', $attraction->id)
-                                       ->first();
-                }
-            }
-            
-            if ($cartItem) {
-                $cartItem->delete();
-                return redirect()->route('cart.index')->with('success', 'Attraction removed from your Cart.');
-            }
-        } else {
-            // For guests, use session
-            $cart = Session::get('cart', []);
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please login to modify your Cart.');
+        }
 
-            // Try the parameter as a slug first
-            if (isset($cart[$identifierParam])) {
-                unset($cart[$identifierParam]);
-                Session::put('cart', $cart);
-                return redirect()->route('cart.index')->with('success', 'Attraction removed from your Cart.');
-            }
+        // For authenticated users, remove from database
+        // First check if $identifierParam is a UUID
+        $cartItem = CartItem::where('user_id', Auth::id())
+                           ->first();
+        
+        if (!$cartItem) {
+            // Try to find by attraction slug - This might remove multiple if date/time/ticket_type differ.
+            // For simplicity, we'll assume slug is unique enough for this direct removal or that specific item removal is done by UUID.
+            // If more specific removal by slug + other params is needed, this logic should be expanded.
+            $attraction = Attraction::where('slug', $identifierParam)->first();
             
-            // If not found as a slug, check if it's a UUID
-            foreach ($cart as $slug => $item) {
-                if (isset($item['uuid']) && $item['uuid'] === $identifierParam) {
-                    unset($cart[$slug]);
-                    Session::put('cart', $cart);
-                    return redirect()->route('cart.index')->with('success', 'Attraction removed from your Cart.');
-                }
+            if ($attraction) {
+                // This will remove the first matching item by attraction_id.
+                // If multiple distinct cart items exist for the same attraction (e.g. different dates/times),
+                // consider requiring UUID for precise deletion or adding more parameters.
+                $cartItem = CartItem::where('user_id', Auth::id())
+                                   ->where('attraction_id', $attraction->id)
+                                   ->first(); // Or specify more conditions if needed
             }
+        }
+        
+        if ($cartItem) {
+            $cartItem->delete();
+            return redirect()->route('cart.index')->with('success', 'Attraction removed from your Cart.');
         }
 
         return redirect()->route('cart.index')->with('error', 'Attraction not found in your Cart.');
@@ -305,13 +320,13 @@ class CartController extends Controller
      */
     public function clear()
     {
-        if (Auth::check()) {
-            // For authenticated users, clear from database
-            CartItem::where('user_id', Auth::id())->delete();
-        } else {
-            // For guests, clear from session
-            Session::forget('cart');
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please login to clear your Cart.');
         }
+
+        // For authenticated users, clear from database
+        CartItem::where('user_id', Auth::id())->delete();
 
         return redirect()->route('cart.index')->with('success', 'Your Cart has been cleared.');
     }
@@ -321,62 +336,49 @@ class CartController extends Controller
      */
     public function checkout()
     {
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please login to proceed to checkout.');
+        }
+
         $attractions = [];
         $total = 0;
         $attractionController = new AttractionController();
-        $allAttractions = $attractionController->getAttractions();
+        $allAttractions = $attractionController->getAttractions(); // This fetches detailed attraction data
         
-        if (Auth::check()) {
-            // For authenticated users, get from database
-            $dbCartItems = CartItem::where('user_id', Auth::id())->get();
-            
-            if ($dbCartItems->isEmpty()) {
-                return redirect()->route('cart.index')->with('error', 'Your Cart is empty. Add some attractions before checkout.');
-            }
-            
-            foreach ($dbCartItems as $item) {
-                $attraction = Attraction::find($item->attraction_id);
-                if ($attraction && isset($allAttractions[$attraction->slug])) {
-                    $attractionData = $allAttractions[$attraction->slug];
-                    $attractionData['quantity'] = $item->quantity;
-                    $attractionData['date'] = $item->date;
-                    $attractionData['time'] = $item->time;
-                    $attractionData['subtotal'] = $item->subtotal;
-                    $attractionData['uuid'] = $item->uuid;
-                    $attractionData['ticket_type_id'] = $item->ticket_type_id;
-                    
-                    $attractions[] = $attractionData;
-                    $total += $item->subtotal;
-                }
-            }
-        } else {
-            // For guests, get from session
-            $sessionCartItems = Session::get('cart', []);
-            
-            if (empty($sessionCartItems)) {
-                return redirect()->route('cart.index')->with('error', 'Your Cart is empty. Add some attractions before checkout.');
-            }
-            
-            foreach ($sessionCartItems as $slug => $item) {
-                if (isset($allAttractions[$slug])) {
-                    $attraction = $allAttractions[$slug];
-                    $attraction['quantity'] = $item['quantity'];
-                    $attraction['date'] = $item['date'];
-                    $attraction['time'] = $item['time'];
-                    $attraction['subtotal'] = $attraction['price'] * $item['quantity'];
-                    $attraction['uuid'] = $item['uuid'] ?? Str::uuid();
-                    $attraction['ticket_type_id'] = $item['ticket_type_id'] ?? 1;
-                    
-                    $attractions[] = $attraction;
-                    $total += $attraction['subtotal'];
-                }
+        // For authenticated users, get from database
+        $dbCartItems = CartItem::where('user_id', Auth::id())->get();
+        
+        if ($dbCartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Your Cart is empty. Add some attractions before checkout.');
+        }
+        
+        foreach ($dbCartItems as $item) {
+            $attractionModel = Attraction::find($item->attraction_id); // Get the base attraction model for slug
+            if ($attractionModel && isset($allAttractions[$attractionModel->slug])) {
+                $attractionData = $allAttractions[$attractionModel->slug]; // Use pre-fetched detailed data
+                $attractionData['quantity'] = $item->quantity;
+                $attractionData['date'] = $item->date;
+                $attractionData['time'] = $item->time;
+                $attractionData['ticket_type_id'] = $item->ticket_type_id;
+                $attractionData['cart_item_uuid'] = $item->uuid; // Pass UUID for potential updates/removals on checkout page
+
+                // Use stored price and subtotal from CartItem
+                $price = $item->price ?? $attractionModel->price; // Fallback to attraction's current price if not stored
+                $subtotal = $item->subtotal ?? ($price * $item->quantity); // Recalculate if not stored
+
+                $attractionData['price'] = $price;
+                $attractionData['subtotal'] = $subtotal;
+                
+                $attractions[] = $attractionData;
+                $total += $subtotal;
             }
         }
     
         $ticketTypes = TicketType::all();
     
         return view('cart.checkout', [
-            'attractions' => $attractions, // Passed as an array
+            'attractions' => $attractions, 
             'total' => $total,
             'categories' => $attractionController->getCategories(),
             'ticketTypes' => $ticketTypes,
@@ -388,111 +390,67 @@ class CartController extends Controller
      */
     public function processCheckout(Request $request)
     {
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please login to process checkout.');
+        }
+
         // Validate common fields
         $validated = $request->validate([
             'PhoneNumber' => 'required|string',
             'state' => 'required|string',
-            'TicketTypesId' => 'required|exists:ticket_types,id', 
+            // 'TicketTypesId' => 'required|exists:ticket_types,id', // This seems to be a general field, but tickets are per item.
+                                                                    // Ticket type should be derived from cart items.
+            // We expect items to be submitted, or we process existing cart items.
+            // If items are submitted from checkout page (e.g. quantities changed), validation is needed here.
+            // For now, assuming we process the existing cart.
         ]);
 
         $ticketsCreated = 0;
         
-        // Fetch all attractions to verify they exist
-        $attractionController = new AttractionController();
-        $allAttractions = $attractionController->getAttractions();
-        
-        if (Auth::check()) {
-            // For authenticated users, get items from database
-            $cartItems = CartItem::where('user_id', Auth::id())->get();
-            
-            // Create a ticket for each attraction in the cart
-            foreach ($cartItems as $item) {
-                try {
-                    $attraction = Attraction::find($item->attraction_id);
-                    
-                    if (!$attraction || !isset($allAttractions[$attraction->slug])) {
-                        Log::error("Attraction with ID {$item->attraction_id} not found in attractions list");
-                        continue;
-                    }
-                    
-                    // Create a new ticket for this attraction
-                    $ticketData = [
-                        'TouristId' => Auth::id(),
-                        'PhoneNumber' => $validated['PhoneNumber'],
-                        'BookingTime' => now(),
-                        'Quantity' => $item->quantity,
-                        'VisitDate' => $item->date,
-                        'TimeSlot' => $item->time,
-                        'TotalCost' => $item->subtotal,
-                        'state' => $validated['state'],
-                        'Attraction' => $attraction->slug,
-                        'TicketTypesId' => $item->ticket_type_id ?? $validated['TicketTypesId'],
-                    ];
-                    
-                    Ticket::create($ticketData);
-                    $ticketsCreated++;
-                } catch (\Exception $e) {
-                    Log::error("Failed to create ticket for attraction ID {$item->attraction_id}: " . $e->getMessage());
-                    return redirect()->route('cart.index')
-                        ->with('error', 'Failed to create ticket: ' . $e->getMessage());
-                }
-            }
-            
-            // Clear the cart after successful checkout if tickets were created
-            if ($ticketsCreated > 0) {
-                CartItem::where('user_id', Auth::id())->delete();
-            }
-        } else {
-            // For guests, use session storage
-            $sessionCartItems = Session::get('cart', []);
-            
-            // Create a ticket for each attraction in the cart
-            foreach ($sessionCartItems as $slug => $item) {
-                try {
-                    // Check if the attraction exists in our list
-                    if (!isset($allAttractions[$slug])) {
-                        Log::error("Attraction with slug {$slug} not found in attractions list");
-                        continue;
-                    }
-                
-                    // Create a new ticket for this attraction
-                    $ticketData = [
-                        'TouristId' => Auth::id() ?? 0, // Guest user
-                        'PhoneNumber' => $validated['PhoneNumber'],
-                        'BookingTime' => now(),
-                        'Quantity' => $item['quantity'],
-                        'VisitDate' => $item['date'],
-                        'TimeSlot' => $item['time'],
-                        'TotalCost' => $allAttractions[$slug]['price'] * $item['quantity'],
-                        'state' => $validated['state'],
-                        'Attraction' => $slug,
-                        'TicketTypesId' => $item['ticket_type_id'] ?? $validated['TicketTypesId'],
-                    ];
-                    
-                    Ticket::create($ticketData);
-                    $ticketsCreated++;
-                } catch (\Exception $e) {
-                    Log::error("Failed to create ticket for attraction with slug {$slug}: " . $e->getMessage());
-                    return redirect()->route('cart.index')
-                        ->with('error', 'Failed to create ticket for attraction: ' . $e->getMessage());
-                }
-            }
-            
-            // Clear the session cart after successful checkout if tickets were created
-            if ($ticketsCreated > 0) {
-                Session::forget('cart');
-            }
-        }
+        // For authenticated users, get items from database
+        $cartItems = CartItem::where('user_id', Auth::id())->get();
 
-        // Redirect based on the result
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
+            
+        // Create a ticket for each cart item
+        foreach ($cartItems as $item) {
+            $attraction = Attraction::find($item->attraction_id);
+            if (!$attraction) {
+                Log::error("Checkout: Attraction ID {$item->attraction_id} not found for User ID " . Auth::id());
+                continue; // Skip this item
+            }
+            // Create Ticket
+            // Get current price from attraction model
+            $currentPrice = $attraction->price;
+            
+            Ticket::create([
+                'TouristId' => Auth::id(),
+                'Attraction' => $item->attraction_id,
+                'TicketTypesId' => $item->ticket_type_id, 
+                'Quantity' => $item->quantity,
+                'BookingTime' => now(),
+                'TotalCost' => $currentPrice * $item->quantity, // Using price directly from attraction
+                'VisitDate' => $item->date,
+                'TimeSlot' => $item->time,
+                'PhoneNumber' => $validated['PhoneNumber'],
+                'state' => $validated['state'],
+            ]);
+            $ticketsCreated++;
+        }
+            
+        // Clear the cart after successful checkout if tickets were created
         if ($ticketsCreated > 0) {
-            // Clear the cart after successful checkout
-            Session::forget('cart');
+            CartItem::where('user_id', Auth::id())->delete(); // Clear user's cart
+            // Session::forget('cart'); // This was for guests, remove
             return redirect()->route('cart.confirmation')
                 ->with('success', 'Your bookings are complete! Created ' . $ticketsCreated . ' tickets.');
-            } else {
+        } else {
+            // This case implies cart was not empty, but no tickets were created (e.g. all attractions not found)
             return redirect()->route('cart.index')
-                ->with('error', 'Failed to create tickets. Cart data: ' . json_encode($cartItems));
+                         ->with('error', 'Could not process your booking. Please try again or contact support.');
         }
     }
 
@@ -515,16 +473,10 @@ class CartController extends Controller
     {
         if (Auth::check()) {
             // For authenticated users, count from database
-            return CartItem::where('user_id', Auth::id())->sum('quantity');
-        } else {
-            // For guests, count from session
-            $cart = Session::get('cart', []);
-            $count = 0;
-            foreach ($cart as $item) {
-                $count += $item['quantity'] ?? 1;
-            }
-            return $count;
+            return CartItem::where('user_id', Auth::id())->count();
         }
+        // For guests, count is 0 as they can't have a cart
+        return 0;
     }
 
     /**
