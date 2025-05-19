@@ -306,38 +306,6 @@ public function search(Request $request)
     ]);
 }
 
-
-
-
-// public function processBooking(Request $request, $attraction)
-// {
-//     // In a real app, this would validate and save the booking and payment details to a database
-    
-//     // Validate payment details
-//     $validated = $request->validate([
-//         'payment_method' => 'required|string',
-//         'date' => 'required|date',
-//         'time' => 'required',
-//         'guests' => 'required|integer|min:1',
-//         // Add more validation rules for payment details based on the selected payment method
-//         'card_number' => 'required_if:payment_method,credit_card',
-//         'expiry_date' => 'required_if:payment_method,credit_card',
-//         'cvv' => 'required_if:payment_method,credit_card',
-//         'cardholder_name' => 'required_if:payment_method,credit_card',
-//         'country' => 'required',
-//         'address' => 'required',
-//         'city' => 'required',
-//         'postal_code' => 'required',
-//         'terms' => 'required',
-//     ]);
-    
-//     // Process payment (in a real app, this would integrate with a payment gateway)
-//     // For now, just simulate a successful payment
-    
-//     // Redirect to confirmation page with success message
-//     return redirect()->route('attractions.show', $attraction)->with('success', 'Your booking has been confirmed! Payment was successful. Please check your email for confirmation details.');
-// }
-
 public function reviews($slug)
 {
     $attractions = $this->getAttractions();
