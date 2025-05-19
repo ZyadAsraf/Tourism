@@ -110,7 +110,7 @@
 
         <div class="lg:col-span-1">
             <div class="card p-6 sticky top-4">
-                <h2 class="text-xl font-bold mb-4 text-gray-600">Add to Your Trip</h2>
+                <h2 class="text-xl font-bold mb-4 text-gray-600">Add to Your Cart</h2>
                 <form action="{{ route('cart.add', $attraction['slug']) }}" method="POST">
                     @csrf
                     <div class="space-y-4 mb-6">
@@ -118,15 +118,6 @@
                             <label class="block text-gray-600 mb-1">Date</label>
                             <input type="date" name="date" class="w-full p-2 border border-gray-200 rounded-md"
                                 required>
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">Time</label>
-                            <select name="time" class="w-full p-2 border border-gray-200 rounded-md" required>
-                                <option value="">Select a time</option>
-                                <option value="morning">Morning (9:00 AM)</option>
-                                <option value="afternoon">Afternoon (1:00 PM)</option>
-                                <option value="evening">Evening (5:00 PM)</option>
-                            </select>
                         </div>
                         <div>
                             <label class="block text-gray-600 mb-1">Number of Guests</label>
@@ -153,11 +144,14 @@
                             guests</p>
                     </div>
 
-                    <button type="submit" class="btn-primary w-full mb-4">Add to Trip Plan</button>
+                    <button type="submit" class="btn-primary w-full mb-4">Add to Cart</button>
 
                     <div class="flex justify-between mt-4">
-                        <a href="{{ route('cart.index') }}" class="text-primary hover:underline">View Trip Plan</a>
+                        <a href="{{ route('cart.index') }}" class="text-primary hover:underline">View Cart</a>
                         
+                        @auth
+                            <button type="button" onclick="showAddToItineraryModal()" class="text-primary hover:underline">Add to Itinerary</button>
+                        @endauth
                     </div>
 
                     @guest
@@ -635,6 +629,92 @@
             </div>
         </div>
     @endif
+
+    <!-- Add to Itinerary Modal -->
+    @auth
+    <div id="add-to-itinerary-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-600">Add to Itinerary</h2>
+                <button onclick="closeAddToItineraryModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <form action="{{ route('itinerary.add-attraction') }}" method="POST" id="add-to-itinerary-form">
+                @csrf
+                <input type="hidden" name="attraction_id" value="{{ $attraction['id'] }}">
+                <input type="hidden" name="day" value="1"> <!-- Default day value -->
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-600 mb-1">Select Itinerary</label>
+                        <select name="itinerary_uuid" class="w-full p-2 border border-gray-200 rounded-md" required>
+                            @forelse($userItineraries as $itinerary)
+                                <option value="{{ $itinerary->uuid }}">{{ $itinerary->name }}</option>
+                            @empty
+                                <option value="">Create new itinerary</option>
+                            @endforelse
+                        </select>
+                        @if($userItineraries->isEmpty())
+                            <p class="text-xs text-gray-500 mt-1">You don't have any itineraries yet. A new one will be created.</p>
+                        @endif
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-600 mb-1">Date</label>
+                            <input type="date" name="date" class="w-full p-2 border border-gray-200 rounded-md" required value="{{ date('Y-m-d') }}">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-600 mb-1">Guests</label>
+                            <select name="quantity" class="w-full p-2 border border-gray-200 rounded-md">
+                                @for($i = 1; $i <= 10; $i++)
+                                    <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">Ticket Type</label>
+                            <select name="ticket_type_id" class="w-full p-2 border border-gray-200 rounded-md">
+                                @foreach($ticketTypes as $ticketType)
+                                    <option value="{{ $ticketType->id }}">{{ $ticketType->Title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="closeAddToItineraryModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            Add to Itinerary
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endauth
+
+    <script>
+        // Functions to show/hide the Add to Itinerary modal
+        function showAddToItineraryModal() {
+            document.getElementById('add-to-itinerary-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeAddToItineraryModal() {
+            document.getElementById('add-to-itinerary-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
 
     @push('scripts')
     <script src="{{ asset('js/tts.js') }}"></script>

@@ -11,6 +11,7 @@ use App\Models\ItineraryType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Http\Controllers\AttractionController;
 
 class ItineraryController extends Controller
 {
@@ -26,7 +27,7 @@ class ItineraryController extends Controller
         // Get itinerary types
         $itineraryTypes = ItineraryType::all();
         
-        // If no types exist, create default ones
+        // If no types exist, create default ones TODO:remove this
         if ($itineraryTypes->isEmpty()) {
             $this->createDefaultItineraryTypes();
             $itineraryTypes = ItineraryType::all();
@@ -47,18 +48,19 @@ class ItineraryController extends Controller
             $itinerary = $this->getOrCreateItinerary();
         }
         
-        // Get itinerary items grouped by day
-        $itineraryItems = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+        // Get itinerary items grouped by day with date information
+        $itineraryData = $this->getItineraryItemsByDay($itinerary, $allAttractions);
         
         // Calculate total cost, duration, and number of attractions
-        $stats = $this->calculateItineraryStats($itineraryItems, $allAttractions);
+        $stats = $this->calculateItineraryStats($itineraryData, $allAttractions);
         
         return view('itinerary.designer', [
             'attractions' => $allAttractions,
             'categories' => $attractionController->getCategories(),
             'itineraryTypes' => $itineraryTypes,
             'itinerary' => $itinerary,
-            'itineraryItems' => $itineraryItems,
+            'itineraryItems' => $itineraryData['items'] ?? [],
+            'itineraryDays' => $itineraryData['days'] ?? [],
             'stats' => $stats,
         ]);
     }
@@ -112,11 +114,20 @@ class ItineraryController extends Controller
         return redirect()->route('itinerary.designer', $newItinerary->uuid)
             ->with('success', 'Itinerary copied successfully!');
     }
+    
     /**
      * Add an attraction to the itinerary
      */
-    public function addAttraction(Request $requestm, $itineraryUuid = null)
+    public function addAttraction(Request $request, $itineraryUuid = null)
     {
+        // Debug information
+        \Log::info('Add Attraction Request', [
+            'day' => $request->day,
+            'attraction_id' => $request->attraction_id,
+            'date' => $request->date,
+            'itinerary_uuid' => $request->itinerary_uuid
+        ]);
+        
         $validated = $request->validate([
             'attraction_id' => 'required|exists:attractions,id',
             'date' => 'required|date',
@@ -124,10 +135,16 @@ class ItineraryController extends Controller
             'quantity' => 'required|integer|min:1',
             'ticket_type_id' => 'required|exists:ticket_types,id',
             'day' => 'required|integer|min:1',
+            'itinerary_uuid' => 'nullable|string|exists:itineraries,uuid',
         ]);
         
-        if ($itineraryUuid) {
-            // If itinerary UUID is provided, find that specific itinerary
+        if (isset($validated['itinerary_uuid']) && !empty($validated['itinerary_uuid'])) {
+            // If itinerary UUID is provided in the form
+            $itinerary = Itinerary::where('uuid', $validated['itinerary_uuid'])
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+        } else if ($itineraryUuid) {
+            // If itinerary UUID is provided in the route
             $itinerary = Itinerary::where('uuid', $itineraryUuid)
                 ->where('user_id', Auth::id())
                 ->firstOrFail();
@@ -135,9 +152,25 @@ class ItineraryController extends Controller
             // If no UUID is provided, get or create a new itinerary
             $itinerary = $this->getOrCreateItinerary();
         }
+        
+        // Get the first date in the itinerary or use the provided date as a starting point
+        $firstDate = ItineraryItem::where('itinerary_id', $itinerary->uuid)->min('date');
+        $dayOffset = $validated['day'] - 1; // Convert day number to day offset (0-based)
+        
+        // If there's a first date, calculate the date based on the day offset
+        // If not, use the provided date
+        if ($firstDate && $validated['day'] > 1) {
+            $date = Carbon::parse($firstDate)->addDays($dayOffset)->format('Y-m-d');
+        } else if ($validated['day'] === 1) {
+            // If it's day 1 and there are existing items, keep the first date consistent
+            $date = $firstDate ?: $validated['date'];
+        } else {
+            $date = $validated['date'];
+        }
+        
         // Calculate position (get max position for the day and add 1)
         $maxPosition = ItineraryItem::where('itinerary_id', $itinerary->uuid)
-            ->whereDate('date', Carbon::parse($validated['date']))
+            ->whereDate('date', $date)
             ->max('position') ?? 0;
             
         // Create itinerary item
@@ -145,8 +178,8 @@ class ItineraryController extends Controller
             'uuid' => (string) Str::uuid(),
             'itinerary_id' => $itinerary->uuid,
             'attraction_id' => $validated['attraction_id'],
-            'date' => $validated['date'],
-            'time' => null  ,
+            'date' => $date,
+            'time' => null,
             'quantity' => $validated['quantity'],
             'TicketTypeId' => $validated['ticket_type_id'],
             'position' => $maxPosition + 1,
@@ -172,13 +205,28 @@ class ItineraryController extends Controller
         ]);
         
         // Find the itinerary item
+        $itinerary = $this->getOrCreateItinerary();
         $item = ItineraryItem::where('uuid', $uuid)
-            ->where('itinerary_id', $this->getOrCreateItinerary()->uuid)
+            ->where('itinerary_id', $itinerary->uuid)
             ->firstOrFail();
+        
+        // Get all items in this itinerary to determine dates
+        $items = ItineraryItem::where('itinerary_id', $itinerary->uuid)->get();
+        $firstDate = $items->min('date');
+        
+        // Calculate the appropriate date based on the day number
+        if ($firstDate && $validated['day'] > 1) {
+            $dayOffset = $validated['day'] - 1;
+            $date = Carbon::parse($firstDate)->addDays($dayOffset)->format('Y-m-d');
+        } else if ($validated['day'] === 1) {
+            $date = $firstDate ?: $validated['date'];
+        } else {
+            $date = $validated['date'];
+        }
             
         // Update the item
         $item->update([
-            'date' => $validated['date'],
+            'date' => $date,
             'time' => $validated['time'],
             'quantity' => $validated['quantity'],
             'TicketTypeId' => $validated['ticket_type_id'],
@@ -226,45 +274,45 @@ class ItineraryController extends Controller
      * Get or create an itinerary for the current user
      */
     private function getOrCreateItinerary($uuid = null)
-{
-    // If UUID is provided, try to find that specific itinerary
-    if ($uuid) {
-        $itinerary = Itinerary::where('uuid', $uuid)
-            ->where('user_id', Auth::id())
+    {
+        // If UUID is provided, try to find that specific itinerary
+        if ($uuid) {
+            $itinerary = Itinerary::where('uuid', $uuid)
+                ->where('user_id', Auth::id())
+                ->first();
+                
+            if ($itinerary) {
+                return $itinerary;
+            }
+        }
+        
+        // If no UUID or itinerary not found, look for the user's most recent itinerary
+        $itinerary = Itinerary::where('user_id', Auth::id())
+            ->latest()
             ->first();
             
-        if ($itinerary) {
-            return $itinerary;
+        // If still no itinerary, create a new one
+        if (!$itinerary) {
+            $typeId = ItineraryType::first()->id ?? $this->createDefaultItineraryTypes()->first()->id;
+            
+            $itinerary = new Itinerary([
+                'uuid' => (string) Str::uuid(),
+                'user_id' => Auth::id(),
+                'type_id' => $typeId,
+                'name' => 'My Trip ' . date('Y'),
+                'description' => 'My custom Egypt itinerary',
+                'public' => false,
+            ]);
+            
+            $itinerary->save();
         }
+        
+        return $itinerary;
     }
-    
-    // If no UUID or itinerary not found, look for the user's most recent itinerary
-    $itinerary = Itinerary::where('user_id', Auth::id())
-        ->latest()
-        ->first();
-        
-    // If still no itinerary, create a new one
-    if (!$itinerary) {
-        $typeId = ItineraryType::first()->id ?? $this->createDefaultItineraryTypes()->first()->id;
-        
-        $itinerary = new Itinerary([
-            'uuid' => (string) Str::uuid(),
-            'user_id' => Auth::id(),
-            'type_id' => $typeId,
-            'name' => 'My Trip ' . date('Y'),
-            'description' => 'My custom Egypt itinerary',
-            'public' => false,
-        ]);
-        
-        $itinerary->save();
-    }
-    
-    return $itinerary;
-}
 
-/**
- * Creates a new itinerary regardless of existing ones
- */
+    /**
+     * Creates a new itinerary regardless of existing ones
+     */
     private function addItinerary()
     {
         // Get the first itinerary type or create a default one
@@ -321,8 +369,9 @@ class ItineraryController extends Controller
         
         return $createdTypes;
     }
-      /**
-     * Group itinerary items by day
+    
+    /**
+     * Group itinerary items by day with date information
      */
     public function getItineraryItemsByDay($itinerary, $allAttractions)
     {
@@ -331,15 +380,32 @@ class ItineraryController extends Controller
             ->orderBy('position')
             ->get();
             
-        $groupedItems = [];
-        
-        foreach ($items as $item) {
-            // Calculate the day number (day 1, day 2, etc.)
-            $firstDate = $items->min('date');
-            $dayDiff = Carbon::parse($item->date)->diffInDays(Carbon::parse($firstDate)) + 1;
+        if ($items->isEmpty()) {
+            return [
+                'days' => [],
+                'items' => []
+            ];
+        }
             
-            if (!isset($groupedItems[$dayDiff])) {
-                $groupedItems[$dayDiff] = [];
+        $groupedItems = [];
+        $daysInfo = [];
+        
+        // First, get all unique dates
+        $uniqueDates = $items->pluck('date')->unique()->sort()->values();
+        
+        // Debug info
+        \Illuminate\Support\Facades\Log::info('Itinerary Items', [
+            'count' => count($items),
+            'days' => count($uniqueDates)
+        ]);
+        
+        // First, organize items by their actual dates
+        $dateGroupedItems = [];
+        foreach ($items as $item) {
+            $itemDate = $item->date;
+            
+            if (!isset($dateGroupedItems[$itemDate])) {
+                $dateGroupedItems[$itemDate] = [];
             }
             
             // Find attraction details
@@ -360,20 +426,42 @@ class ItineraryController extends Controller
                 $attraction['ticket_type_id'] = $item->TicketTypeId;
                 $attraction['subtotal'] = $attraction['price'] * $item->quantity;
                 
-                $groupedItems[$dayDiff][] = $attraction;
+                $dateGroupedItems[$itemDate][] = $attraction;
             }
         }
         
-        return $groupedItems;
+        // Now map date groups to day numbers (1, 2, 3, etc.) and include date information
+        foreach ($uniqueDates as $index => $date) {
+            $dayNumber = $index + 1; // Sequential days, no gaps
+            $carbonDate = Carbon::parse($date);
+            
+            $daysInfo[$dayNumber] = [
+                'date' => $date,
+                'formatted_date' => $carbonDate->format('M d, Y'), // Format: Jan 15, 2025
+                'day_of_week' => $carbonDate->format('l'), // Format: Monday, Tuesday, etc.
+                'day_number' => $dayNumber
+            ];
+            
+            $groupedItems[$dayNumber] = $dateGroupedItems[$date];
+        }
+        
+        return [
+            'days' => $daysInfo,
+            'items' => $groupedItems
+        ];
     }
-      /**
+    
+    /**
      * Calculate itinerary stats (total cost, duration, number of attractions)
      */
-    public function calculateItineraryStats($itineraryItems, $allAttractions)
+    public function calculateItineraryStats($itineraryData, $allAttractions)
     {
         $totalCost = 0;
         $totalAttractions = 0;
         $totalDuration = 0; // in hours
+        
+        // If we receive the new structure with 'items' key, use that
+        $itineraryItems = isset($itineraryData['items']) ? $itineraryData['items'] : $itineraryData;
         
         foreach ($itineraryItems as $day => $items) {
             foreach ($items as $item) {
@@ -400,7 +488,8 @@ class ItineraryController extends Controller
             'durationText' => $this->formatDuration($totalDuration)
         ];
     }
-      /**
+    
+    /**
      * Format duration in hours as human-readable text
      */
     private function formatDuration($hours)
@@ -450,11 +539,15 @@ class ItineraryController extends Controller
         
         // Process each itinerary to calculate stats
         foreach ($itineraries as $itinerary) {
-            // Group items by day for each itinerary
-            $itinerary->groupedItems = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+            // Group items by day for each itinerary with date information
+            $itineraryData = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+            
+            // Store both items and days info
+            $itinerary->groupedItems = $itineraryData['items'] ?? [];
+            $itinerary->daysInfo = $itineraryData['days'] ?? [];
             
             // Calculate stats for each itinerary
-            $itinerary->stats = $this->calculateItineraryStats($itinerary->groupedItems, $allAttractions);
+            $itinerary->stats = $this->calculateItineraryStats($itineraryData, $allAttractions);
         }
         
         $itineraryTypes = ItineraryType::all();
@@ -504,11 +597,15 @@ class ItineraryController extends Controller
         
         // Process each itinerary to calculate stats
         foreach ($itineraries as $itinerary) {
-            // Group items by day for each itinerary
-            $itinerary->groupedItems = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+            // Group items by day for each itinerary with date information
+            $itineraryData = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+            
+            // Store both items and days info
+            $itinerary->groupedItems = $itineraryData['items'] ?? [];
+            $itinerary->daysInfo = $itineraryData['days'] ?? [];
             
             // Calculate stats for each itinerary
-            $itinerary->stats = $this->calculateItineraryStats($itinerary->groupedItems, $allAttractions);
+            $itinerary->stats = $this->calculateItineraryStats($itineraryData, $allAttractions);
         }
         
         $itineraryTypes = ItineraryType::all();
@@ -541,15 +638,16 @@ class ItineraryController extends Controller
             abort(403, 'This itinerary is private.');
         }
         
-        // Group items by day
-        $groupedItems = $this->getItineraryItemsByDay($itinerary, $allAttractions);
+        // Group items by day with date information
+        $itineraryData = $this->getItineraryItemsByDay($itinerary, $allAttractions);
         
         // Calculate stats
-        $stats = $this->calculateItineraryStats($groupedItems, $allAttractions);
+        $stats = $this->calculateItineraryStats($itineraryData, $allAttractions);
         
         return view('itinerary.show', [
             'itinerary' => $itinerary,
-            'itineraryItems' => $groupedItems,
+            'itineraryItems' => $itineraryData['items'] ?? [],
+            'itineraryDays' => $itineraryData['days'] ?? [],
             'stats' => $stats,
             'categories' => $attractionController->getCategories()
         ]);

@@ -58,18 +58,30 @@
         <div class="mb-6">
             <div class="flex overflow-x-auto space-x-2 pb-2" id="tabs-container">
                 @php
-                    // Ensure we always show at least 6 days or the maximum day from the itinerary, whichever is greater
-                    $maxDay = max(6, count($itineraryItems) > 0 ? max(array_keys($itineraryItems)) : 0);
+                    // Use the actual days from the itinerary data
+                    $days = $itineraryDays ?? [];
+                    $maxDay = count($days) > 0 ? max(array_keys($days)) : 0;
                 @endphp
                 
-                @for($day = 1; $day <= $maxDay; $day++)
+                @if(count($days) > 0)
+                    @foreach($days as $dayNumber => $dayInfo)
+                        <button 
+                            id="day-tab-{{ $dayNumber }}" 
+                            class="day-tab whitespace-nowrap px-4 py-2 rounded-md font-medium text-sm {{ $dayNumber == 1 ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
+                            onclick="selectDay({{ $dayNumber }})">
+                            <div class="text-xs">{{ $dayInfo['day_of_week'] }}</div>
+                            <div>Day {{ $dayNumber }}</div>
+                            <div class="text-xs">{{ $dayInfo['formatted_date'] }}</div>
+                        </button>
+                    @endforeach
+                @else
                     <button 
-                        id="day-tab-{{ $day }}" 
-                        class="day-tab whitespace-nowrap px-4 py-2 rounded-md font-medium text-sm {{ isset($itineraryItems[$day]) ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}"
-                        onclick="selectDay({{ $day }})">
-                        Day {{ $day }}
+                        id="day-tab-1" 
+                        class="day-tab whitespace-nowrap px-4 py-2 rounded-md font-medium text-sm bg-primary text-white"
+                        onclick="selectDay(1)">
+                        Day 1
                     </button>
-                @endfor
+                @endif
                 
                 <button class="whitespace-nowrap px-4 py-2 rounded-md font-medium text-sm bg-gray-100 text-gray-600 hover:bg-gray-200" onclick="addNewDay()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" viewBox="0 0 20 20" fill="currentColor">
@@ -81,71 +93,104 @@
         </div>
 
         <!-- Itinerary Items for Selected Day -->
-        @for($day = 1; $day <= max(6, count($itineraryItems) > 0 ? max(array_keys($itineraryItems)) : 0); $day++)
-            <div id="day-content-{{ $day }}" class="day-content" style="display: {{ $day == 1 ? 'block' : 'none' }}">
+        @if(count($days) > 0)
+            @foreach($days as $dayNumber => $dayInfo)
+                <div id="day-content-{{ $dayNumber }}" class="day-content" style="display: {{ $dayNumber == 1 ? 'block' : 'none' }}">
+                    <div class="mb-6 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-600">Day {{ $dayNumber }} - {{ $dayInfo['formatted_date'] }} - {{ $itinerary->name ?? 'My Trip' }}</h2>
+                        <div class="flex items-center gap-2">
+                            
+                            <a href="{{ route('attractions.index') }}" class="btn-sm bg-primary text-white rounded-md p-2 text-center inline-block">
+                                Add Attraction
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div id="attractions-container-{{ $dayNumber }}" class="space-y-4">
+                        @if(isset($itineraryItems[$dayNumber]) && count($itineraryItems[$dayNumber]) > 0)
+                            @foreach($itineraryItems[$dayNumber] as $index => $attraction)
+                                <div class="card p-4 mb-4 flex flex-col md:flex-row gap-4" id="attraction-{{ $attraction['uuid'] }}">
+                                    <div class="w-full md:w-1/4">
+                                        <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}" class="w-full h-32 object-cover rounded-lg">
+                                    </div>
+                                    <div class="w-full md:w-3/4">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <h3 class="text-xl font-bold text-gray-600">{{ $attraction['title'] }}</h3>
+                                            <button onclick="removeAttraction('{{ $attraction['uuid'] }}')" class="text-red-500 hover:text-red-700">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-1 mb-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                            <span class="text-sm text-gray-600">{{ $attraction['rating'] }} ({{ number_format($attraction['reviewCount']) }})</span>
+                                        </div>
+                                        <p class="text-gray-600 mb-4 line-clamp-2">{{ $attraction['description'] }}</p>
+                                        <div class="flex flex-wrap gap-4 items-center">
+                                            <div class="text-sm text-gray-500">
+                                                <span class="font-medium">Date:</span> {{ date('Y-m-d', strtotime($attraction['date'])) }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                <span class="font-medium">Time:</span> {{ $attraction['time'] ?? 'Morning' }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                <span class="font-medium">Price:</span> {{ $attraction['price'] }}£E/person
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                <span class="font-medium">Guests:</span> {{ $attraction['quantity'] }}
+                                            </div>
+                                            <div class="ml-auto text-lg font-bold text-gray-700">
+                                                {{ $attraction['subtotal'] }}£E
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="text-center p-6 bg-gray-50 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                <h3 class="text-lg font-medium text-gray-600 mb-2">No Attractions Added for Day {{ $dayNumber }}</h3>
+                                <p class="text-gray-500 mb-4">Start building your itinerary by adding attractions for this day.</p>
+                                <button class="btn-primary" onclick="showAddAttractionModal({{ $dayNumber }})">Add Attraction</button>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <!-- Default Day 1 content when no itinerary days exist -->
+            <div id="day-content-1" class="day-content" style="display: block">
                 <div class="mb-6 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-gray-600">Day {{ $day }} - {{ $itinerary->name ?? 'My Trip' }}</h2>
-                    <button class="btn-sm bg-primary text-white rounded-md p-2" onclick="showAddAttractionModal({{ $day }})">
-                        Add Attraction
-                    </button>
+                    <h2 class="text-xl font-bold text-gray-600">Day 1 - {{ $itinerary->name ?? 'My Trip' }}</h2>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('attractions.index') }}" class="btn-sm bg-gray-600 text-white rounded-md p-2 flex items-center" title="Browse Attractions">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        <button class="btn-sm bg-primary text-white rounded-md p-2" onclick="showAddAttractionModal(1)">
+                            Add Attraction
+                        </button>
+                    </div>
                 </div>
                 
-                <div id="attractions-container-{{ $day }}" class="space-y-4">
-                    @if(isset($itineraryItems[$day]) && count($itineraryItems[$day]) > 0)
-                        @foreach($itineraryItems[$day] as $index => $attraction)
-                            <div class="card p-4 mb-4 flex flex-col md:flex-row gap-4" id="attraction-{{ $attraction['uuid'] }}">
-                                <div class="w-full md:w-1/4">
-                                    <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}" class="w-full h-32 object-cover rounded-lg">
-                                </div>
-                                <div class="w-full md:w-3/4">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h3 class="text-xl font-bold text-gray-600">{{ $attraction['title'] }}</h3>
-                                        <button onclick="removeAttraction('{{ $attraction['uuid'] }}')" class="text-red-500 hover:text-red-700">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="flex items-center gap-1 mb-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                        <span class="text-sm text-gray-600">{{ $attraction['rating'] }} ({{ number_format($attraction['reviewCount']) }})</span>
-                                    </div>
-                                    <p class="text-gray-600 mb-4 line-clamp-2">{{ $attraction['description'] }}</p>
-                                    <div class="flex flex-wrap gap-4 items-center">
-                                        <div class="text-sm text-gray-500">
-                                            <span class="font-medium">Date:</span> {{ date('Y-m-d', strtotime($attraction['date'])) }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            <span class="font-medium">Time:</span> {{ $attraction['time'] ?? 'Morning' }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            <span class="font-medium">Price:</span> {{ $attraction['price'] }}£E/person
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            <span class="font-medium">Guests:</span> {{ $attraction['quantity'] }}
-                                        </div>
-                                        <div class="ml-auto text-lg font-bold text-gray-700">
-                                            {{ $attraction['subtotal'] }}£E
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="text-center p-6 bg-gray-50 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            <h3 class="text-lg font-medium text-gray-600 mb-2">No Attractions Added for Day {{ $day }}</h3>
-                            <p class="text-gray-500 mb-4">Start building your itinerary by adding attractions for this day.</p>
-                            <button class="btn-primary" onclick="showAddAttractionModal({{ $day }})">Add Attraction</button>
-                        </div>
-                    @endif
+                <div id="attractions-container-1" class="space-y-4">
+                    <div class="text-center p-6 bg-gray-50 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <h3 class="text-lg font-medium text-gray-600 mb-2">No Attractions Added for Day 1</h3>
+                        <p class="text-gray-500 mb-4">Start building your itinerary by adding attractions for this day.</p>
+                        <button class="btn-primary" onclick="showAddAttractionModal(1)">Add Attraction</button>
+                    </div>
                 </div>
             </div>
-        @endfor
+        @endif
     </div>
     
     <!-- Itinerary Summary Sidebar -->
@@ -221,6 +266,7 @@
         <form action="{{ route('itinerary.add-attraction') }}" method="POST" id="add-attraction-form">
             @csrf
             <input type="hidden" name="day" id="selected-day" value="1">
+            <input type="hidden" name="itinerary_uuid" value="{{ $itinerary->uuid }}">
             
             <div class="space-y-4">
                 <div>
@@ -297,6 +343,10 @@
     
     // Function to select a day tab
     function selectDay(day) {
+        // Ensure day is treated as a number
+        day = parseInt(day, 10);
+        console.log("Selecting day: " + day);
+        
         currentDay = day;
         
         // Hide all day content
@@ -305,9 +355,11 @@
         });
         
         // Show selected day content
-        const selectedDayContent = document.getElementById('day-content-' + day);
+        var selectedDayContent = document.getElementById('day-content-' + day);
         if (selectedDayContent) {
             selectedDayContent.style.display = 'block';
+        } else {
+            console.log("Warning: Content for day " + day + " not found");
         }
         
         // Update active tab styling
@@ -316,25 +368,70 @@
             tab.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
         });
         
-        const activeTab = document.getElementById('day-tab-' + day);
+        var activeTab = document.getElementById('day-tab-' + day);
         if (activeTab) {
             activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
             activeTab.classList.add('bg-primary', 'text-white');
+        } else {
+            console.log("Warning: Tab for day " + day + " not found");
         }
+        
+        // Update the selected day in the add attraction form
+        document.getElementById('selected-day').value = day;
     }
-    
     // Function to add a new day
     function addNewDay() {
         const tabsContainer = document.getElementById('tabs-container');
-        const lastDay = tabsContainer.querySelectorAll('.day-tab').length;
-        const newDay = lastDay + 1;
+        const dayTabs = tabsContainer.querySelectorAll('.day-tab');
         
-        // Add new day tab
+        // Count actual day tabs (exclude the "Add Day" button)
+        var lastDay = 0;
+        dayTabs.forEach(function(tab) {
+            const dayMatch = tab.id.match(/day-tab-(\d+)/);
+            if (dayMatch) {
+                const dayNum = parseInt(dayMatch[1], 10);
+                if (dayNum > lastDay) {
+                    lastDay = dayNum;
+                }
+            }
+        });
+        
+        const newDay = lastDay + 1;
+        console.log("Creating new day: " + newDay);
+        
+        // Get the current date
+        const currentDate = new Date();
+        // Add days to the current date based on the new day number
+        currentDate.setDate(currentDate.getDate() + (newDay - 1));
+        const formattedDate = currentDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+        });
+        const dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+        
+        // Add new day tab with date information
         const newTabButton = document.createElement('button');
         newTabButton.id = 'day-tab-' + newDay;
         newTabButton.classList.add('day-tab', 'whitespace-nowrap', 'px-4', 'py-2', 'rounded-md', 'font-medium', 'text-sm', 'bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
-        newTabButton.textContent = 'Day ' + newDay;
-        newTabButton.onclick = function() { selectDay(newDay); };
+        
+        // Create content with day of week and date
+        const dayOfWeekDiv = document.createElement('div');
+        dayOfWeekDiv.className = 'text-xs';
+        dayOfWeekDiv.textContent = dayOfWeek;
+        
+        const dayNumberDiv = document.createElement('div');
+        dayNumberDiv.textContent = 'Day ' + newDay;
+        
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'text-xs';
+        dateDiv.textContent = formattedDate;
+        
+        newTabButton.appendChild(dayOfWeekDiv);
+        newTabButton.appendChild(dayNumberDiv);
+        newTabButton.appendChild(dateDiv);
+        
+        newTabButton.onclick = function() { selectDay(parseInt(newDay, 10)); };
         
         // Insert before the "Add Day" button
         tabsContainer.insertBefore(newTabButton, tabsContainer.lastElementChild);
@@ -349,10 +446,17 @@
             
             newDayContent.innerHTML = `
                 <div class="mb-6 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-gray-600">Day ${newDay} - ${document.querySelector('input[name="name"]').value || 'My Trip'}</h2>
-                    <button class="btn-sm bg-primary text-white rounded-md p-2" onclick="showAddAttractionModal(${newDay})">
-                        Add Attraction
-                    </button>
+                    <h2 class="text-xl font-bold text-gray-600">Day ${newDay} - ${formattedDate} - ${document.querySelector('input[name="name"]').value || 'My Trip'}</h2>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('attractions.index') }}" class="btn-sm bg-gray-600 text-white rounded-md p-2 flex items-center" title="Browse Attractions">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        <button class="btn-sm bg-primary text-white rounded-md p-2" onclick="showAddAttractionModal(${newDay})">
+                            Add Attraction
+                        </button>
+                    </div>
                 </div>
                 
                 <div id="attractions-container-${newDay}" class="space-y-4">
@@ -371,12 +475,17 @@
         }
         
         // Switch to the new day
-        selectDay(newDay);
+        selectDay(parseInt(newDay, 10));
     }
-    
-    // Function to show the add attraction modal
+      // Function to show the add attraction modal
     function showAddAttractionModal(day) {
         document.getElementById('add-attraction-modal').style.display = 'flex';
+        
+        // Ensure day is treated as a number
+        day = parseInt(day, 10);
+        console.log("Opening modal for day: " + day);
+        
+        // Set the selected day in the form
         document.getElementById('selected-day').value = day;
         
         // Set the date input to the current date plus (day-1) days

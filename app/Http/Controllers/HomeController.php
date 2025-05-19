@@ -140,11 +140,7 @@ class HomeController extends Controller
             'banners' => $banners,
             'user' => $user,
             'mostLikedItineraries' => $mostLikedItineraries,
-            'officialItineraries' => $officialItineraries
-            'user' => $user,
-            'mostLikedItineraries' => $mostLikedItineraries,
-            'officialItineraries' => $officialItineraries
-            'user' => $user,
+            'officialItineraries' => $officialItineraries,
             'articles' => $articles
         ]);
     }
