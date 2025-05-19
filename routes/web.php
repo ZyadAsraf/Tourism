@@ -8,6 +8,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\ArticlesController;
+use App\Http\Controllers\TicketController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home'); 
 // Public Articles routes
@@ -47,6 +48,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Stripe 
     Route::post('/cart/confirmation', [CartController::class, 'store'])->name('cart.store');
+    
+    // Ticket Routes
+    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
     
     // Itinerary Designer Routes
     Route::get('/itinerary/designer', [ItineraryController::class, 'createNewItinerary'])->name('itinerary.newItinerary');

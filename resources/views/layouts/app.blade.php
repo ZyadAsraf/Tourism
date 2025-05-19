@@ -133,12 +133,18 @@
                 My Cart
                 @php
                     $cartCount = App\Http\Controllers\CartController::getCartCount();
+                    use Illuminate\Support\Facades\Auth;
                 @endphp
                 @if($cartCount > 0)
                     <span class="absolute -top-2 -right-3 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                         {{ $cartCount }}
                     </span>
                 @endif
+            </a>
+            
+            <!-- My Tickets -->
+            <a href="{{ route('tickets.index') }}" class="text-gray-600 hover:text-primary {{ request()->routeIs('tickets.*') ? 'font-semibold text-primary' : '' }}">
+                My Tickets
             </a>
         
             <!-- Profile -->
