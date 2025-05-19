@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('articles', function (Blueprint $table) {
             //$table->uuid(column: 'id')->primary();
             $table->id();
-            $table->string('ArticleLinks', 100);
             $table->string('ArticleHeading', 100);
             $table->text('ArticleBody'); // Changed from string(500) to text()
             $table->string('Img');

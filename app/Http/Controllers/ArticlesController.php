@@ -18,7 +18,7 @@ class ArticlesController extends Controller
     // Show a single article
     public function show($id)
     {
-        $article = Article::with('admin')->findOrFail($id);
+        $article = Article::with(['admin', 'attractions'])->findOrFail($id);
         return view('articles.show', compact('article'));
     }
 

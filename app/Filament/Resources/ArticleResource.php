@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ArticleResource\Pages;
 use App\Filament\Resources\ArticleResource\RelationManagers;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use App\Filament\Resources\ArticleResource\RelationManagers\articleLinksRelationManager;
 use App\Models\Admin;
 use App\Models\Article;
 use App\Models\articles;
@@ -37,7 +38,6 @@ class ArticleResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('ArticleLinks')->required()->label('Link')->url()->rules('max:100'),
                 TextInput::make('ArticleHeading')->required()->label('Heading')->rules('max:100'),
                 MarkdownEditor::make('ArticleBody')->required(),
                 FileUpload::make('Img')->directory('imgs')->required()->directory("Imgs"),
@@ -51,7 +51,6 @@ class ArticleResource extends Resource
             ->columns([
                 TextColumn::make('id'),
                 TextColumn::make('ArticleHeading'),
-                TextColumn::make('ArticleLinks'),
             ])
             ->filters([
                 //
@@ -73,7 +72,7 @@ class ArticleResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            articleLinksRelationManager::class,
         ];
     }
 

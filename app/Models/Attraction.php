@@ -65,6 +65,11 @@ class Attraction extends Model
     {
         return $this->hasMany(Ticket::class, 'AttractionName', 'id');
     }
+
+    public function articles(){
+        return $this->belongsToMany(Article::class, 'article_links', 'attraction_id', 'article_id');
+    }
+
     protected static function boot()
     {
         parent::boot();

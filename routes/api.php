@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AttractionController;
+use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\HomeController;
 
 // Route::middleware('auth:sanctum')->post('/tokens/create', function (Request $request) {
@@ -19,6 +20,9 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::group(['middleware'=>'api'], function () {
     Route::get('/get-attractions', [AttractionController::class, 'getAttractions']);
 
+    // Article routes
+    Route::get('/articles', [ArticleController::class, 'index']);
+    Route::get('/articles/{id}', [ArticleController::class, 'show']);
 
     Route::get('/categories', [AttractionController::class, 'getCategories']);
     Route::get('/home', [AttractionController::class, 'homeApi']);
@@ -38,6 +42,11 @@ Route::group(['middleware'=>'api'], function () {
 // Routes that require authentication
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/attractions/{slug}/reviews', [AttractionController::class, 'addReview']);
+    
+    // Protected article routes
+    Route::post('/articles', [ArticleController::class, 'store']);
+    Route::put('/articles/{id}', [ArticleController::class, 'update']);
+    Route::delete('/articles/{id}', [ArticleController::class, 'destroy']);
 
     // If you want only authenticated users to see tokens/create:
     Route::post('/tokens/create', function (Request $request) {

@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@php
+use Illuminate\Support\Str;
+@endphp
 
 @section('title', $article->ArticleHeading)
 
@@ -19,6 +22,34 @@
         <div id="articleBody" class="prose max-w-none mb-6">
             {!! nl2br(e($article->ArticleBody)) !!}
         </div>
+        
+        @if($article->attractions->count() > 0)
+            <div class="mt-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Related Attractions</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($article->attractions as $attraction)
+                        <div class="bg-gray-100 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                            <a href="{{ route('attractions.show', Str::slug($attraction->AttractionName)) }}" class="block">
+                                @if($attraction->Img)
+                                    <img src="{{ '/storage/' . $attraction->Img }}" alt="{{ $attraction->AttractionName }}" class="w-full h-40 object-cover">
+                                @else
+                                    <div class="w-full h-40 bg-gray-300 flex items-center justify-center">
+                                        <span class="text-gray-500">No Image</span>
+                                    </div>
+                                @endif
+                                <div class="p-4">
+                                    <h3 class="font-semibold text-gray-800">{{ $attraction->AttractionName }}</h3>
+                                    @if($attraction->City)
+                                        <p class="text-gray-600 text-sm">{{ $attraction->City }}</p>
+                                    @endif
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+        
         @if($article->admin)
             <div class="text-gray-500 text-sm mt-4">
                 By {{ $article->admin->name }}
