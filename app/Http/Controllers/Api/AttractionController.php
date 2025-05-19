@@ -18,7 +18,7 @@ public function getAttractions(Request $request = null)
 {
     // Fetch attractions from the database that are marked as Available
     $query = Attraction::where('Status', 'Available')
-        ->with(['governorate', 'categories', 'admin'])
+        ->with(['governorate', 'categories', 'admin', 'images', 'images360']) // Eager load images
         ->select(['*']);
     
     // Apply filters if provided
@@ -90,6 +90,30 @@ public function getAttractions(Request $request = null)
                 continue; // Skip this attraction as it doesn't match the duration filter
             }
         }
+
+        // Get regular gallery images
+        $galleryImages = [];
+        if ($attraction->images) {
+            foreach ($attraction->images as $image) {
+                $galleryImages[] = '/storage/' . $image->filename;
+            }
+        }
+        if (empty($galleryImages) && $attraction->Img) {
+            $galleryImages[] = '/storage/' . $attraction->Img;
+        } elseif (empty($galleryImages)) {
+            $galleryImages[] = '/images/placeholder.jpg';
+        }
+
+        // Get 360° images
+        $panoramaImages = [];
+        if ($attraction->images360) {
+            foreach ($attraction->images360 as $image360) {
+                $panoramaImages[] = [
+                    'url' => '/storage/' . $image360->filename,
+                    'caption' => $image360->alt_text ?? $attraction->AttractionName
+                ];
+            }
+        }
         
         $formattedAttractions[$slug] = [
             'id' => $attraction->id,
@@ -100,16 +124,18 @@ public function getAttractions(Request $request = null)
             'reviewCount' => rand(1000, 10000), // Generate random review count for now
             'description' => strip_tags(Str::markdown($attraction->Description)),
             'longDescription' => strip_tags(Str::markdown($attraction->Description)),
-            'image' => $attraction->Img ? '/storage/' . $attraction->Img : '/images/placeholder.jpg',
-            'gallery' => $attraction->Img ? ['/storage/' . $attraction->Img] : ['/images/placeholder.jpg'],
+            'image' => $attraction->Img ? '/storage/' . $attraction->Img : ($galleryImages[0] ?? '/images/placeholder.jpg'),
+            'gallery' => $galleryImages,
+            'panorama_images' => $panoramaImages,
             'mapImage' => $attraction->LocationLink ?? url('/').'/images/map-placeholder.jpg',
-            'category' => $attraction->categories->isNotEmpty() ? $attraction->categories->first()->Name : 'Attraction',
+            'category' => $attraction->categories->isNotEmpty() ? Str::slug($attraction->categories->first()->Name) : 'attraction',
+            'categoryName' => $attraction->categories->isNotEmpty() ? $attraction->categories->first()->Name : 'Attraction',
             'location' => $attraction->City ?? $attraction->governorate->Name ?? 'Egypt',
             'duration' => $duration,
             'durationType' => $durationType, // Store the duration type for filtering
             'included' => ['Entrance fees', 'Guide'],
             'notIncluded' => ['Transportation', 'Meals', 'Gratuities'],
-            'featured' => true
+            'featured' => true // You might want to make this dynamic based on a DB field
         ];
     }
     
@@ -128,8 +154,10 @@ public function getAttractions(Request $request = null)
             'longDescription' => 'This is a sample attraction. Please add real attractions through the admin panel.',
             'image' => '/images/placeholder.jpg',
             'gallery' => ['/images/placeholder.jpg'],
-            'mapImage' => URL::to('/'),
-            'category' => 'Attraction',
+            'panorama_images' => [],
+            'mapImage' => URL::to('/images/map-placeholder.jpg'),
+            'category' => 'attraction',
+            'categoryName' => 'Attraction',
             'location' => 'Egypt',
             'duration' => 'Less than 3 hours',
             'durationType' => 'short',
@@ -139,7 +167,7 @@ public function getAttractions(Request $request = null)
         ];
     }
     
-    return response()->json($formattedAttractions);
+    return response()->json(array_values($formattedAttractions)); // Return as a flat array
 }
 
 public function getCategories(): JsonResponse
