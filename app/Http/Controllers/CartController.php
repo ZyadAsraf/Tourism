@@ -419,11 +419,6 @@ class CartController extends Controller
         $validated = $request->validate([
             'PhoneNumber' => 'required|string',
             'state' => 'required|string',
-            // 'TicketTypesId' => 'required|exists:ticket_types,id', // This seems to be a general field, but tickets are per item.
-                                                                    // Ticket type should be derived from cart items.
-            // We expect items to be submitted, or we process existing cart items.
-            // If items are submitted from checkout page (e.g. quantities changed), validation is needed here.
-            // For now, assuming we process the existing cart.
         ]);
 
         $ticketsCreated = 0;
@@ -444,8 +439,7 @@ class CartController extends Controller
             }
             // Create Ticket
             // Get current price from attraction model
-            $currentPrice = $attraction->price;
-            // dd($currentPrice);
+            $currentPrice = $attraction->EntryFee;
             Ticket::create([
                 'TouristId' => Auth::id(),
                 'Attraction' => $item->attraction_id,
@@ -473,7 +467,6 @@ class CartController extends Controller
                          ->with('error', 'Could not process your booking. Please try again or contact support.');
         }
     }
-
     /**
      * Display checkout confirmation
      */
