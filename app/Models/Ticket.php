@@ -45,7 +45,7 @@ class Ticket extends Model
 
     public function attraction()
     {
-        return $this->belongsTo(Attraction::class, 'AttractionName');
+        return $this->belongsTo(Attraction::class, 'Attraction');
     }
 
     // A Ticket is managed by an Attraction Staff

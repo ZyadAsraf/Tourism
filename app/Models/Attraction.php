@@ -63,7 +63,7 @@ class Attraction extends Model
 
     public function tickets()
     {
-        return $this->hasMany(Ticket::class, 'AttractionName', 'id');
+        return $this->hasMany(Ticket::class, 'Attraction');
     }
 
     public function articles(){
