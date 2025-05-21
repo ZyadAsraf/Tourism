@@ -24,6 +24,13 @@ class HomeController extends Controller
             
         $featured = [];
         
+        // Get attraction IDs for batch review stats retrieval
+        $attractionIds = $attractions->pluck('id')->toArray();
+        
+        // Use the AttractionController to get review stats for all attractions at once
+        $attractionController = new AttractionController();
+        $reviewStats = $attractionController->getMultipleAttractionReviewStats($attractionIds);
+        
         foreach ($attractions as $attraction) {
             $slug = Str::slug($attraction->AttractionName);
             
@@ -32,8 +39,8 @@ class HomeController extends Controller
                 'title' => $attraction->AttractionName,
                 'slug' => $slug,
                 'price' => $attraction->EntryFee,
-                'rating' => rand(4, 5) . '.' . rand(0, 9), // Generate random rating for now
-                'reviewCount' => rand(1000, 10000), // Generate random review count for now
+                'rating' => $reviewStats[$attraction->id]['average_rating'],
+                'reviewCount' => $reviewStats[$attraction->id]['review_count'],
                 'description' => strip_tags(Str::markdown($attraction->Description)),
                 'image' => $attraction->Img ? '/storage/' . $attraction->Img : '/images/placeholder.jpg',
                 'location' => $attraction->City ?? $attraction->governorate->Name ?? 'Egypt',

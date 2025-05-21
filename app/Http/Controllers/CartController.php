@@ -35,6 +35,10 @@ class CartController extends Controller
         // Get cart items from database
         $cartItems = CartItem::where('user_id', Auth::id())->get();
         
+        // Get attraction IDs for batch review stats retrieval
+        $attractionIds = $cartItems->pluck('attraction_id')->toArray();
+        $reviewStats = $attractionController->getMultipleAttractionReviewStats($attractionIds);
+        
         foreach ($cartItems as $item) {
             $attraction = Attraction::find($item->attraction_id);
             if ($attraction) {
@@ -61,6 +65,12 @@ class CartController extends Controller
                     $attractionData['date'] = $item->date;
                     $attractionData['time'] = $item->time;
                     $attractionData['ticket_type_id'] = $item->ticket_type_id;
+                    
+                    // Add review statistics
+                    if (isset($reviewStats[$attraction->id])) {
+                        $attractionData['rating'] = $reviewStats[$attraction->id]['average_rating'];
+                        $attractionData['reviewCount'] = $reviewStats[$attraction->id]['review_count'];
+                    }
                     
                     // Calculate subtotal from attraction price
                     $subtotal = $attractionData['price'] * $item->quantity;
@@ -353,6 +363,10 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your Cart is empty. Add some attractions before checkout.');
         }
         
+        // Get attraction IDs for batch review stats retrieval
+        $attractionIds = $dbCartItems->pluck('attraction_id')->toArray();
+        $reviewStats = $attractionController->getMultipleAttractionReviewStats($attractionIds);
+        
         foreach ($dbCartItems as $item) {
             $attractionModel = Attraction::find($item->attraction_id); // Get the base attraction model for slug
             if ($attractionModel && isset($allAttractions[$attractionModel->slug])) {
@@ -362,6 +376,12 @@ class CartController extends Controller
                 $attractionData['time'] = $item->time;
                 $attractionData['ticket_type_id'] = $item->ticket_type_id;
                 $attractionData['cart_item_uuid'] = $item->uuid; // Pass UUID for potential updates/removals on checkout page
+
+                // Add review statistics
+                if (isset($reviewStats[$item->attraction_id])) {
+                    $attractionData['rating'] = $reviewStats[$item->attraction_id]['average_rating'];
+                    $attractionData['reviewCount'] = $reviewStats[$item->attraction_id]['review_count'];
+                }
 
                 // Use stored price and subtotal from CartItem
                 $price = $item->price ?? $attractionModel->price; // Fallback to attraction's current price if not stored
@@ -425,7 +445,7 @@ class CartController extends Controller
             // Create Ticket
             // Get current price from attraction model
             $currentPrice = $attraction->price;
-            
+            // dd($currentPrice);
             Ticket::create([
                 'TouristId' => Auth::id(),
                 'Attraction' => $item->attraction_id,

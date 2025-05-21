@@ -54,6 +54,10 @@ public function getAttractions(Request $request = null)
     
     $formattedAttractions = [];
     
+    // Fetch all review statistics in a single query to improve performance
+    $attractionIds = $attractions->pluck('id')->toArray();
+    $reviewStats = $this->getMultipleAttractionReviewStats($attractionIds);
+    
     // Map duration values to attraction IDs (in a real app, this would come from the database)
     $durationMap = [
         // Assign durations to attractions based on ID
@@ -92,8 +96,8 @@ public function getAttractions(Request $request = null)
             'title' => $attraction->AttractionName,
             'slug' => $slug,
             'price' => $attraction->EntryFee,
-            'rating' => rand(4, 5) . '.' . rand(0, 9), // Generate random rating for now
-            'reviewCount' => rand(1000, 10000), // Generate random review count for now
+            'rating' => $reviewStats[$attraction->id]['average_rating'],
+            'reviewCount' => $reviewStats[$attraction->id]['review_count'],
             'description' => strip_tags(Str::markdown($attraction->Description)),
             'image' => $attraction->Img ? '/storage/' . $attraction->Img : '/images/placeholder.jpg',
             'gallery' => $attraction->Img ? ['/storage/' . $attraction->Img] : ['/images/placeholder.jpg'],
@@ -117,8 +121,8 @@ public function getAttractions(Request $request = null)
             'title' => 'Sample Attraction',
             'slug' => 'sample-attraction',
             'price' => 100,
-            'rating' => 4.5,
-            'reviewCount' => 1000,
+            'rating' => 0,
+            'reviewCount' => 0,
             'description' => 'This is a sample attraction. Please add real attractions through the admin panel.',
             'longDescription' => 'This is a sample attraction. Please add real attractions through the admin panel.',
             'image' => '/images/placeholder.jpg',
@@ -351,6 +355,62 @@ public function addReview(Request $request, $slug)
 
     // Redirect back to the attraction page with a success message
     return redirect()->route('attractions.show', $slug)->with('success', 'Your review has been submitted successfully!');
+}
+
+/**
+ * Get review statistics for a specific attraction
+ * 
+ * @param int $attractionId The attraction ID
+ * @return array An array containing average rating and review count
+ */
+public function getAttractionReviewStats($attractionId)
+{
+    // Get all reviews for this attraction
+    $reviews = Review::where('attraction_id', $attractionId)->get();
+    
+    // Calculate statistics
+    $count = $reviews->count();
+    $averageRating = $count > 0 ? round($reviews->avg('rating'), 1) : 0;
+    
+    // Return the statistics
+    return [
+        'average_rating' => $averageRating,
+        'review_count' => $count
+    ];
+}
+
+/**
+ * Get review statistics for multiple attractions in a single query
+ * 
+ * @param array $attractionIds Array of attraction IDs
+ * @return array An array of review statistics indexed by attraction ID
+ */
+public function getMultipleAttractionReviewStats($attractionIds)
+{
+    // Initialize the result array with default values
+    $result = [];
+    foreach ($attractionIds as $id) {
+        $result[$id] = [
+            'average_rating' => 0,
+            'review_count' => 0
+        ];
+    }
+    
+    // Get review counts and average ratings in a single query
+    $reviewStats = Review::whereIn('attraction_id', $attractionIds)
+        ->selectRaw('attraction_id, COUNT(*) as review_count, AVG(rating) as average_rating')
+        ->groupBy('attraction_id')
+        ->get();
+    
+    // Update the result array with the actual values
+    foreach ($reviewStats as $stat) {
+        $result[$stat->attraction_id] = [
+            'average_rating' => round($stat->average_rating, 1),
+            'review_count' => $stat->review_count
+        ];
+    }
+    
+    return $result;
 }
 
 }

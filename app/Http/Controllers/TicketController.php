@@ -31,6 +31,10 @@ class TicketController extends Controller
         // Get tickets from database for the current user
         $userTickets = Ticket::where('TouristId', Auth::id())->get();
         
+        // Get attraction IDs for batch review stats retrieval
+        $attractionIds = $userTickets->pluck('Attraction')->toArray();
+        $reviewStats = $attractionController->getMultipleAttractionReviewStats($attractionIds);
+        
         foreach ($userTickets as $ticket) {
             $attraction = Attraction::find($ticket->Attraction);
             if ($attraction) {
@@ -58,6 +62,12 @@ class TicketController extends Controller
                     $attractionData['subtotal'] = $ticket->TotalCost;
                     $attractionData['booking_time'] = $ticket->BookingTime;
                     $attractionData['state'] = $ticket->state;
+                    
+                    // Add review statistics
+                    if (isset($reviewStats[$attraction->id])) {
+                        $attractionData['rating'] = $reviewStats[$attraction->id]['average_rating'];
+                        $attractionData['reviewCount'] = $reviewStats[$attraction->id]['review_count'];
+                    }
                     
                     $tickets[] = $attractionData;
                     $total += $ticket->TotalCost;
@@ -100,6 +110,9 @@ class TicketController extends Controller
         $attractionController = new AttractionController();
         $allAttractions = $attractionController->getAttractions();
         
+        // Get review statistics for this attraction
+        $reviewStats = $attractionController->getAttractionReviewStats($attraction->id);
+        
         // Find attraction data
         $attractionData = null;
         foreach ($allAttractions as $slug => $data) {
@@ -119,6 +132,7 @@ class TicketController extends Controller
             'ticket' => $ticket,
             'attraction' => $attractionData,
             'ticketType' => $ticketType,
+            'reviewStats' => $reviewStats,
             'categories' => $attractionController->getCategories()
         ]);
     }
