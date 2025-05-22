@@ -581,6 +581,8 @@ public function reviews($slug)
             'id' => $attraction->id,
             'name' => $attraction->AttractionName,
             'slug' => Str::slug($attraction->AttractionName),
+            'averageRating' => $attraction->reviews->avg('rating'),
+            'reviewCount' => $attraction->reviews->count(),
         ],
         'reviews' => $reviews,
         'categories' => $this->getCategories()->getData(true)['data']
