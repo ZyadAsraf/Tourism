@@ -167,7 +167,7 @@ public function getAttractions(Request $request = null)
         ];
     }
     
-    return response()->json(array_values($formattedAttractions)); // Return as a flat array
+    return response()->json($formattedAttractions); // Return as a flat array
 }
 
 public function getCategories(): JsonResponse
