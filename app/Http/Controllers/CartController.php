@@ -42,15 +42,15 @@ class CartController extends Controller
         foreach ($cartItems as $item) {
             $attraction = Attraction::find($item->attraction_id);
             if ($attraction) {
-                // Try to find attraction data by slug or AttractionName
-                $attractionSlug = $attraction->slug ?? $attraction->AttractionName ?? null;
+                // Generate slug from AttractionName to match with allAttractions array
+                $attractionSlug = Str::slug($attraction->AttractionName);
                 $attractionData = null;
                 
-                // Check direct match
-                if ($attractionSlug && isset($allAttractions[$attractionSlug])) {
+                // Check direct match by slug
+                if (isset($allAttractions[$attractionSlug])) {
                     $attractionData = $allAttractions[$attractionSlug];
                 } else {
-                    // Search through attractions for a match
+                    // Search through attractions for a match by ID
                     foreach ($allAttractions as $slug => $data) {
                         if ($data['id'] == $attraction->id) {
                             $attractionData = $data;
@@ -92,7 +92,8 @@ class CartController extends Controller
     /**
      * Add an attraction to the cart
      */
-    public function add(Request $request, $slug)
+    
+public function add(Request $request, $slug)
     {
         // Check if the user is authenticated
         if (!Auth::check()) {
@@ -107,8 +108,11 @@ class CartController extends Controller
             'ticket_type_id' => 'required|exists:ticket_types,id',
         ]);
         
-        // Find the attraction
-        $attraction = Attraction::where('AttractionName', $slug)->first();
+        // Find the attraction by converting slug back to attraction name
+        // Since slug is created by Str::slug($attraction->AttractionName), we need to find by matching
+        $attraction = Attraction::all()->first(function ($attraction) use ($slug) {
+            return Str::slug($attraction->AttractionName) === $slug;
+        });
         
         if (!$attraction) {
             return redirect()->route('cart.index')->with('error', 'Attraction not found.');
@@ -122,8 +126,6 @@ class CartController extends Controller
             ->where('ticket_type_id', $validated['ticket_type_id'])
             ->first();
         
-        $price = $attraction->price; // Get attraction price
-
         if ($cartItem) {
             // Update existing cart item
             $cartItem->quantity += $validated['quantity'];
@@ -242,7 +244,11 @@ class CartController extends Controller
         if ($uuid) {
             $query->where('uuid', $uuid);
         } elseif ($slug) {
-            $attraction = Attraction::where('AttractionName', $slug)->first();
+            // Find attraction by converting slug back to attraction name
+            $attraction = Attraction::all()->first(function ($attraction) use ($slug) {
+                return Str::slug($attraction->AttractionName) === $slug;
+            });
+            
             if (!$attraction) {
                 return redirect()->route('cart.index')->with('error', 'Attraction not found.');
             }
@@ -297,23 +303,25 @@ class CartController extends Controller
         }
 
         // For authenticated users, remove from database
-        // First check if $identifierParam is a UUID
-        $cartItem = CartItem::where('user_id', Auth::id())
-                           ->first();
+        // First check if $identifierParam is a UUID (assuming UUIDs have specific format)
+        $cartItem = null;
         
-        if (!$cartItem) {
-            // Try to find by attraction slug - This might remove multiple if date/time/ticket_type differ.
-            // For simplicity, we'll assume slug is unique enough for this direct removal or that specific item removal is done by UUID.
-            // If more specific removal by slug + other params is needed, this logic should be expanded.
-            $attraction = Attraction::where('slug', $identifierParam)->first();
+        // Try to find by UUID first
+        if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $identifierParam)) {
+            $cartItem = CartItem::where('user_id', Auth::id())
+                            ->where('uuid', $identifierParam)
+                            ->first();
+        } else {
+            // Try to find by attraction slug
+            $attraction = Attraction::all()->first(function ($attraction) use ($identifierParam) {
+                return Str::slug($attraction->AttractionName) === $identifierParam;
+            });
             
             if ($attraction) {
-                // This will remove the first matching item by attraction_id.
-                // If multiple distinct cart items exist for the same attraction (e.g. different dates/times),
-                // consider requiring UUID for precise deletion or adding more parameters.
+                // Remove the first matching item by attraction_id
                 $cartItem = CartItem::where('user_id', Auth::id())
-                                   ->where('attraction_id', $attraction->id)
-                                   ->first(); // Or specify more conditions if needed
+                                ->where('attraction_id', $attraction->id)
+                                ->first();
             }
         }
         
@@ -354,7 +362,7 @@ class CartController extends Controller
         $attractions = [];
         $total = 0;
         $attractionController = new AttractionController();
-        $allAttractions = $attractionController->getAttractions(); // This fetches detailed attraction data
+        $allAttractions = $attractionController->getAttractions();
         
         // For authenticated users, get from database
         $dbCartItems = CartItem::where('user_id', Auth::id())->get();
@@ -368,35 +376,53 @@ class CartController extends Controller
         $reviewStats = $attractionController->getMultipleAttractionReviewStats($attractionIds);
         
         foreach ($dbCartItems as $item) {
-            $attractionModel = Attraction::find($item->attraction_id); // Get the base attraction model for slug
-            if ($attractionModel && isset($allAttractions[$attractionModel->slug])) {
-                $attractionData = $allAttractions[$attractionModel->slug]; // Use pre-fetched detailed data
-                $attractionData['quantity'] = $item->quantity;
-                $attractionData['date'] = $item->date;
-                $attractionData['time'] = $item->time;
-                $attractionData['ticket_type_id'] = $item->ticket_type_id;
-                $attractionData['cart_item_uuid'] = $item->uuid; // Pass UUID for potential updates/removals on checkout page
-
-                // Add review statistics
-                if (isset($reviewStats[$item->attraction_id])) {
-                    $attractionData['rating'] = $reviewStats[$item->attraction_id]['average_rating'];
-                    $attractionData['reviewCount'] = $reviewStats[$item->attraction_id]['review_count'];
-                }
-
-                // Use stored price and subtotal from CartItem
-                $price = $item->price ?? $attractionModel->price; // Fallback to attraction's current price if not stored
-                $subtotal = $item->subtotal ?? ($price * $item->quantity); // Recalculate if not stored
-
-                $attractionData['price'] = $price;
-                $attractionData['subtotal'] = $subtotal;
+            $attractionModel = Attraction::find($item->attraction_id);
+            if ($attractionModel) {
+                // Generate slug from AttractionName to match with allAttractions array
+                $attractionSlug = Str::slug($attractionModel->AttractionName);
                 
-                $attractions[] = $attractionData;
-                $total += $subtotal;
+                // Find attraction data by matching slug or ID
+                $attractionData = null;
+                if (isset($allAttractions[$attractionSlug])) {
+                    $attractionData = $allAttractions[$attractionSlug];
+                } else {
+                    // Search through attractions for a match by ID
+                    foreach ($allAttractions as $slug => $data) {
+                        if ($data['id'] == $attractionModel->id) {
+                            $attractionData = $data;
+                            break;
+                        }
+                    }
+                }
+                
+                if ($attractionData) {
+                    $attractionData['quantity'] = $item->quantity;
+                    $attractionData['date'] = $item->date;
+                    $attractionData['time'] = $item->time;
+                    $attractionData['ticket_type_id'] = $item->ticket_type_id;
+                    $attractionData['cart_item_uuid'] = $item->uuid;
+
+                    // Add review statistics
+                    if (isset($reviewStats[$item->attraction_id])) {
+                        $attractionData['rating'] = $reviewStats[$item->attraction_id]['average_rating'];
+                        $attractionData['reviewCount'] = $reviewStats[$item->attraction_id]['review_count'];
+                    }
+
+                    // Use stored price or fallback to attraction's current price
+                    $price = $item->price ?? $attractionModel->EntryFee;
+                    $subtotal = $item->subtotal ?? ($price * $item->quantity);
+
+                    $attractionData['price'] = $price;
+                    $attractionData['subtotal'] = $subtotal;
+                    
+                    $attractions[] = $attractionData;
+                    $total += $subtotal;
+                }
             }
         }
-    
+
         $ticketTypes = TicketType::all();
-    
+
         return view('cart.checkout', [
             'attractions' => $attractions, 
             'total' => $total,
