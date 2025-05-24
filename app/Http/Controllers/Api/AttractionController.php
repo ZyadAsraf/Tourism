@@ -54,7 +54,8 @@ public function getAttractions(Request $request = null)
         }
     }
     
-    $attractions = $query->get();
+ $perPage = 3; // the pages
+    $attractions = $query->paginate($perPage);
     
     $formattedAttractions = [];
     
@@ -76,7 +77,7 @@ public function getAttractions(Request $request = null)
         'multi_day' => 'Multi-day'
     ];
     
-    foreach ($attractions as $attraction) {
+ foreach ($attractions->items() as $attraction) {//update for pagination
         $slug = Str::slug($attraction->AttractionName);
         
         // Assign a duration type based on attraction ID (or any other logic)
@@ -167,7 +168,13 @@ public function getAttractions(Request $request = null)
         ];
     }
     
-    return response()->json($formattedAttractions); // Return as a flat array
+   return response()->json([//update for pagination
+            'current_page' => $attractions->currentPage(),
+            'last_page' => $attractions->lastPage(),
+            'total' => $attractions->total(),
+            'per_page' => $attractions->perPage(),
+            'data' => $formattedAttractions
+        ]);
 }
 
 public function getCategories(): JsonResponse
