@@ -149,7 +149,7 @@ class TicketController extends Controller
         
         // Encrypt the ticket data
         $encryptedData = $this->encryptTicketData($ticketData);
-
+        
         if (!$attractionData) {
             return response()->json([
                 'success' => false,
@@ -279,20 +279,63 @@ class TicketController extends Controller
             ], 500);
         }
     }
-    public function validateScannedTicket(Request $request)
+    /**
+     * Generate QR code data for a ticket (API endpoint)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function generateQRData(Request $request, $id)
     {
-        // Validate request
-        $validated = $request->validate([
-            'qr_data' => 'required|string',
-        ]);
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
         
-        // Send the encrypted data to the validation endpoint
-        $response = Http::post(route('api.validate-ticket'), [
-            'encrypted_data' => $validated['qr_data']
-        ]);
+        $ticket = Ticket::where('id', $id)
+                        ->where('TouristId', $user->id)
+                        ->first();
         
-        // Return the validation result
-        return $response->json();
+        if (!$ticket) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ticket not found or does not belong to the user.',
+            ], 404);
+        }
+        
+        // Create ticket data object with only necessary information
+        $ticketData = [
+            'id' => $ticket->id,
+            'touristId' => $ticket->TouristId,
+            'attractionId' => $ticket->Attraction,
+            'quantity' => $ticket->Quantity,
+            'visitDate' => $ticket->VisitDate,
+            'timeSlot' => $ticket->TimeSlot,
+            'generated' => now()->timestamp
+        ];
+        
+        // Encrypt the ticket data
+        $encryptedData = $this->encryptTicketData($ticketData);
+        
+        // Generate QR code URL using a QR code service
+        $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($encryptedData);
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'encrypted_data' => $encryptedData,
+                'qr_image_url' => $qrImageUrl,
+                'ticket_id' => $ticket->id,
+                'visit_date' => $ticket->VisitDate,
+                'time_slot' => $ticket->TimeSlot,
+                'quantity' => $ticket->Quantity
+            ]
+        ]);
     }
     
     /**
@@ -330,7 +373,7 @@ class TicketController extends Controller
         if (!$hasRole) {
             return response()->json([
                 'valid' => false,
-                'message' => 'Unauthorized: Staff role required'
+                'message' => 'Unauthorized'
             ], 403);
         }
 
@@ -343,7 +386,7 @@ class TicketController extends Controller
         
         // Decrypt the data
         $ticketData = $this->decryptTicketData($encryptedData);
-        
+
         // Check if decryption failed (invalid format)
         if (!$ticketData) {
             return response()->json([

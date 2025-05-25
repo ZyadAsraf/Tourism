@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Ticket Routes
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::get('/tickets/{id}/qr', [TicketController::class, 'showQR'])->name('tickets.qr');
     
     // Itinerary Designer Routes
     Route::get('/itinerary/designer', [ItineraryController::class, 'createNewItinerary'])->name('itinerary.newItinerary');
