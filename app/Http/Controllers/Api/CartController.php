@@ -47,15 +47,15 @@ class CartController extends Controller
         foreach ($cartItems as $item) {
             $attraction = Attraction::find($item->attraction_id);
             if ($attraction) {
-                // Try to find attraction data by slug or AttractionName
-                $attractionSlug = $attraction->slug ?? Str::slug($attraction->AttractionName) ?? null;
+                // Generate slug from AttractionName to match with allAttractions array
+                $attractionSlug = Str::slug($attraction->AttractionName);
                 $attractionData = null;
                 
-                // Check direct match
-                if ($attractionSlug && isset($allAttractions[$attractionSlug])) {
+                // Check direct match by slug
+                if (isset($allAttractions[$attractionSlug])) {
                     $attractionData = $allAttractions[$attractionSlug];
                 } else {
-                    // Search through attractions for a match
+                    // Search through attractions for a match by ID
                     foreach ($allAttractions as $slug => $data) {
                         if ($data['id'] == $attraction->id) {
                             $attractionData = $data;
