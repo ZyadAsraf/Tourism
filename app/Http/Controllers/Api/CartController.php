@@ -310,7 +310,6 @@ class CartController extends Controller
         // Validate request
         $validated = $request->validate([
             'PhoneNumber' => 'required|string',
-            'state' => 'required|string',
         ]);
 
         // Get cart items
@@ -347,7 +346,7 @@ class CartController extends Controller
                 'VisitDate' => $item->date,
                 'TimeSlot' => $item->time,
                 'PhoneNumber' => $validated['PhoneNumber'],
-                'state' => $validated['state'],
+                'state' => 'valid',
             ]);
             
             $createdTickets[] = $ticket;
