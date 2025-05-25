@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Attraction extends Model
 {
@@ -88,5 +90,19 @@ class Attraction extends Model
     {
         return $this->hasMany(Attraction360Image::class);
     }
+    /**
+     * Get all attraction staff records for this attraction.
+     */
+    public function attractionStaff(): HasMany
+    {
+        return $this->hasMany(AttractionStaff::class);
+    }
 
+    /**
+     * Get all users who staff this attraction (many-to-many through pivot).
+     */
+    public function staff(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'attraction_staff');
+    }
 }

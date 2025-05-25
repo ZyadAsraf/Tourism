@@ -17,6 +17,8 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar, HasName, HasMedia
 {
@@ -96,7 +98,19 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
             ->nonQueued();
     }
     public function reviews()
-{
-    return $this->hasMany(Review::class);
-}
+    {
+        return $this->hasMany(Review::class);
+    }
+    public function attractionStaff(): HasMany
+    {
+        return $this->hasMany(AttractionStaff::class);
+    }
+
+    /**
+     * Get all attractions this user staffs (many-to-many through pivot).
+     */
+    public function staffedAttractions(): BelongsToMany
+    {
+        return $this->belongsToMany(Attraction::class, 'attraction_staff');
+    }
 }
