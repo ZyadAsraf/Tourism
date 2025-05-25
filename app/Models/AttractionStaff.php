@@ -41,4 +41,17 @@ class AttractionStaff extends Model
     {
         return $this->belongsTo(Attraction::class);
     }
+    public static function assignUserToAttractions($userId, $attractionIds)
+{
+    // First, remove existing assignments for this user if needed
+    // static::where('user_id', $userId)->delete();
+    
+    // Create new assignments
+    foreach ($attractionIds as $attractionId) {
+        static::firstOrCreate([
+            'user_id' => $userId,
+            'attraction_id' => $attractionId,
+        ]);
+    }
+}
 }

@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo('images/massar-log.png')
             ->brandLogoHeight(fn (GeneralSettings $settings) => $settings->brand_logoHeight)
             ->colors(fn (GeneralSettings $settings) => $settings->site_theme)
-            ->databaseNotifications()->databaseNotificationsPolling('30s')
+            ->databaseNotifications()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
