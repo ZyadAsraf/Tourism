@@ -108,25 +108,7 @@
             
             <!-- Itineraries -->
             <a href="{{ route('itineraries.index') }}" class="text-gray-600 hover:text-primary {{ request()->routeIs('itineraries.*') ? 'font-semibold text-primary' : '' }}">Itineraries</a>
-        
-            <!-- Categories Dropdown -->
-            <div class="relative group">
-                <button class="text-gray-600 hover:text-primary flex items-center gap-1 focus:outline-none">
-                    Categories
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block z-10">
-                    <div class="py-1">
-                        @foreach($categories ?? [] as $slug => $name)
-                            <a href="{{ route('attractions.category', $slug) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                {{ $name }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
+    
 
             <!-- My Cart -->
             <a href="{{ route('cart.index') }}" class="text-gray-600 hover:text-primary flex items-center gap-1 relative">
@@ -163,7 +145,7 @@
     
         <div class="flex items-center gap-4">
             @auth
-                <span class="text-gray-600">Welcome, {{ Auth::user()->firstname }}</span>
+               
                 <!-- Profile Dropdown Link -->
                
                 <form method="POST" action="{{ route('logout') }}">

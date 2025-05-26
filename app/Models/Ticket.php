@@ -43,20 +43,22 @@ class Ticket extends Model
     }
 
 
-    public function attraction()
-    {
-        return $this->belongsTo(Attraction::class, 'Attraction');
-    }
+public function attraction()
+{
+    return $this->belongsTo(Attraction::class, 'Attraction'); // or the actual foreign key column
+}
+
 
     // A Ticket is managed by an Attraction Staff
     public function attractionStaff()
     {
         return $this->belongsTo(User::class, 'AttractionStaffId');
     }
-    public function ticketType()
-    {
-        return $this->belongsTo(TicketType::class, 'TicketTypeId');
-    }
+public function ticketType()
+{
+    return $this->belongsTo(TicketType::class, 'TicketTypesId');
+}
+
     protected static function booted()
     {
         static::creating(function ($model) {

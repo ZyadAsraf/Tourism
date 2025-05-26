@@ -7,7 +7,7 @@ dotenv.config();
 
 export default defineConfig({
     server: {
-        host: process.env.VITE_HOST || '192.168.100.13',
+        host: process.env.VITE_HOST || '127.0.0.1',
         port: parseInt(process.env.VITE_PORT || '5173'),
     },
     plugins: [

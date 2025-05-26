@@ -52,7 +52,7 @@ class UserResource extends Resource
                         ->hiddenLabel()
                         ->avatar()
                         ->collection('avatars')
-                        ->dehydrated(true) // <-- أضف هذا السطر
+                        ->dehydrated(true) 
                         ->alignCenter()
                         ->columnSpanFull(),
                     

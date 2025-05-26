@@ -13,29 +13,31 @@ class ChartWidgets extends ChartWidget
     protected static ?string $pollingInterval = null;
 
 
-    protected function getData(): array
-    {
-        // Count the number of tickets per attraction
-        $attractionsData = Ticket::selectRaw('attraction, COUNT(*) as VisitCount')
-            ->groupBy('attraction')
-            ->orderByDesc('VisitCount') // Order by most visited
-            ->limit(10) // Get the top 10 attractions
-            ->pluck('VisitCount', 'attraction')
-            ->toArray();
+protected function getData(): array
+{
+    // Join tickets with attractions to get the attraction names
+    $attractionsData = Ticket::join('attractions', 'tickets.attraction', '=', 'attractions.id')
+        ->selectRaw('attractions.AttractionName, COUNT(*) as VisitCount')
+        ->groupBy('attractions.AttractionName')
+        ->orderByDesc('VisitCount')
+        ->limit(10)
+        ->pluck('VisitCount', 'AttractionName')
+        ->toArray();
 
-        return [
-            'datasets' => [
-                [
-                    'label' => 'Number of Visits',
-                    'data' => array_values($attractionsData), // Ticket counts
-                    'backgroundColor' => 'rgba(255, 99, 132, 0.5)', // Red color
-                    'borderColor' => 'rgba(255, 99, 132, 1)',
-                    'borderWidth' => 1,
-                ],
+    return [
+        'datasets' => [
+            [
+                'label' => 'Number of Visits',
+                'data' => array_values($attractionsData),
+                'backgroundColor' => 'rgba(255, 99, 132, 0.5)',
+                'borderColor' => 'rgba(255, 99, 132, 1)',
+                'borderWidth' => 1,
             ],
-            'labels' => array_keys($attractionsData), // Attraction names from tickets
-        ];
-    }
+        ],
+        'labels' => array_keys($attractionsData),
+    ];
+}
+
 
     protected function getType(): string
     {
