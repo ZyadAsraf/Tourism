@@ -137,7 +137,7 @@ class TicketController extends Controller
                 break;
             }
         }
-        $ticketData = [
+        $QRData = [
             'id' => $ticket->id,
             'touristId' => $ticket->TouristId,
             'attractionId' => $ticket->Attraction,
@@ -148,8 +148,9 @@ class TicketController extends Controller
         ];
         
         // Encrypt the ticket data
-        $encryptedData = $this->encryptTicketData($ticketData);
-        
+        $encryptedData = $this->encryptTicketData($QRData);
+        $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($encryptedData);
+
         if (!$attractionData) {
             return response()->json([
                 'success' => false,
@@ -172,7 +173,7 @@ class TicketController extends Controller
                     'phone_number' => $ticket->PhoneNumber,
                     'state' => $ticket->state
                 ],
-                'attraction' => $encryptedData,
+                'qrImageUrl' => $qrImageUrl,
                 'ticket_type' => $ticketType ? [
                     'id' => $ticketType->id,
                     'title' => $ticketType->Title,
@@ -197,146 +198,7 @@ class TicketController extends Controller
             'data' => $ticketTypes
         ]);
     }
-
-    /**
-     * Verify a ticket belongs to a user and has the correct date
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function verifyTicket(Request $request)
-    {
-        try {
-            // Validate the request
-            $validated = $request->validate([
-                'ticket_data' => 'required|string',
-                'user_data' => 'required|string',
-            ]);
-            
-            // Decode JSON strings
-            $ticketData = json_decode($validated['ticket_data'], true);
-            $userData = json_decode($validated['user_data'], true);
-            
-            // Check if JSON was decoded successfully
-            if (!$ticketData || !$userData) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid JSON data provided',
-                ], 400);
-            }
-            
-            // Validate required fields
-            if (!isset($ticketData['id']) || !isset($userData['user_id']) || !isset($ticketData['visit_date'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Missing required fields in provided data',
-                ], 400);
-            }
-            
-            // Find the ticket
-            $ticket = Ticket::find($ticketData['id']);
-            
-            if (!$ticket) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ticket not found',
-                ], 404);
-            }
-            
-            // Verify ticket belongs to the user
-            $isValidUser = ($ticket->TouristId == $userData['user_id']);
-            
-            // Verify the date matches
-            $isValidDate = ($ticket->VisitDate == $ticketData['visit_date']);
-            
-            // Get additional information for the response
-            $attraction = Attraction::find($ticket->Attraction);
-            $ticketType = TicketType::find($ticket->TicketTypesId);
-            
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'is_valid' => ($isValidUser && $isValidDate),
-                    'valid_user' => $isValidUser,
-                    'valid_date' => $isValidDate,
-                    'ticket_details' => [
-                        'id' => $ticket->id,
-                        'quantity' => $ticket->Quantity,
-                        'visit_date' => $ticket->VisitDate,
-                        'time_slot' => $ticket->TimeSlot,
-                        'state' => $ticket->state,
-                        'attraction_name' => $attraction ? $attraction->Name : 'Unknown',
-                        'ticket_type' => $ticketType ? $ticketType->Title : 'Standard'
-                    ]
-                ]
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Ticket verification error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while verifying the ticket: ' . $e->getMessage(),
-            ], 500);
-        }
-    }
-    /**
-     * Generate QR code data for a ticket (API endpoint)
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function generateQRData(Request $request, $id)
-    {
-        $user = $request->user();
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-        
-        $ticket = Ticket::where('id', $id)
-                        ->where('TouristId', $user->id)
-                        ->first();
-        
-        if (!$ticket) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ticket not found or does not belong to the user.',
-            ], 404);
-        }
-        
-        // Create ticket data object with only necessary information
-        $ticketData = [
-            'id' => $ticket->id,
-            'touristId' => $ticket->TouristId,
-            'attractionId' => $ticket->Attraction,
-            'quantity' => $ticket->Quantity,
-            'visitDate' => $ticket->VisitDate,
-            'timeSlot' => $ticket->TimeSlot,
-            'generated' => now()->timestamp
-        ];
-        
-        // Encrypt the ticket data
-        $encryptedData = $this->encryptTicketData($ticketData);
-        
-        // Generate QR code URL using a QR code service
-        $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($encryptedData);
-        
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'encrypted_data' => $encryptedData,
-                'qr_image_url' => $qrImageUrl,
-                'ticket_id' => $ticket->id,
-                'visit_date' => $ticket->VisitDate,
-                'time_slot' => $ticket->TimeSlot,
-                'quantity' => $ticket->Quantity
-            ]
-        ]);
-    }
+    
     
     /**
      * Encrypt ticket data
@@ -368,14 +230,6 @@ class TicketController extends Controller
     public function validateTicket(Request $request)
     {
         $user = User::find($request->user()->id);
-        $hasRole = $user->hasRole('Attraction_Staff');
-
-        if (!$hasRole) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Unauthorized'
-            ], 403);
-        }
 
         // Validate request
         $validated = $request->validate([
@@ -424,7 +278,6 @@ class TicketController extends Controller
         
         // Check if ticket is for the correct date
         $visitDate = \Carbon\Carbon::parse($ticket->VisitDate);
-        $today = \Carbon\Carbon::today();
 
         if (!$visitDate->isToday()) {
             return response()->json([

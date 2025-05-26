@@ -49,7 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tickets', [TicketController::class, 'index']);
     Route::get('/tickets/{id}', [TicketController::class, 'show']);
     Route::get('/ticket-types', [TicketController::class, 'getTicketTypes']);
-    Route::get('/tickets/{id}/qr', [TicketController::class, 'generateQRData']);
     Route::post('/validate-ticket', [TicketController::class, 'validateTicket'])->name('api.validate-ticket');
     
     // Cart routes

@@ -107,6 +107,32 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
     }
 
     /**
+     * Check if the user can verify tickets for a specific attraction.
+     * Super admins can verify any attraction tickets.
+     * Attraction staff can only verify tickets for attractions they are assigned to.
+     *
+     * @param int $attractionId
+     * @return bool
+     */
+    public function canVerifyAttractionTickets($attractionId): bool
+    {
+        // Super admins can verify any attraction tickets
+        if ($this->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Attraction staff can only verify tickets for attractions they are assigned to
+        if ($this->hasRole('attraction_staff')) {
+            return $this->attractionStaff()
+                ->where('attraction_id', $attractionId)
+                ->exists();
+        }
+
+        // Users without appropriate roles cannot verify tickets
+        return false;
+    }
+
+    /**
      * Get all attractions this user staffs (many-to-many through pivot).
      */
     public function staffedAttractions(): BelongsToMany
